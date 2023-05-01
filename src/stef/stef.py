@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.transporter import AbstractTransporter
-from src.constant import UnitType, TarifType, FRENCH_CSV_PARAMS
+from src.constant import UnitType, TarifType, CSV_PARAMS
 
 
 class SteffFixedCost:
@@ -22,12 +22,12 @@ class VariableCostCalculator:
         data_folder = Path(r"../data/stef")
         self.tarif_structure = pd.read_csv(
             data_folder / "tarif_structure.csv",
-            **FRENCH_CSV_PARAMS,
+            **CSV_PARAMS,
             index_col=["Unité"]
         )
         self.tarif_dep = pd.read_csv(
             data_folder / "tarif_par_departement.csv",
-            **FRENCH_CSV_PARAMS,
+            **CSV_PARAMS,
             index_col=["Département"]
         )
 
@@ -82,6 +82,7 @@ class Stef(AbstractTransporter):
 
     def get_total_cost(self, department: int) -> pd.DataFrame:
         df = self.bottle_cost.loc[self._get_dep_code(department)].T
+        print(df)
         df *= self.gas_modulator
         df += self.fixed_cost
         return df

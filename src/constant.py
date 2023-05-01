@@ -10,8 +10,9 @@ class UnitType(str, Enum):
     BOTTLE = "Col"
     PALET = "Palette"
 
-FRENCH_CSV_PARAMS = {
+
+CSV_PARAMS = {
     "sep": ";",
-    "decimal": ",",
+    "decimal": ".",
     "encoding": "utf-8",
 }
