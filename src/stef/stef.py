@@ -19,7 +19,7 @@ class SteffFixedCost:
 
 class VariableCostCalculator:
     def __init__(self):
-        data_folder = Path(r"data/stef")
+        data_folder = Path(r"../data/stef")
         self.tarif_structure = pd.read_csv(
             data_folder / "tarif_structure.csv",
             **FRENCH_CSV_PARAMS,
