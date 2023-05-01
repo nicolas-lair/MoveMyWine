@@ -1,7 +1,9 @@
+from pathlib import Path
+
 import pandas as pd
 
 from transporter import AbstractTransporter
-from constant import UnitType, TarifType
+from constant import UnitType, TarifType, FRENCH_CSV_PARAMS
 
 
 class SteffFixedCost:
@@ -17,9 +19,17 @@ class SteffFixedCost:
 
 class VariableCostCalculator:
     def __init__(self):
-        self.tarif_structure = pd.read_csv("stef/tarif_structure.csv", sep=";", encoding="utf-8", index_col=["Unité"])
-        self.tarif_dep = pd.read_csv("stef/tarif_par_departement.csv", sep=";", encoding="utf-8",
-                                     index_col=["Département"])
+        data_folder = Path(r"data/stef")
+        self.tarif_structure = pd.read_csv(
+            data_folder / "tarif_structure.csv",
+            **FRENCH_CSV_PARAMS,
+            index_col=["Unité"]
+        )
+        self.tarif_dep = pd.read_csv(
+            data_folder / "tarif_par_departement.csv",
+            **FRENCH_CSV_PARAMS,
+            index_col=["Département"]
+        )
 
     def _get_tarif_id(self, unit: UnitType, volume: int) -> pd.Series:
         tarif_type = self.tarif_structure.loc[unit]
