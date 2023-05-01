@@ -64,7 +64,8 @@ cost_by_bottle = dbc.Card(dcc.Graph(id="cost-by-bottle-graph", figure=px.scatter
 app.layout = dbc.Container(
     [
         html.H1("Move My Wine", className="text-center"),
-        html.P("Cette application permet de faire des comparaison de prix sur les transporteurs", className="text-center"),
+        html.P("Cette application permet de faire des comparaison de prix sur les transporteurs",
+               className="text-center"),
         dcc.Tabs(id="tabs-example-graph", value='tab-1-example-graph', children=[
             dcc.Tab(label='Comparaison par transporteur', value='tab-1-transporter-comparison'),
             dcc.Tab(label='Calculateur de coût', value='tab-2-cost-calculator'),
@@ -74,27 +75,43 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
+transporter_comparison_layout = html.Div([
+    html.H3('Comparaison par transporteur'),
+    dbc.Row([dbc.Col(transporter_dropdown),
+             # dbc.Col(quantity_selector),
+             dbc.Col(destination_dropdown),
+             dbc.Col(params_selector)
+             ]),
+    dbc.Row(dbc.Col(total_cost)),
+    dbc.Row(dbc.Col(cost_by_bottle)),
+])
+
+cost_calc_layout = html.Div([
+    html.H3('Calculateur de coût'),
+    dbc.Row([dbc.Col(transporter_dropdown),
+             # dbc.Col(quantity_selector),
+             dbc.Col(destination_dropdown),
+             dbc.Col(params_selector)
+             ]),    dbc.Row(dbc.Col(total_cost)),
+    dbc.Row(dbc.Col(cost_by_bottle)),
+])
+
+app.validation_layout = html.Div([
+    app.layout,
+    transporter_comparison_layout,
+    cost_calc_layout
+
+])
+
+
 @app.callback(Output('tabs-content-example-graph', 'children'),
               Input('tabs-example-graph', 'value'))
 def render_content(tab):
     if tab == 'tab-1-transporter-comparison':
-        return html.Div([
-            html.H3('Tab content 2'),
-            dbc.Row([dbc.Col(transporter_dropdown), dbc.Col(quantity_selector), dbc.Col(destination_dropdown)]),
-            dbc.Row(dbc.Col(total_cost)),
-            dbc.Row(dbc.Col(cost_by_bottle)),
-        ])
+        return transporter_comparison_layout
     elif tab == 'tab-2-cost-calculator':
-        return html.Div([
-            html.H3('Tab content 2'),
-            dbc.Row([dbc.Col(transporter_dropdown),
-                     # dbc.Col(quantity_selector),
-                     dbc.Col(destination_dropdown),
-                     dbc.Col(params_selector)
-                     ]),
-            dbc.Row(dbc.Col(total_cost)),
-            dbc.Row(dbc.Col(cost_by_bottle)),
-        ])
+        return cost_calc_layout
+
 
 @callback(
     Output('total-cost-graph', 'figure'),
