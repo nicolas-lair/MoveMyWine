@@ -9,6 +9,7 @@ transporter_dict = {
 }
 
 app = Dash(__name__, title="MoveMyWine", external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
 
 transporter_dropdown = html.Div(
     [
