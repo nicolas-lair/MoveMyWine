@@ -11,6 +11,7 @@ pandas = "^2.0.1"
 dash = "^2.9.3"
 plotly = "^5.14.1"
 dash-bootstrap-components = "^1.4.1"
+dash-tools = "^1.11.1"
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
