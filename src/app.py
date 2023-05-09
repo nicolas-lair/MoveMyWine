@@ -3,14 +3,14 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import dash_daq as daq
 
-from stef.stef import Stef
-from geodis.geodis import Geodis
+from stef import *
+from geodis import *
 
 from departement import DEPARTMENTS_TO_CODE
 
 transporter_dict = {
-    "Stef": Stef(),
-    "Geodis": Geodis()
+    StefParams.name: Stef(),
+    GeodisParams.name: Geodis()
 }
 
 app = Dash(__name__, title="MoveMyWine",

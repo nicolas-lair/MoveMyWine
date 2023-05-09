@@ -103,7 +103,7 @@ class GasModulation:
         return self.gas_modulation.loc[min_condition & max_condition, "Modulation"].item()
 
 
-class Geodis(AbstractTransporter):
+class MyTransporter(AbstractTransporter):
     def __init__(self):
         self.gas_modulator = GasModulation()
         self.var_cost_calc = VariableCostCalculator()

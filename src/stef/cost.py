@@ -6,16 +6,16 @@ from src.cost_calculator.fixed_cost_by_expedition import FixedCostByExpeditionCa
 from src.cost_calculator.cost_by_bottle import CostByBottleCalculator
 from src.constant import UnitType, BOTTLE_BY_PACKAGE, PACKAGE_WEIGHT
 from src.file_structure import TarifStructureFile
-from src.stef.constant import StefParams
+from src.stef.constant import TransporterParams as p
 
 
 class StefCostByBottleCalculator(CostByBottleCalculator):
     def __init__(
             self,
-            max_palet_weight: int = StefParams.max_palet_weight,
+            max_palet_weight: int = p.max_palet_weight,
             package_weight: int = PACKAGE_WEIGHT
     ):
-        super().__init__(data_folder=StefParams.data_folder)
+        super().__init__(data_folder=p.data_folder)
         self.max_palet_weight = max_palet_weight
         self.package_weight = package_weight
         self.bottle_by_package = BOTTLE_BY_PACKAGE
@@ -29,11 +29,11 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
         return (self.max_palet_weight * self.bottle_by_package) // self.package_weight
 
 
-class Stef(AbstractTransporter):
+class MyTransporter(AbstractTransporter):
     def __init__(self):
-        self.gasModulator = GasModulator(data_folder=StefParams.data_folder)
+        self.gasModulator = GasModulator(data_folder=p.data_folder)
         self.costByBottle = StefCostByBottleCalculator()
-        self.costByExpeditionObject = FixedCostByExpeditionCalculator(**StefParams.expedition_cost)
+        self.costByExpeditionObject = FixedCostByExpeditionCalculator(**p.expedition_cost)
 
         max_bottles = self.costByBottle.max_bottles
         self.bottle_cost = pd.concat(

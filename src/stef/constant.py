@@ -1,8 +1,8 @@
 from src.constant import DATA_FOLDER
 
 
-class StefParams:
-    name = "stef"
+class TransporterParams:
+    name = "Stef"
     max_palet_weight = 600
 
     expedition_cost = dict(
@@ -10,4 +10,4 @@ class StefParams:
         security=0.7
     )
 
-    data_folder = DATA_FOLDER / name
+    data_folder = DATA_FOLDER / name.lower()
