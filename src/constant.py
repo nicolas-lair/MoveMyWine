@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 
 
 class TarifType(str, Enum):
@@ -16,3 +17,8 @@ CSV_PARAMS = {
     "decimal": ".",
     "encoding": "utf-8",
 }
+
+BOTTLE_BY_PACKAGE = 6
+PACKAGE_WEIGHT = 8
+
+DATA_FOLDER = Path(r"../data")
