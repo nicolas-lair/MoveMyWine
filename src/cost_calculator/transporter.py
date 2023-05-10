@@ -5,7 +5,7 @@ import pandas as pd
 from src.cost_calculator.fixed_cost_by_expedition import FixedCostByExpeditionCalculator
 from src.cost_calculator.gas_modulator import GasModulator
 from src.cost_calculator.cost_by_bottle import CostByBottleCalculator
-from src.cost_calculator.recurrent_cost import MonthlyCostCalculator
+from src.cost_calculator.monthly_cost import MonthlyCostCalculator
 
 
 class AbstractTransporter(ABC):

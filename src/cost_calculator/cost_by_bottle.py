@@ -23,27 +23,28 @@ class CostByBottleCalculator:
         self.cost_by_dest_and_volume = self.compute_cost_by_destination_and_volume()
 
     @abstractmethod
-    @property
-    def max_bottles(self) -> int:
-        pass
-
-    @abstractmethod
-    def _get_tarif_id(self, unit: UnitType) -> pd.Series:
-        pass
-
-    @abstractmethod
     def _get_dpt_code(self, series_of_dpt: pd.Series) -> pd.Series:
         pass
 
-    def _batch_compute(self, unit: UnitType, volume: int) -> pd.Series:
-        tarif_id = self._get_tarif_id(unit=unit)
+    def _get_tarif_id(self, volume: int) -> pd.Series:
+        min_volume_condition = (self.tarif_structure[TarifStructureFile.Cols.min_] <= volume)
+        max_volume_condition = (self.tarif_structure[TarifStructureFile.Cols.max_] >= volume)
+        return self.tarif_structure[min_volume_condition & max_volume_condition]
+
+    @property
+    def max_bottles(self) -> int:
+        max_bottles = self.tarif_structure.loc[UnitType.BOTTLE, TarifStructureFile.Cols.max_].max()
+        return max_bottles
+
+    def _compute_cost(self, volume: int) -> pd.Series:
+        tarif_id = self._get_tarif_id(volume=volume)
         cost = self.tarif_by_dep[tarif_id[TarifStructureFile.Cols.tarif].item()].to_frame(volume)
         if tarif_id.Type.item() == TarifType.VARIABLE:
             cost *= volume
         return cost
 
     def compute_bottle_cost_nationwide(self, n_bottles: int):
-        return self._batch_compute(unit=UnitType.BOTTLE, volume=n_bottles)
+        return self._compute_cost(volume=n_bottles)
 
     def compute_cost_by_destination_and_volume(self) -> pd.DataFrame:
         cost = pd.concat(

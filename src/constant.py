@@ -22,8 +22,9 @@ CSV_PARAMS = {
 class Package:
     bottle_by_package = 6
     package_weight = 8
+    max_package_without_palet = 15
 
-BOTTLE_BY_PACKAGE = 6
+
 N_EXPEDITION = 5
 
 DATA_FOLDER = Path(r"../data")

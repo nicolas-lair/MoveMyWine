@@ -1,21 +1,19 @@
 import pandas as pd
 
-from src.cost_calculator.gas_modulator import GasModulator
-from src.cost_calculator.transporter import AbstractTransporter
-from src.cost_calculator.fixed_cost_by_expedition import FixedCostByExpeditionCalculator
-from src.cost_calculator.cost_by_bottle import CostByBottleCalculator
+from src.cost_calculator import *
+
 from src.constant import UnitType, Package
 from src.file_structure import TarifStructureFile
-from src.stef.constant import TransporterParams as p
+from .constant import TransporterParams as tp
 
 
 class StefCostByBottleCalculator(CostByBottleCalculator):
     def __init__(
             self,
-            max_palet_weight: int = p.max_palet_weight,
+            max_palet_weight: int = tp.max_palet_weight,
             package_weight: int = Package.package_weight
     ):
-        super().__init__(data_folder=p.data_folder)
+        super().__init__(data_folder=tp.data_folder)
         # TODO remove ligne Relivraison
         self.max_palet_weight = max_palet_weight
         self.package_weight = package_weight
@@ -53,6 +51,6 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
 
 class MyTransporter(AbstractTransporter):
     def __init__(self):
-        self.gasModulator = GasModulator(data_folder=p.data_folder)
+        self.gasModulator = GasModulator(data_folder=tp.data_folder)
         self.costByBottle = StefCostByBottleCalculator()
-        self.costByExpeditionObject = FixedCostByExpeditionCalculator(**p.expedition_cost)
+        self.costByExpeditionObject = FixedCostByExpeditionCalculator(**tp.expedition_cost)
