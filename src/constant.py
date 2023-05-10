@@ -18,7 +18,12 @@ CSV_PARAMS = {
     "encoding": "utf-8",
 }
 
+
+class Package:
+    bottle_by_package = 6
+    package_weight = 8
+
 BOTTLE_BY_PACKAGE = 6
-PACKAGE_WEIGHT = 8
+N_EXPEDITION = 5
 
 DATA_FOLDER = Path(r"../data")

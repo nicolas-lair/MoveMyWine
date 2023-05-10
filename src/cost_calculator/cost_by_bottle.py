@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from pathlib import Path
 
 import pandas as pd
@@ -13,28 +15,40 @@ class CostByBottleCalculator:
             **TarifStructureFile.csv_format,
             index_col=[TarifStructureFile.Cols.unit]
         )
-        self.tarif_dep = pd.read_csv(
+        self.tarif_by_dep = pd.read_csv(
             data_folder / TarifDeptFile.name,
             **TarifDeptFile.csv_format,
             index_col=[TarifDeptFile.Cols.dpt]
         )
+        self.cost_by_dest_and_volume = self.compute_cost_by_destination_and_volume()
 
-    def _get_tarif_id(self, unit: UnitType, volume: int) -> pd.Series:
-        tarif_type = self.tarif_structure.loc[unit]
-        return tarif_type[
-            (tarif_type[TarifStructureFile.Cols.min_] <= volume)
-            & (tarif_type[TarifStructureFile.Cols.max_] >= volume)
-            ]
+    @abstractmethod
+    @property
+    def max_bottles(self) -> int:
+        pass
+
+    @abstractmethod
+    def _get_tarif_id(self, unit: UnitType) -> pd.Series:
+        pass
+
+    @abstractmethod
+    def _get_dpt_code(self, series_of_dpt: pd.Series) -> pd.Series:
+        pass
 
     def _batch_compute(self, unit: UnitType, volume: int) -> pd.Series:
-        tarif = self._get_tarif_id(unit=unit, volume=volume)
-        cost = self.tarif_dep[tarif[TarifStructureFile.Cols.tarif].item()].to_frame(volume)
-        if tarif.Type.item() == TarifType.VARIABLE:
+        tarif_id = self._get_tarif_id(unit=unit)
+        cost = self.tarif_by_dep[tarif_id[TarifStructureFile.Cols.tarif].item()].to_frame(volume)
+        if tarif_id.Type.item() == TarifType.VARIABLE:
             cost *= volume
         return cost
 
     def compute_bottle_cost_nationwide(self, n_bottles: int):
         return self._batch_compute(unit=UnitType.BOTTLE, volume=n_bottles)
 
-    def compute_palet_cost_nationwide(self, n_palets: int):
-        return self._batch_compute(unit=UnitType.PALET, volume=n_palets)
+    def compute_cost_by_destination_and_volume(self) -> pd.DataFrame:
+        cost = pd.concat(
+            [self.compute_bottle_cost_nationwide(n_bottles=i) for i in range(self.max_bottles + 1)],
+            axis=1
+        )
+        cost["dpt_code"] = self._get_dpt_code(cost.index)
+        return cost
