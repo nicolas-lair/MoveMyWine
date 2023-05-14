@@ -3,5 +3,5 @@ from .constant import TransporterParams
 from .app_custom import MyDashCustomComponent
 
 
-class Geodis(MyTransporter, TransporterParams, MyDashCustomComponent):
+class DBSchenker(MyTransporter, TransporterParams, MyDashCustomComponent):
     pass

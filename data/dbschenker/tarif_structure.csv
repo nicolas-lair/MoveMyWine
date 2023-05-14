@@ -1,0 +1,11 @@
+﻿Tarif;Type;Unité;Min;Max
+Tarif 1;Forfait;Col;1;3
+Tarif 2;Forfait;Col;4;6
+Tarif 3;Forfait;Col;7;12
+Tarif 4;Forfait;Col;13;18
+Tarif 5;Forfait;Col;19;24
+Tarif 6;Forfait;Col;25;36
+Tarif 7;Forfait;Col;37;48
+Tarif 8;Forfait;Col;49;60
+Tarif 9;Variable;Col;61;120
+Tarif 10;Variable;Col;121;300

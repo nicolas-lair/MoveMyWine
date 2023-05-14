@@ -1,5 +1,5 @@
 from .transporter import AbstractTransporter
 from .cost_by_bottle import CostByBottleCalculator
 from .fixed_cost_by_expedition import FixedCostByExpeditionCalculator
-from .gas_modulator import GasModulator
+from .gas_modulator import GasModulatorFromPrice
 from .monthly_cost import MonthlyCostCalculator

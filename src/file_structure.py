@@ -41,3 +41,18 @@ class GasModulationFile(CSVFile):
         min_price = "Min"
         max_price = "Max"
         modulation = "Modulation"
+
+
+class TarifZoneFile(CSVFile):
+    name = "tarif_par_zone.csv"
+
+    class Cols(str, Enum):
+        zone = "Zone"
+
+
+class CorrespondanceZoneDpt(CSVFile):
+    name = "correspondance_zone_dpt.csv"
+
+    class Cols(str, Enum):
+        zone = TarifZoneFile.Cols.zone.value
+        dpt = TarifDeptFile.Cols.dpt.value

@@ -5,7 +5,7 @@ import pandas as pd
 from src.file_structure import GasModulationFile
 
 
-class GasModulator:
+class GasModulatorFromPrice:
     def __init__(self, data_folder: Path):
         self.gas_modulation = pd.read_csv(
             data_folder / GasModulationFile.name,

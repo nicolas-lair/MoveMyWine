@@ -1,66 +1,97 @@
 from dash import Dash, html, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
-import plotly.express as px
-import dash_daq as daq
 
-from stef import *
-from geodis import *
+from stef import Stef
+from geodis import Geodis
+from dbschenker import DBSchenker
 
 from departement import DEPARTMENTS_TO_CODE
+from app_constant import Id
+from constant import N_EXPEDITION
+
+import comparison_tab as comp_tab
 
 transporter_dict = {
-    StefParams.name: Stef(),
-    GeodisParams.name: Geodis()
+    Stef.name: Stef(),
+    Geodis.name: Geodis(),
+    DBSchenker.name: DBSchenker()
 }
 
 app = Dash(__name__, title="MoveMyWine",
-           external_stylesheets=[dbc.themes.BOOTSTRAP])
+           external_stylesheets=[dbc.themes.BOOTSTRAP],
+           suppress_callback_exceptions=True)
 server = app.server
 
 transporter_dropdown = html.Div(
     [
-        html.H3("Transporteur"),
-        html.Label("Choix du transporteur", htmlFor="transporter-dropdown"),
-        dcc.Dropdown(list(transporter_dict.keys()), 'Stef', id="transporter-dropdown", clearable=False),
+        html.H4("Transporteur"),
+        html.Label("Choix du transporteur"),
+        dcc.Dropdown(
+            list(transporter_dict.keys()),
+            Stef.name,
+            id=Id.transporter_dropdown,
+            clearable=False
+        )
     ]
 )
 
+# destination_dropdown = html.Div(
+#     [
+#         html.H3("Destination"),
+#         html.Label("Choix du département de destination", htmlFor="department-dropdown"),
+#         dcc.Dropdown(DEPARTMENTS_TO_CODE, '75', id="department-dropdown"),
+#     ]
+# )
+
 destination_dropdown = html.Div(
     [
-        html.H3("Destination"),
-        html.Label("Choix du département de destination", htmlFor="department-dropdown"),
-        dcc.Dropdown(DEPARTMENTS_TO_CODE, '75', id="department-dropdown"),
+        dbc.Col(
+            [
+                html.H4("Origine / Destination"),
+                dbc.Row(
+                    [
+                        html.Label("Origine"),
+                        html.Br(),
+                        dcc.Dropdown(DEPARTMENTS_TO_CODE, '49', id=Id.origin_dropdown, disabled=True)
+                    ]
+                ),
+                dbc.Row(
+                    [
+                        html.Label("Destination"),
+                        html.Br(),
+                        dcc.Dropdown(DEPARTMENTS_TO_CODE, '75', id=Id.destination_dropdown)
+                    ]
+                )
+            ]
+        )
     ]
 )
 
 quantity_selector = html.Div(
     [
-        html.H3("Quantités"),
+        html.H4("Quantités"),
         dbc.Row([dbc.Col([html.Label("Nombre de bouteilles", htmlFor="bottles-selector"),
                           html.Br(),
-                          dcc.Input(id='bottles', type='number', min=1, max=600, step=1)]),
-
-                 dbc.Col([html.Label("Nombre de palettes", htmlFor="palet-selector"),
-                          html.Br(),
-                          dcc.Input(id='palets', type='number', min=1, max=20, step=1)])])
+                          dcc.Input(id=Id.bottles_selector, type='number', min=1, max=2000, step=1)]),
+                 ]
+                )
     ]
 )
 
-params_selector = html.Div(
+n_expedition_slider = html.Div(
     [
-        html.H3("Paramètres"),
-        html.Label(["Prix du Gaz CNR, disponible ", html.A('ici', href='https://www.cnr.fr/espaces/13/indicateurs/41', target="_blank")]),
-        daq.NumericInput(id="gas-modulation-input",
-                         min=0.981, #TODO make params
-                         max=2.3307, #TODO make params
-                         value=1.409,
-                         labelPosition="top",
-                         size=150
-                         ),
-    ])
-total_cost = dbc.Card(dcc.Graph(id="total-cost-graph", figure=px.scatter(title="figure title")), className="mt-2")
-cost_by_bottle = dbc.Card(dcc.Graph(id="cost-by-bottle-graph", figure=px.scatter(title="figure title")),
-                          className="mt-2")
+        dbc.Row([dbc.Col([html.Label("Nombre d'expéditions par mois"),
+                          html.Br(),
+                          dcc.Slider(id=Id.n_expedition_slider, min=1, max=15, step=1,
+                                     value=N_EXPEDITION)]),
+                 ]
+                )
+    ]
+)
+
+# total_cost = dbc.Card(dcc.Graph(id="total-cost-graph", figure=px.scatter(title="figure title")), className="mt-2")
+# cost_by_bottle = dbc.Card(dcc.Graph(id="cost-by-bottle-graph", figure=px.scatter(title="figure title")),
+#                           className="mt-2")
 
 app.layout = dbc.Container(
     [
@@ -75,33 +106,34 @@ app.layout = dbc.Container(
     ],
     fluid=True,
 )
-
+total_cost, cost_by_bottle, update_cost = comp_tab.build_graphs_and_callbacks(app, transporter_dict)
 transporter_comparison_layout = html.Div([
-    html.H3('Comparaison par transporteur'),
-    dbc.Row([dbc.Col(transporter_dropdown),
-             # dbc.Col(quantity_selector),
-             dbc.Col(destination_dropdown),
-             dbc.Col(params_selector)
-             ]),
-    dbc.Row(dbc.Col(total_cost)),
+    dbc.Row([
+        dbc.Col([
+            comp_tab.build_transporter_dropdown(transporter_dict),
+            n_expedition_slider
+        ]),
+        dbc.Col(destination_dropdown),
+        dbc.Col(comp_tab.build_params_selector(app, transporter_dict))
+    ]),
     dbc.Row(dbc.Col(cost_by_bottle)),
+    dbc.Row(dbc.Col(total_cost)),
 ])
 
 cost_calc_layout = html.Div([
-    html.H3('Calculateur de coût'),
     dbc.Row([dbc.Col(transporter_dropdown),
              # dbc.Col(quantity_selector),
              dbc.Col(destination_dropdown),
-             dbc.Col(params_selector)
-             ]),    dbc.Row(dbc.Col(total_cost)),
+             # dbc.Col(params_selector)
+             ]), dbc.Row(dbc.Col(total_cost)),
     dbc.Row(dbc.Col(cost_by_bottle)),
 ])
 
 app.validation_layout = html.Div([
     app.layout,
     transporter_comparison_layout,
-    cost_calc_layout
-
+    cost_calc_layout,
+    # params_selector,
 ])
 
 
@@ -114,27 +146,18 @@ def render_content(tab):
         return cost_calc_layout
 
 
-@callback(
-    Output('total-cost-graph', 'figure'),
-    Input('transporter-dropdown', 'value'),
-    Input('gas-modulation-input', 'value'),
-    Input('department-dropdown', 'value')
-)
-def update_total_cost(transporter, gas_price, dept):
-    df = transporter_dict[transporter].get_total_cost(department=dept, gas_price=gas_price)
-    return px.bar(df)
-
-
-@callback(
-    Output('cost-by-bottle-graph', 'figure'),
-    Input('transporter-dropdown', 'value'),
-    Input('gas-modulation-input', 'value'),
-    Input('department-dropdown', 'value')
-)
-def update_cost_by_bottle(transporter, gas_price, dept):
-    df = transporter_dict[transporter].get_cost_by_bottle(department=dept, gas_price=gas_price)
-    return px.bar(df)
-
+# @callback(
+#     Output('total-cost-graph', 'figure'),
+#     Output('cost-by-bottle-graph', 'figure'),
+#     Input(Id.transporter_dropdown, 'value'),
+#     Input(Id.gas_price_input, 'value'),
+#     Input(Id.gas_factor_input, 'value'),
+#     Input(Id.destination_dropdown, 'value'),
+# )
+# def update_cost(transporter, gas_price, gas_factor, dept):
+#     df = transporter_dict[transporter].get_total_cost(department=dept, gas_factor=1 + gas_factor / 100,
+#                                                       gas_price=gas_price)
+#     return px.bar(df), px.bar(df / df.index)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
