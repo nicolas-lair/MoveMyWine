@@ -116,9 +116,9 @@ transporter_comparison_layout = html.Div([
         dbc.Col(destination_dropdown),
         dbc.Col(comp_tab.build_params_selector(app, transporter_dict))
     ]),
+    dbc.Row(dbc.Col(best_transporter)),
     dbc.Row(dbc.Col(cost_by_bottle)),
     dbc.Row(dbc.Col(total_cost)),
-    dbc.Row(dbc.Col(best_transporter)),
 ])
 
 cost_calc_layout = html.Div([
