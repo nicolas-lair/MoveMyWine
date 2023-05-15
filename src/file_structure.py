@@ -52,6 +52,10 @@ class TarifZoneFile(CSVFile):
 
 class CorrespondanceZoneDpt(CSVFile):
     name = "correspondance_zone_dpt.csv"
+    csv_format = {
+        **CSVFile.csv_format,
+        "dtype": str
+    }
 
     class Cols(str, Enum):
         zone = TarifZoneFile.Cols.zone.value

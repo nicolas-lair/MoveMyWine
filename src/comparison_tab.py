@@ -43,9 +43,15 @@ def build_graphs_and_callbacks(app, transporter_dict):
                                         figure=px.scatter(title="Coût par bouteille")),
                               className="mt-2")
 
+    best_transporter_id = build_component_id(Id.comparison_tab, Id.best_transporter)
+    best_transporter = dbc.Card(dcc.Graph(id=best_transporter_id,
+                                          figure=px.scatter(title="Meilleur transporteur")),
+                                className="mt-2")
+
     @app.callback(
         Output(total_cost_id, 'figure'),
         Output(cost_by_bottle_id, 'figure'),
+        Output(best_transporter_id, 'figure'),
         Input(build_component_id(Id.comparison_tab, Id.transporter_dropdown), 'value'),
         Input(build_component_id(Id.comparison_tab, Id.gas_price_input), 'value'),
         Input(build_component_id(Id.comparison_tab, Id.gas_factor_input), 'value'),
@@ -64,8 +70,20 @@ def build_graphs_and_callbacks(app, transporter_dict):
         all_df = all_df.rename(columns={dept: "Coût"})
         all_df["Coût par bouteille"] = all_df["Coût"] / all_df.index
         # TODO Add range options
-        all_df = all_df[all_df.index <= 150]
-        return (px.bar(all_df, y="Coût", color="Transporteur", barmode='group', ),
-                px.bar(all_df, y="Coût par bouteille", color="Transporteur", barmode='group', ))
+        all_df = all_df[all_df.index <= 100]
+        return (px.bar(all_df, y="Coût", color="Transporteur", barmode='group'),
+                px.bar(all_df, y="Coût par bouteille", color="Transporteur", barmode='group'),
+                px.bar(
+                    (all_df
+                     .reset_index()
+                     .sort_values(["index", "Coût"], ascending=True)
+                     .drop_duplicates(subset=["index"], keep="first")
+                     .set_index("index")
+                     ),
+                    y="Coût",
+                    color="Transporteur",
+                    category_orders={"Transporteur": list(transporter_dict.keys())}
+                )
+                )
 
-    return total_cost, cost_by_bottle, update_cost
+    return total_cost, cost_by_bottle, best_transporter, update_cost

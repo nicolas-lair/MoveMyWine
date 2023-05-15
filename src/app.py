@@ -106,7 +106,7 @@ app.layout = dbc.Container(
     ],
     fluid=True,
 )
-total_cost, cost_by_bottle, update_cost = comp_tab.build_graphs_and_callbacks(app, transporter_dict)
+total_cost, cost_by_bottle, best_transporter, update_cost = comp_tab.build_graphs_and_callbacks(app, transporter_dict)
 transporter_comparison_layout = html.Div([
     dbc.Row([
         dbc.Col([
@@ -118,6 +118,7 @@ transporter_comparison_layout = html.Div([
     ]),
     dbc.Row(dbc.Col(cost_by_bottle)),
     dbc.Row(dbc.Col(total_cost)),
+    dbc.Row(dbc.Col(best_transporter)),
 ])
 
 cost_calc_layout = html.Div([
