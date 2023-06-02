@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 from stef import Stef
 from geodis import Geodis
 from dbschenker import DBSchenker
+from chronopost import Chronopost
 
 from departement import DEPARTMENTS_TO_CODE
 from app_constant import Id
@@ -14,7 +15,8 @@ import comparison_tab as comp_tab
 transporter_dict = {
     Stef.name: Stef(),
     Geodis.name: Geodis(),
-    DBSchenker.name: DBSchenker()
+    DBSchenker.name: DBSchenker(),
+    Chronopost.name: Chronopost()
 }
 
 app = Dash(__name__, title="MoveMyWine",
@@ -116,9 +118,9 @@ transporter_comparison_layout = html.Div([
         dbc.Col(destination_dropdown),
         dbc.Col(comp_tab.build_params_selector(app, transporter_dict))
     ]),
-    dbc.Row(dbc.Col(best_transporter)),
-    dbc.Row(dbc.Col(cost_by_bottle)),
-    dbc.Row(dbc.Col(total_cost)),
+    dbc.Row(best_transporter),
+    dbc.Row(cost_by_bottle),
+    dbc.Row(total_cost),
 ])
 
 cost_calc_layout = html.Div([

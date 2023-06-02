@@ -36,20 +36,20 @@ class CostByBottleCalculator(ABC):
         max_bottles = self.tarif_structure.loc[UnitType.BOTTLE, TarifStructureFile.Cols.max_].max()
         return max_bottles
 
-    def _compute_cost(self, bottles: int) -> pd.Series:
-        tarif_id, volume_in_tarif_unit = self._get_tarif_id(bottles=bottles)
-        cost = self.tarif_by_dep[tarif_id[TarifStructureFile.Cols.tarif].item()].to_frame(bottles)
+    def compute_cost_nationwide(self, n_bottles: int) -> pd.Series:
+        tarif_id, volume_in_tarif_unit = self._get_tarif_id(bottles=n_bottles)
+        cost = self.tarif_by_dep[tarif_id[TarifStructureFile.Cols.tarif_id].item()].to_frame(n_bottles)
         if tarif_id.Type.item() == TarifType.VARIABLE:
             cost *= volume_in_tarif_unit
         return cost
 
-    def compute_bottle_cost_nationwide(self, n_bottles: int):
-        return self._compute_cost(bottles=n_bottles)
-
     def compute_cost_by_destination_and_volume(self) -> pd.DataFrame:
         cost = pd.concat(
-            [self.compute_bottle_cost_nationwide(n_bottles=i) for i in range(1, self.max_bottles + 1)],
+            [self.compute_cost_nationwide(n_bottles=i) for i in range(1, self.max_bottles + 1)],
             axis=1
         )
         cost = cost.set_index(self._get_dpt_code(cost.index))
         return cost
+
+    def compute_cost(self, *args, **kwargs):
+        return self.cost_by_dest_and_volume

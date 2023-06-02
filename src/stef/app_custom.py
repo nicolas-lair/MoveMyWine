@@ -1,10 +1,12 @@
 from typing import Final
 
 from dash import html, dcc
-from .constant import TransporterParams
+
+
 from src.app_generics.dash_custom_component import DashCustomComponents
 from src.app_constant import Id
 
+from .constant import TransporterParams
 
 class MyDashCustomComponent(DashCustomComponents):
     transporter_name: Final[str] = TransporterParams.name

@@ -3,7 +3,7 @@ from math import ceil
 
 from src.cost_calculator import *
 
-from src.constant import UnitType, Package
+from src.constant import UnitType, Package, Bottle
 from src.file_structure import TarifStructureFile
 from .constant import TransporterParams
 
@@ -14,22 +14,19 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
     def __init__(
             self,
             max_palet_weight: int = tp.max_palet_weight,
-            package_weight: int = Package.package_weight
     ):
         # TODO remove ligne Relivraison
         self.max_palet_weight = max_palet_weight
-        self.package_weight = package_weight
-        self.bottle_by_package = Package.bottle_by_package
         super().__init__(data_folder=tp.data_folder)
 
-    @property
-    def max_bottles_in_palet(self) -> int:
-        return (self.max_palet_weight * self.bottle_by_package) // self.package_weight
+    def get_max_bottles_in_palet(self, bottle_type: Bottle = Bottle()) -> int:
+        package_weight = Package().get_package_weight(bottle=bottle_type)
+        return ceil((self.max_palet_weight * Package.bottle_by_package) // package_weight)
 
     @property
     def max_bottles(self) -> int:
         max_palets = self.tarif_structure.loc[UnitType.PALET, TarifStructureFile.Cols.max_].max()
-        max_bottles = max_palets * self.max_bottles_in_palet
+        max_bottles = max_palets * self.get_max_bottles_in_palet()
         return max_bottles
 
     def _get_dpt_code(self, dpt_series: pd.Series) -> pd.Series:
@@ -41,7 +38,7 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
             unit = UnitType.BOTTLE
         else:
             unit = UnitType.PALET
-            volume = ceil(volume / self.max_bottles_in_palet)
+            volume = ceil(volume / self.get_max_bottles_in_palet())
         return unit, volume
 
     def _get_tarif_id(self, bottles: int) -> (pd.Series, int):
@@ -55,11 +52,10 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
 
 
 class MyTransporter(AbstractTransporter):
-    def __init__(self):
-        self.gasModulator = GasModulatorFromPrice(data_folder=tp.data_folder)
-        self.costByBottle = StefCostByBottleCalculator()
-        self.costByExpeditionObject = FixedCostByExpeditionCalculator(**tp.expedition_cost)
-        self.monthlyCost = MonthlyCostCalculator()
+    gasModulator = GasModulatorFromPrice(data_folder=tp.data_folder)
+    costByBottle = StefCostByBottleCalculator()
+    costByExpeditionObject = FixedCostByExpeditionCalculator(**tp.expedition_cost)
+    monthlyCost = MonthlyCostCalculator()
 
     def get_total_cost(self, department: str, gas_price: float, n_client: int = None, **kwargs) -> pd.DataFrame:
         gas_factor = self.gasModulator.get_modulation_factor(gas_price)

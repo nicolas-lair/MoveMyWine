@@ -39,10 +39,9 @@ class MyCostByBottleCalculator(CostByBottleCalculator):
 
 
 class MyTransporter(AbstractTransporter):
-    def __init__(self):
-        self.costByBottle = MyCostByBottleCalculator(data_folder=tp.data_folder)
-        self.costByExpeditionObject = FixedCostByExpeditionCalculator(**tp.expedition_cost)
-        self.monthlyCost = MonthlyCostCalculator(**tp.monthly_cost)
+    costByBottle = MyCostByBottleCalculator(data_folder=tp.data_folder)
+    costByExpeditionObject = FixedCostByExpeditionCalculator(**tp.expedition_cost)
+    monthlyCost = MonthlyCostCalculator(**tp.monthly_cost)
 
     def get_total_cost(self, department: str, gas_factor: float, n_client: int = None, **kwargs) -> pd.DataFrame:
         return super().get_total_cost(department=department, gas_factor=1, n_client=n_client, **kwargs)

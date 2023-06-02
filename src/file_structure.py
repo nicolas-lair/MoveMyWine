@@ -20,6 +20,7 @@ class TarifStructureFile(CSVFile):
     name = "tarif_structure.csv"
 
     class Cols(str, Enum):
+        tarif_id = "Tarif"
         tarif = "Tarif"
         unit = "Unité"
         type_ = "Type"

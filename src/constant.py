@@ -10,6 +10,7 @@ class TarifType(str, Enum):
 class UnitType(str, Enum):
     BOTTLE = "Col"
     PALET = "Palette"
+    KG = "Kg"
 
 
 CSV_PARAMS = {
@@ -19,10 +20,18 @@ CSV_PARAMS = {
 }
 
 
+class Bottle:
+    volume = 0.75  # L
+    weight = 1.4  # Kg
+
+
 class Package:
+    box_weight = 0.6  # Kg
     bottle_by_package = 6
-    package_weight = 8
-    max_package_without_palet = 15
+    package_weight = 8.5  # Kg
+
+    def get_package_weight(self, bottle: Bottle):
+        return self.bottle_by_package * bottle.weight + self.box_weight
 
 
 N_EXPEDITION = 5
