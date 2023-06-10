@@ -35,5 +35,3 @@ class Package:
 
 
 N_EXPEDITION = 5
-
-DATA_FOLDER = Path(r"../data")

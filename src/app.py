@@ -1,10 +1,7 @@
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html, dcc, Output, Input
 import dash_bootstrap_components as dbc
 
-from stef import Stef
-from geodis import Geodis
-from dbschenker import DBSchenker
-from chronopost import Chronopost
+from src.my_transporters import Stef, Geodis, DBSchenker, Chronopost
 
 from departement import DEPARTMENTS_TO_CODE
 from app_constant import Id

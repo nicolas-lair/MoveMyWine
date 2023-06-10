@@ -1,5 +1,5 @@
 from typing import Final
-from src.app_generics.transporter_params import AbstractTransporterParams, ExtraPackageCost
+from src.transporter.transporter_params import AbstractTransporterParams, ExtraPackageCost
 
 
 class TransporterParams(AbstractTransporterParams):
@@ -20,5 +20,5 @@ class TransporterParams(AbstractTransporterParams):
         "facturation": 13,
     }
 
-    default_gas_factor = 15.57
+    default_gas_factor = 15.32
     gas_modulation_link = "https://geodis.com/fr/gestion-du-fret/transport-terrestre/transport-de-palettes-et-de-colis/taux-de-surcharge-carburant"

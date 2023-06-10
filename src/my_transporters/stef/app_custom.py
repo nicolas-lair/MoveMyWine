@@ -2,11 +2,11 @@ from typing import Final
 
 from dash import html, dcc
 
-
 from src.app_generics.dash_custom_component import DashCustomComponents
 from src.app_constant import Id
 
 from .constant import TransporterParams
+
 
 class MyDashCustomComponent(DashCustomComponents):
     transporter_name: Final[str] = TransporterParams.name
@@ -22,7 +22,7 @@ class MyDashCustomComponent(DashCustomComponents):
                     type="number",
                     min=0.981,  # TODO make params
                     max=2.3307,  # TODO make params
-                    value=1.409,
+                    value=1.3310,
                     step=0.05
                 ),
             ],

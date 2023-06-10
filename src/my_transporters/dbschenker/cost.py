@@ -34,14 +34,15 @@ class MyCostByBottleCalculator(CostByBottleCalculator):
         self.tarif_by_dep = self.tarif_by_dep.set_index(CorrespondanceZoneDpt.Cols.dpt)
         self.cost_by_dest_and_volume = super().compute_cost_by_destination_and_volume()
 
-    def _get_dpt_code(self, dpt_series: pd.Series) -> pd.Series:
+    @staticmethod
+    def _get_dpt_code(dpt_series: pd.Series) -> pd.Series:
         return dpt_series
 
 
-class MyTransporter(AbstractTransporter):
-    costByBottle = MyCostByBottleCalculator(data_folder=tp.data_folder)
-    costByExpeditionObject = FixedCostByExpeditionCalculator(**tp.expedition_cost)
-    monthlyCost = MonthlyCostCalculator(**tp.monthly_cost)
-
-    def get_total_cost(self, department: str, gas_factor: float, n_client: int = None, **kwargs) -> pd.DataFrame:
-        return super().get_total_cost(department=department, gas_factor=1, n_client=n_client, **kwargs)
+class DBSchenkerTotalCost(TotalCostCalculator):
+    costs = {
+        CostType.ByBottle: GasModulatedCost(MyCostByBottleCalculator(data_folder=tp.data_folder), True),
+        CostType.ByPackage: GasModulatedCost(CostByPackageCalculator(), True),
+        CostType.Expedition: GasModulatedCost(FixedCostByExpeditionCalculator(**tp.expedition_cost), True),
+        CostType.Monthly: GasModulatedCost(MonthlyCostCalculator(**tp.monthly_cost), False)
+    }

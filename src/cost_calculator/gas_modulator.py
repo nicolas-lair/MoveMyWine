@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import functools
 import pandas as pd
 
 from src.file_structure import GasModulationFile
@@ -28,10 +28,3 @@ class GasModulatorFromPrice:
             .item()
         )
         return factor
-
-
-def apply_gas_factor(func):
-    def wrapper(self, *args, **kwargs):
-        cost = func(self, *args, **kwargs)
-        if self.apply_gas_modulation:
-            cost *=

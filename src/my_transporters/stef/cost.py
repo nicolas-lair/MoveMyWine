@@ -4,6 +4,7 @@ from math import ceil
 from src.cost_calculator import *
 
 from src.constant import UnitType, Package, Bottle
+from src.cost_calculator.constant import CostType
 from src.file_structure import TarifStructureFile
 from .constant import TransporterParams
 
@@ -51,12 +52,19 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
         return tarif_id, volume
 
 
-class MyTransporter(AbstractTransporter):
+class StefTotalCost(TotalCostCalculator):
+    costs = {
+        CostType.ByBottle: GasModulatedCost(StefCostByBottleCalculator(), gas_modulation_applicability=True),
+        CostType.Expedition: GasModulatedCost(FixedCostByExpeditionCalculator(**tp.expedition_cost),
+                                              gas_modulation_applicability=False),
+        CostType.Monthly: GasModulatedCost(MonthlyCostCalculator(), gas_modulation_applicability=False)
+    }
     gasModulator = GasModulatorFromPrice(data_folder=tp.data_folder)
-    costByBottle = StefCostByBottleCalculator()
-    costByExpeditionObject = FixedCostByExpeditionCalculator(**tp.expedition_cost)
-    monthlyCost = MonthlyCostCalculator()
 
-    def get_total_cost(self, department: str, gas_price: float, n_client: int = None, **kwargs) -> pd.DataFrame:
+    def compute_cost(self, gas_price: float, *args, **kwargs) -> float:
         gas_factor = self.gasModulator.get_modulation_factor(gas_price)
-        return super().get_total_cost(department, gas_factor, n_client)
+        return super().compute_cost(gas_factor=gas_factor, *args, **kwargs)
+
+    def compute_cost_by_bottle(self, gas_price: float, *args, **kwargs) -> pd.DataFrame:
+        kwargs["gas_factor"] = self.gasModulator.get_modulation_factor(gas_price)
+        return super().compute_cost_by_bottle(*args, **kwargs)

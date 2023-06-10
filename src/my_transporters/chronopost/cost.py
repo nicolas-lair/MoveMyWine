@@ -51,13 +51,19 @@ class MyCostByBottleCalculator(CostByBottleCalculator):
         df_cost = pd.DataFrame(index=DEPARTMENTS_TO_CODE.keys(), columns=[n_bottles], data=cost)
         return df_cost
 
-    def compute_cost(self, *args, **kwargs):
-        return self.compute_cost_by_destination_and_volume()
+    def compute_cost(self, bottle_type=Bottle(), *args, **kwargs):
+        return self.compute_cost_by_destination_and_volume(*args, bottle_type=bottle_type, **kwargs)
+
+    def compute_cost_by_bottle(self, department: str, bottle_type=Bottle(), *args, **kwargs):
+        return self.compute_cost_by_destination_and_volume(*args, bottle_type=bottle_type, **kwargs).loc[department]
 
     def _get_dpt_code(self, dpt_series: pd.Series) -> pd.Series:
         return dpt_series
 
-class MyTransporter(AbstractTransporter):
-    costByBottle = MyCostByBottleCalculator(data_folder=tp.data_folder)
-    costByExpeditionObject = FixedCostByExpeditionCalculator(**tp.expedition_cost)
-    monthlyCost = MonthlyCostCalculator(**tp.monthly_cost)
+
+class ChronopostTotalCost(TotalCostCalculator):
+    costs = {
+        CostType.ByBottle: GasModulatedCost(MyCostByBottleCalculator(data_folder=tp.data_folder), True),
+        CostType.ByPackage: GasModulatedCost(CostByPackageCalculator(), True),
+        CostType.Expedition: GasModulatedCost(FixedCostByExpeditionCalculator(**tp.expedition_cost), True),
+    }

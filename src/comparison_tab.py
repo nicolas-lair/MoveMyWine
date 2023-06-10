@@ -6,6 +6,7 @@ import plotly.express as px
 from departement import DEPARTMENTS_TO_CODE
 from app_constant import Id
 from app_utils import build_component_id
+from src.cost_calculator.constant import CostType
 
 
 def build_transporter_dropdown(transporter_dict):
@@ -61,13 +62,14 @@ def build_graphs_and_callbacks(app, transporter_dict):
     def update_cost(selected_transporter, gas_price, gas_factor, dept, n_expedition):
         all_df = []
         for transporter in selected_transporter:
-            df = transporter_dict[transporter].get_total_cost(department=dept, gas_factor=1 + gas_factor / 100,
-                                                              gas_price=gas_price, n_client=n_expedition)
+            print(f"Computing costs for {transporter}")
+            df = transporter_dict[transporter].compute_cost_by_bottle(
+                department=dept, gas_factor=1 + gas_factor / 100, gas_price=gas_price, n_expedition_by_month=n_expedition)
             df = pd.DataFrame(df)
             df["Transporteur"] = transporter
             all_df.append(df)
         all_df = pd.concat(all_df)
-        all_df = all_df.rename(columns={dept: "Coût"})
+        all_df = all_df.rename(columns={CostType.Total: "Coût"})
         all_df["Coût par bouteille"] = all_df["Coût"] / all_df.index
         # TODO Add range options
         all_df = all_df[all_df.index <= 100]

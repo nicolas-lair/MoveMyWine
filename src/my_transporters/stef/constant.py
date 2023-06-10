@@ -1,5 +1,6 @@
+import dataclasses
 from typing import Final
-from src.app_generics.transporter_params import AbstractTransporterParams
+from src.transporter.transporter_params import AbstractTransporterParams
 
 
 class TransporterParams(AbstractTransporterParams):

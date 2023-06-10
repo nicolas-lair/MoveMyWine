@@ -1,5 +1,5 @@
 from typing import Final
-from src.app_generics.transporter_params import AbstractTransporterParams
+from src.transporter.transporter_params import AbstractTransporterParams
 
 
 class TransporterParams(AbstractTransporterParams):
@@ -14,4 +14,4 @@ class TransporterParams(AbstractTransporterParams):
         "facturation": 24.56,
     }
 
-    gas_modulation_link = "https://geodis.com/fr/gestion-du-fret/transport-terrestre/transport-de-palettes-et-de-colis/taux-de-surcharge-carburant"
+    gas_modulation_link = ""

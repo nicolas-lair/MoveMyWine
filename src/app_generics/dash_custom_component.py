@@ -12,7 +12,7 @@ class DashCustomComponents(ABC):
 
     def __init__(self, *args, **kwargs):
         """ For cooperative multiple inheritance """
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
     def build_params_selector_object(self, app, location, hidden):
         div_object = self._build_params_div_object(location, hidden)
