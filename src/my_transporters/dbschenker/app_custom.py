@@ -6,6 +6,7 @@ from src.app_constant import Id
 from src.app_generics.dash_custom_component import DashCustomComponents
 from src.app_utils import build_component_id
 
+
 class MyDashCustomComponent(DashCustomComponents):
     transporter_name: Final[str] = TransporterParams.name
 

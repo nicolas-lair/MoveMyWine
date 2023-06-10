@@ -64,7 +64,11 @@ def build_graphs_and_callbacks(app, transporter_dict):
         for transporter in selected_transporter:
             print(f"Computing costs for {transporter}")
             df = transporter_dict[transporter].compute_cost_by_bottle(
-                department=dept, gas_factor=1 + gas_factor / 100, gas_price=gas_price, n_expedition_by_month=n_expedition)
+                department=dept,
+                gas_factor=1 + gas_factor / 100,
+                gas_price=gas_price,
+                n_expedition_by_month=n_expedition
+            )
             df = pd.DataFrame(df)
             df["Transporteur"] = transporter
             all_df.append(df)

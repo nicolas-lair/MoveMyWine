@@ -6,6 +6,7 @@ from departement import DEPARTMENTS_TO_CODE
 from app_constant import Id
 from app_utils import build_component_id
 
+
 def build_transporter_dropdown(transporter_dict):
     transporter_dropdown = html.Div(
         [
