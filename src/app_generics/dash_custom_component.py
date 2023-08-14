@@ -10,9 +10,11 @@ from src.app_utils import build_component_id
 class DashCustomComponents(ABC):
     transporter_name: str
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, transporter_params, *args, **kwargs):
         """ For cooperative multiple inheritance """
         super().__init__()
+        self.transporter_name: Final[str] = transporter_params.name
+
 
     def build_params_selector_object(self, app, location, hidden):
         div_object = self._build_params_div_object(location, hidden)
@@ -41,15 +43,15 @@ class GasFactorParam(DashCustomComponents):
     """
 
     def __init__(self, transporter_params, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.transporter_name: Final[str] = transporter_params.name
+        super().__init__(transporter_params, *args, **kwargs)
+        # self.transporter_name: Final[str] = transporter_params.name
         self.gas_modulation_link = transporter_params.gas_modulation_link
         self.default_gas_factor = transporter_params.default_gas_factor
 
     def _build_params_div_object(self, location: str = "", hidden: bool = True):
         params = html.Div(
             [
-                html.Label(["Surcharge carburant, information disponible ",
+                html.Label([f"{self.transporter_name} : Surcharge carburant, information disponible ",
                             html.A("ici", href=self.gas_modulation_link, target="_blank")]),
                 html.Br(),
                 dcc.Input(
@@ -58,7 +60,7 @@ class GasFactorParam(DashCustomComponents):
                     min=0,
                     max=100,
                     value=self.default_gas_factor,
-                    step=0.5
+                    step=0.01
                 ),
             ],
             hidden=hidden,

@@ -3,7 +3,7 @@ from .abstract_cost import AbstractCost
 from .constant import CostType
 
 
-class FixedCostByExpeditionCalculator(AbstractCost):
+class FixedCostByExpe(AbstractCost):
     def __init__(self, **kwargs):
         super().__init__()
         self.fixed_cost_by_expedition = kwargs

@@ -1,5 +1,6 @@
-from dash import Dash, html, dcc, Output, Input
+from dash import Dash, html, dcc, Output, Input, callback
 import dash_bootstrap_components as dbc
+import pandas as pd
 
 from src.my_transporters import Stef, Geodis, DBSchenker, Chronopost
 
@@ -10,9 +11,10 @@ from constant import N_EXPEDITION
 import comparison_tab as comp_tab
 
 transporter_dict = {
+    # TODO STEF : apply gas modulation on fix cost (except surete)
     Stef.name: Stef(),
-    Geodis.name: Geodis(),
-    DBSchenker.name: DBSchenker(),
+    # Geodis.name: Geodis(),
+    # DBSchenker.name: DBSchenker(),
     Chronopost.name: Chronopost()
 }
 
@@ -44,6 +46,7 @@ transporter_dropdown = html.Div(
 
 destination_dropdown = html.Div(
     [
+        dcc.Store(id='data_df_id'),
         dbc.Col(
             [
                 html.H4("Origine / Destination"),
@@ -105,7 +108,7 @@ app.layout = dbc.Container(
     ],
     fluid=True,
 )
-total_cost, cost_by_bottle, best_transporter, update_cost = comp_tab.build_graphs_and_callbacks(app, transporter_dict)
+total_cost, cost_by_bottle, best_transporter, update_cost, copy_best_transporter_table = comp_tab.build_graphs_and_callbacks(app, transporter_dict)
 transporter_comparison_layout = html.Div([
     dbc.Row([
         dbc.Col([
@@ -115,8 +118,14 @@ transporter_comparison_layout = html.Div([
         dbc.Col(destination_dropdown),
         dbc.Col(comp_tab.build_params_selector(app, transporter_dict))
     ]),
-    dbc.Row(best_transporter),
-    dbc.Row(cost_by_bottle),
+    dbc.Row([
+        dcc.Clipboard(id=Id.best_transporter + "_copy", style={"fontSize": 20}),
+        best_transporter
+    ]),
+    dbc.Row([
+        dcc.Clipboard(id="cost_by_bottle_copy", style={"fontSize": 20}),
+        cost_by_bottle
+    ]),
     dbc.Row(total_cost),
 ])
 

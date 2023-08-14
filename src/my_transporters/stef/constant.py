@@ -7,9 +7,9 @@ class TransporterParams(AbstractTransporterParams):
     name: Final[str] = "Stef"
     max_palet_weight = 600
 
-    expedition_cost = dict(
-        position=5.2,
-        security=0.7
-    )
+
+    position_cost=5.2
+    security_cost=0.7
+
 
     gas_modulation_link = "https://www.cnr.fr/espaces/13/indicateurs/41"

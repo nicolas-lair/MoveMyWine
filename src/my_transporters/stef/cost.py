@@ -55,8 +55,8 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
 class StefTotalCost(TotalCostCalculator):
     costs = {
         CostType.ByBottle: GasModulatedCost(StefCostByBottleCalculator(), gas_modulation_applicability=True),
-        CostType.Expedition: GasModulatedCost(FixedCostByExpeditionCalculator(**tp.expedition_cost),
-                                              gas_modulation_applicability=False),
+        CostType.Expedition: GasModulatedCost(FixedCostByExpe(position_cost = tp.position_cost), gas_modulation_applicability=True),
+        CostType.Security: GasModulatedCost(FixedCostByExpe(security_cost = tp.security_cost), gas_modulation_applicability=False),
         CostType.Monthly: GasModulatedCost(MonthlyCostCalculator(), gas_modulation_applicability=False)
     }
     gasModulator = GasModulatorFromPrice(data_folder=tp.data_folder)

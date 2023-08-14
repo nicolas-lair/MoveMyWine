@@ -65,5 +65,5 @@ class ChronopostTotalCost(TotalCostCalculator):
     costs = {
         CostType.ByBottle: GasModulatedCost(MyCostByBottleCalculator(data_folder=tp.data_folder), True),
         CostType.ByPackage: GasModulatedCost(CostByPackageCalculator(), True),
-        CostType.Expedition: GasModulatedCost(FixedCostByExpeditionCalculator(**tp.expedition_cost), True),
+        CostType.Expedition: GasModulatedCost(FixedCostByExpe(**tp.expedition_cost), True),
     }

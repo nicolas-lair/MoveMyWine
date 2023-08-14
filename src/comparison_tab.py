@@ -1,5 +1,5 @@
 import pandas as pd
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
@@ -34,6 +34,7 @@ def build_params_selector(app, transporter_dict):
 
 
 def build_graphs_and_callbacks(app, transporter_dict):
+
     total_cost_id = build_component_id(Id.comparison_tab, Id.total_cost_graph)
     total_cost = dbc.Card(dcc.Graph(id=total_cost_id,
                                     figure=px.scatter(title="Coût d'une expédition")),
@@ -53,6 +54,7 @@ def build_graphs_and_callbacks(app, transporter_dict):
         Output(total_cost_id, 'figure'),
         Output(cost_by_bottle_id, 'figure'),
         Output(best_transporter_id, 'figure'),
+        Output("data_df_id", 'data'),
         Input(build_component_id(Id.comparison_tab, Id.transporter_dropdown), 'value'),
         Input(build_component_id(Id.comparison_tab, Id.gas_price_input), 'value'),
         Input(build_component_id(Id.comparison_tab, Id.gas_factor_input), 'value'),
@@ -76,7 +78,7 @@ def build_graphs_and_callbacks(app, transporter_dict):
         all_df = all_df.rename(columns={CostType.Total: "Coût"})
         all_df["Coût par bouteille"] = all_df["Coût"] / all_df.index
         # TODO Add range options
-        all_df = all_df[all_df.index <= 100]
+        all_df = all_df[all_df.index <= 99]
         return (px.bar(all_df, y="Coût", color="Transporteur", barmode='group'),
                 px.bar(all_df, y="Coût par bouteille", color="Transporteur", barmode='group'),
                 px.bar(
@@ -89,7 +91,24 @@ def build_graphs_and_callbacks(app, transporter_dict):
                     y="Coût",
                     color="Transporteur",
                     category_orders={"Transporteur": list(transporter_dict.keys())}
-                )
+                ),
+                all_df.reset_index().rename(columns={"index": "n_bottles"}).to_dict('records')
                 )
 
-    return total_cost, cost_by_bottle, best_transporter, update_cost
+    @callback(
+        Output(Id.best_transporter + "_copy", "content"),
+        Input(Id.best_transporter + "_copy", "n_clicks"),
+        State("data_df_id", "data"),
+        prevent_initial_call=True
+    )
+    def copy_best_transporter_table(_, data):
+        dff = pd.DataFrame(data)
+        dff = (dff
+               .sort_values(["n_bottles", "Coût"], ascending=True)
+               .drop_duplicates(subset=["n_bottles"], keep="first")
+               )
+        # See options for .to_csv() or .to_excel() or .to_string() in the  pandas documentation
+        dff["Coût"] = dff["Coût"].round()
+        return dff.to_csv(index=False)  # includes headers
+
+    return total_cost, cost_by_bottle, best_transporter, update_cost, copy_best_transporter_table

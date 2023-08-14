@@ -22,13 +22,13 @@ CSV_PARAMS = {
 
 class Bottle:
     volume = 0.75  # L
-    weight = 1.4  # Kg
+    weight = 0.75+0.580  # Kg
 
 
 class Package:
     box_weight = 0.6  # Kg
     bottle_by_package = 6
-    package_weight = 8.5  # Kg
+    package_weight = Bottle.weight*bottle_by_package + box_weight  # Kg
 
     def get_package_weight(self, bottle: Bottle):
         return self.bottle_by_package * bottle.weight + self.box_weight
