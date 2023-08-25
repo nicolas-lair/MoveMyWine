@@ -78,7 +78,7 @@ def build_graphs_and_callbacks(app, transporter_dict):
         all_df = all_df.rename(columns={CostType.Total: "Coût"})
         all_df["Coût par bouteille"] = all_df["Coût"] / all_df.index
         # TODO Add range options
-        all_df = all_df[all_df.index <= 99]
+        all_df = all_df[all_df.index <= 198]
         return (px.bar(all_df, y="Coût", color="Transporteur", barmode='group'),
                 px.bar(all_df, y="Coût par bouteille", color="Transporteur", barmode='group'),
                 px.bar(
