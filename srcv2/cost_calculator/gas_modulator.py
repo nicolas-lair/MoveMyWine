@@ -1,5 +1,4 @@
 from pathlib import Path
-import functools
 import pandas as pd
 
 from src.file_structure import GasModulationFile

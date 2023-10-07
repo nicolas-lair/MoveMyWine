@@ -3,7 +3,7 @@ from typing import Dict
 
 from enum import Enum
 
-from constant import CSV_PARAMS
+from src.constant import CSV_PARAMS
 
 
 class AbstractCols(str, Enum):

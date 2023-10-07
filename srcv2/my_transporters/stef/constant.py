@@ -1,14 +1,14 @@
-import dataclasses
 from typing import Final
-from src.transporter.transporter_params import AbstractTransporterParams
+from dataclasses import dataclass
 
+from srcv2.transporter.transporter_params import AbstractTransporterParams
 
+@dataclass(kw_only=True)
 class TransporterParams(AbstractTransporterParams):
     name: Final[str] = "Stef"
-    max_palet_weight = 600
+    max_palet_weight: int = 600
 
-    position_cost=5.2
-    security_cost=0.7
+    position_cost: float = 5.2
+    security_cost: float = 0.7
 
-
-    gas_modulation_link = "https://www.cnr.fr/espaces/13/indicateurs/41"
+    gas_modulation_link: str = "https://www.cnr.fr/espaces/13/indicateurs/41"

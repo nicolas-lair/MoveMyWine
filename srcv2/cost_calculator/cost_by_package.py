@@ -1,25 +1,22 @@
 from dataclasses import dataclass, field
 from typing import Dict
-from math import ceil
 
-import pandas as pd
-
-from src.constant import Package
 from .constant import CostType
 from .abstract_cost import AbstractCost
+from .expedition import MultiRefExpedition
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ExtraPackageCost:
     extra_package_cost: float = 0  # No cost by default
     max_free_package: int = 0  # No cost by default
     multi_package_max_fee: float = 0  # No cost by default
 
 
-@dataclass
 class CostByPackageCalculator(AbstractCost):
+    name: str = CostType.ByPackage
     costs_by_package: Dict[str, float] = field(default_factory=dict)
-    extra_package_costs: ExtraPackageCost = ExtraPackageCost()
+    extra_package_costs: ExtraPackageCost = field(default_factory=ExtraPackageCost)
 
     @property
     def base_cost_by_package(self) -> float:
@@ -33,14 +30,8 @@ class CostByPackageCalculator(AbstractCost):
         cost = min(cost, self.extra_package_costs.multi_package_max_fee)
         return cost
 
-    def compute_cost(self, n_bottles, *args, **kwargs) -> float:
-        n_packages = ceil(n_bottles / Package.bottle_by_package)
+    def _compute_cost(self, expedition: MultiRefExpedition, *args, **kwargs) -> float:
+        n_packages = expedition.n_packages
         base_cost = n_packages * self.base_cost_by_package
         extra_cost = self.compute_extra_package_cost(n_packages)
         return base_cost + extra_cost
-
-    def compute_cost_by_bottle(self, *args, **kwargs) -> pd.DataFrame:
-        N = 100
-        cost_by_bottle = [self.compute_cost(n_bottles, *args, **kwargs) for n_bottles in range(1, N)]
-        cost_by_bottle = pd.DataFrame(index=range(1, N), data=cost_by_bottle, columns=[CostType.ByPackage])
-        return cost_by_bottle

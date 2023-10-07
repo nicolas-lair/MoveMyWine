@@ -1,6 +1,8 @@
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-
+from typing import Optional
+from math import ceil
 
 class TarifType(str, Enum):
     FORFAIT = "Forfait"
@@ -20,18 +22,28 @@ CSV_PARAMS = {
 }
 
 
-class Bottle:
-    volume = 0.75  # L
-    weight = 0.75+0.580  # Kg
+class BaseBottle:
+    def __init__(self, empty_weight, volume, bottle_eq: Optional[int] = None):
+        self.empty_weight = empty_weight  # Kg
+        self.volume = volume  # L
+        self.bottle_eq = ceil(self.volume // 0.75) if bottle_eq is None else bottle_eq
+
+    @property
+    def weight(self):
+        return self.empty_weight + self.volume
 
 
+BOTTLE = BaseBottle(empty_weight=0.580, volume=0.75, bottle_eq=1)
+MAGNUM = BaseBottle(empty_weight=2*0.580, volume=1.5, bottle_eq=2)
+
+
+@dataclass(kw_only=True)
 class Package:
-    box_weight = 0.6  # Kg
-    bottle_by_package = 6
-    package_weight = Bottle.weight*bottle_by_package + box_weight  # Kg
-
-    def get_package_weight(self, bottle: Bottle):
-        return self.bottle_by_package * bottle.weight + self.box_weight
+    box_weight: float = 0.6
+    bottle_by_package: int = 6
+    # def __init__(self, box_weight=0.6, bottle_by_package=6):
+    #     self.box_weight = box_weight  # Kg
+    #     self.bottle_by_package = bottle_by_package #
 
 
 N_EXPEDITION = 5
