@@ -7,6 +7,10 @@ from .expedition import MultiRefExpedition
 
 class TotalCostCalculator(UserDict[CostType, AbstractCost]):
     def compute_cost(self, gas_factor: float, expedition: MultiRefExpedition, *args, **kwargs):
-        total_cost = sum(
-            [cc.compute_cost(expedition=expedition,  *args, gas_factor=gas_factor, **kwargs) for cc in self.values()])
+        detailed_cost = {
+            k: cc.compute_cost(expedition=expedition,  *args, gas_factor=gas_factor, **kwargs)
+            for k, cc in self.items()
+        }
+        print(detailed_cost)
+        total_cost = sum(detailed_cost.values(), 0)
         return total_cost

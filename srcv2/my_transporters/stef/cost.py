@@ -80,10 +80,15 @@ class StefTotalCost(TotalCostCalculator):
         return super().compute_cost(gas_factor=gas_factor, *args, **kwargs)
 
 
-
 if __name__ == "__main__":
+    from srcv2.constant import MAGNUM, BOTTLE, Package
     cost_calculator = StefTotalCost()
     expedition = MultiRefExpedition([
-        SingleRefExpedition(n_bottles=54)
+        SingleRefExpedition(n_bottles=24, bottle_type=BOTTLE, package=Package()),
+        SingleRefExpedition(n_bottles=24, bottle_type=BOTTLE, package=Package()),
+        SingleRefExpedition(n_bottles=24, bottle_type=BOTTLE, package=Package()),
+        SingleRefExpedition(n_bottles=12, bottle_type=BOTTLE, package=Package()),
+
+        SingleRefExpedition(n_bottles=12, bottle_type=MAGNUM, package=Package(bottle_by_package=3))
     ])
     print(cost_calculator.compute_cost(gas_price=1.55, expedition=expedition, department="75"))

@@ -45,5 +45,4 @@ class Package:
     #     self.box_weight = box_weight  # Kg
     #     self.bottle_by_package = bottle_by_package #
 
-
 N_EXPEDITION = 5

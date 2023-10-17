@@ -16,7 +16,11 @@ class TransporterParams(AbstractTransporterParams):
         multi_package_max_fee=9999,  # Coût max de la gestion multi-colis - Chronopost
     ))
 
+    fixed_cost: dict = field(
+        default_factory=lambda: {
+            "surete": 0.8,
+            "eco": 0.09,
+        }
+    )
     default_gas_factor: float = 17.55
     gas_modulation_link: str = "https://www.chronopost.fr/fr/surcharge-carburant"
-
-    max_bottles: int = 100  # Quantité arbitraire
