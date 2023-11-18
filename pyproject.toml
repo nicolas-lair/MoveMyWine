@@ -17,8 +17,8 @@ numpy = "^1.26.0"
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
-dash-tools = "^1.11.1"
-
+ruff = "^0.1.6"
+pre-commit = "^3.5.0"
 
 [build-system]
 requires = ["poetry-core"]
