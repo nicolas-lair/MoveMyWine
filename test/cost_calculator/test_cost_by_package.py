@@ -1,5 +1,6 @@
 from srcv2.cost_calculator.cost_by_package import ExtraPackageCost, CostByPackageCalculator
-from srcv2.cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition
+from srcv2.cost_calculator.expedition import SingleRefExpedition
+from srcv2.cost_calculator.constant import CostType
 
 free_extra_package_cost = ExtraPackageCost()
 custom_extra_package_cost = ExtraPackageCost(extra_package_cost=1, max_free_package=3, multi_package_max_fee=3.5)
@@ -21,7 +22,7 @@ class TestExtraPackageCost:
 
 
 class TestCostByPackageCalculator:
-    no_cost = CostByPackageCalculator(gas_modulated=False, extra_package_costs=free_extra_package_cost)
+    no_cost = CostByPackageCalculator(gas_modulated=False, extra_package_costs=free_extra_package_cost, name="free")
     no_base_cost = CostByPackageCalculator(gas_modulated=False, extra_package_costs=custom_extra_package_cost)
     cost_with_gas_mod = CostByPackageCalculator(gas_modulated=True, costs_by_package=base_package_cost,
                                                 extra_package_costs=custom_extra_package_cost)
@@ -55,3 +56,7 @@ class TestCostByPackageCalculator:
                     4 * base_package_cost["package_cost"] + 1)
         assert self.cost_with_gas_mod.compute_cost(gas_factor=2, expedition=SingleRefExpedition(n_bottles=240)) == 2 * (
                     40 * base_package_cost["package_cost"] + 3.5)
+
+    def test_name(self):
+        assert self.no_cost.name == "free"
+        assert self.no_base_cost.name == CostType.ByPackage
