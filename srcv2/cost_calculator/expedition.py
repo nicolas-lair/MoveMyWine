@@ -16,14 +16,13 @@ class SingleRefExpedition:
         self.package = package
 
     @property
-    def n_package(self):
-        assert self.package is not None, "Please add a package to this expedition first"
+    def n_packages(self):
         bottle_package = ceil(self.n_bottles / self.package.bottle_by_package)
         return bottle_package
 
     @property
     def weight(self):
-        n_package = self.n_package
+        n_package = self.n_packages
         return self.n_bottles * self.bottle_type.weight + self.package.box_weight * n_package
 
     @property
@@ -38,7 +37,7 @@ class MultiRefExpedition(UserList[SingleRefExpedition]):
 
     @property
     def n_packages(self):
-        return sum([exp.n_package for exp in self])
+        return sum([exp.n_packages for exp in self])
 
     @property
     def n_bottles(self):

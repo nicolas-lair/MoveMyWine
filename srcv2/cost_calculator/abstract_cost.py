@@ -16,6 +16,9 @@ class AbstractCost(ABC):
         ...
 
     def apply_gas_modulation_factory(self, func):
+        if not self.gas_modulated:
+            return func
+
         def gas_modulated_cost(gas_factor, *args, **kwargs):
             cost = func(*args, **kwargs)
             if self.gas_modulated:
