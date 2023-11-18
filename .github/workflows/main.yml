@@ -52,7 +52,7 @@ jobs:
       # them in the cache key. I'm not, so it can be simple and just depend on the poetry.lock.
       - name: cache deps
         id: cache-deps
-        uses: actions/cache@v4.7.1
+        uses: actions/cache@v3.3.2
         with:
           path: .venv
           key: pydeps-${{ hashFiles('**/poetry.lock') }}
