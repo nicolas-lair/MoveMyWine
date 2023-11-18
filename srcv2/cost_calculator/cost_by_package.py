@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from .constant import CostType
@@ -14,17 +14,20 @@ class ExtraPackageCost:
 
     def compute_extra_cost(self, n_packages: int) -> float:
         extra_package = max(0, n_packages - self.max_free_package)
-        extra_cost = min(self.multi_package_max_fee, self.extra_package_cost * extra_package)
+        extra_cost = min(
+            self.multi_package_max_fee, self.extra_package_cost * extra_package
+        )
         return extra_cost
 
 
 class CostByPackageCalculator(AbstractCost):
-    def __init__(self,
-                 gas_modulated: bool,
-                 extra_package_costs: ExtraPackageCost,
-                 costs_by_package: Optional[dict[str, float]] = None,
-                 name: str = CostType.ByPackage
-                 ):
+    def __init__(
+        self,
+        gas_modulated: bool,
+        extra_package_costs: ExtraPackageCost,
+        costs_by_package: Optional[dict[str, float]] = None,
+        name: str = CostType.ByPackage,
+    ):
         super().__init__(gas_modulated=gas_modulated)
         if costs_by_package is None:
             costs_by_package = {}

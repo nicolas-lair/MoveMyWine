@@ -1,8 +1,14 @@
-from pathlib import Path
-
 import pandas as pd
 
-from srcv2.cost_calculator import *
+from srcv2.cost_calculator import (
+    AbstractCost,
+    SingleRefExpedition,
+    MultiRefExpedition,
+    CostType,
+    TotalCostCalculator,
+    CostByPackageCalculator,
+    FixedCostByExpe,
+)
 from srcv2.file_structure import TarifStructureFile
 from srcv2.departement import DEPARTMENTS_TO_CODE
 from srcv2.my_transporters.chronopost.constant import TransporterParams
@@ -11,14 +17,14 @@ tp = TransporterParams()
 
 
 class MyCostByBottleCalculator(AbstractCost):
-    def __init__(self, data_folder: Path):
+    def __init__(self):
         super().__init__(gas_modulated=True)
-        self.extra_kg_cost = TransporterParams.extra_kg_cost
+        self.extra_kg_cost = tp.extra_kg_cost
 
         self.tarif_structure = pd.read_csv(
-            data_folder / TarifStructureFile.name,
+            tp.data_folder / TarifStructureFile.name,
             **TarifStructureFile.csv_format,
-            index_col=[TarifStructureFile.Cols.unit]
+            index_col=[TarifStructureFile.Cols.unit],
         )
 
     @property
@@ -27,10 +33,17 @@ class MyCostByBottleCalculator(AbstractCost):
 
     def get_base_cost(self, expedition_weight: float, overweight: float) -> float:
         if overweight > 0:
-            tarif_id = self.tarif_structure.loc[self.tarif_structure[TarifStructureFile.Cols.max_] == self.max_tarif_weight]
+            tarif_id = self.tarif_structure.loc[
+                self.tarif_structure[TarifStructureFile.Cols.max_]
+                == self.max_tarif_weight
+            ]
         else:
-            min_weight_condition = self.tarif_structure[TarifStructureFile.Cols.min_] < expedition_weight
-            max_weight_condition = self.tarif_structure[TarifStructureFile.Cols.max_] >= expedition_weight
+            min_weight_condition = (
+                self.tarif_structure[TarifStructureFile.Cols.min_] < expedition_weight
+            )
+            max_weight_condition = (
+                self.tarif_structure[TarifStructureFile.Cols.max_] >= expedition_weight
+            )
             tarif_id = self.tarif_structure[min_weight_condition & max_weight_condition]
         base_cost = tarif_id[TarifStructureFile.Cols.tarif].item()
         return base_cost
@@ -44,11 +57,17 @@ class MyCostByBottleCalculator(AbstractCost):
         overweight = self.get_tarif_overweight(expedition_weight)
         base_cost = self.get_base_cost(expedition_weight, overweight)
         cost = base_cost + overweight * self.extra_kg_cost
-        df_cost = pd.DataFrame(index=DEPARTMENTS_TO_CODE.keys(), columns=[expedition.n_bottles_equivalent], data=cost)
+        df_cost = pd.DataFrame(
+            index=DEPARTMENTS_TO_CODE.keys(),
+            columns=[expedition.n_bottles_equivalent],
+            data=cost,
+        )
         return df_cost
 
-    def _compute_cost(self, expedition: MultiRefExpedition, *args, **kwargs):
-        return self.compute_cost_nationwide(expedition)
+    def _compute_cost(
+        self, expedition: MultiRefExpedition, department: str, *args, **kwargs
+    ):
+        return self.compute_cost_nationwide(expedition).loc[department]
 
     @staticmethod
     def _get_dpt_code(series_of_dpt: pd.Series) -> pd.Series:
@@ -57,16 +76,33 @@ class MyCostByBottleCalculator(AbstractCost):
 
 class ChronopostTotalCost(TotalCostCalculator):
     def __init__(self):
-        super().__init__({
-            CostType.ByBottle: MyCostByBottleCalculator(data_folder=tp.data_folder),
-            CostType.ByPackage: CostByPackageCalculator(gas_modulated=True),
-        }
-    )
+        super().__init__(
+            {
+                CostType.ByBottle: MyCostByBottleCalculator(),
+                CostType.ByPackage: CostByPackageCalculator(
+                    gas_modulated=True, extra_package_costs=tp.extra_package_cost
+                ),
+                CostType.Expedition: FixedCostByExpe(
+                    gas_modulated=True, **tp.fixed_cost
+                ),
+            }
+        )
 
 
 if __name__ == "__main__":
+    from srcv2.constant import BOTTLE, Package
+
     cost_calculator = ChronopostTotalCost()
-    expedition = MultiRefExpedition([
-        SingleRefExpedition(n_bottles=12)
-    ])
-    print(cost_calculator.compute_cost(gas_factor=tp.default_gas_factor, expedition=expedition))
+    expedition = MultiRefExpedition(
+        [
+            SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),
+            # SingleRefExpedition(n_bottles=36, bottle_type=BOTTLE, package=Package()),
+            # SingleRefExpedition(n_bottles=48, bottle_type=BOTTLE, package=Package()),
+            # SingleRefExpedition(n_bottles=6, bottle_type=MAGNUM, package=Package(bottle_by_package=3))
+        ]
+    )
+    print(
+        cost_calculator.compute_cost(
+            gas_factor=1 + tp.default_gas_factor / 100, expedition=expedition
+        )
+    )

@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 from typing import Optional
 from math import ceil
+
 
 class TarifType(str, Enum):
     FORFAIT = "Forfait"
@@ -34,7 +34,7 @@ class BaseBottle:
 
 
 BOTTLE = BaseBottle(empty_weight=0.580, volume=0.75, bottle_eq=1)
-MAGNUM = BaseBottle(empty_weight=2*0.580, volume=1.5, bottle_eq=2)
+MAGNUM = BaseBottle(empty_weight=2 * 0.580, volume=1.5, bottle_eq=2)
 
 
 @dataclass(kw_only=True)
@@ -44,5 +44,6 @@ class Package:
     # def __init__(self, box_weight=0.6, bottle_by_package=6):
     #     self.box_weight = box_weight  # Kg
     #     self.bottle_by_package = bottle_by_package #
+
 
 N_EXPEDITION = 5

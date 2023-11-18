@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from srcv2.transporter.transporter_params import AbstractTransporterParams
 
+
 @dataclass(kw_only=True)
 class TransporterParams(AbstractTransporterParams):
     name: Final[str] = "Stef"

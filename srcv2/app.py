@@ -1,8 +1,7 @@
-from dash import Dash, html, dcc, Output, Input, callback
+from dash import Dash, html, dcc, Output, Input
 import dash_bootstrap_components as dbc
-import pandas as pd
 
-from src.my_transporters import Stef, Geodis, DBSchenker, Chronopost
+from src.my_transporters import Stef, Chronopost
 
 from departement import DEPARTMENTS_TO_CODE
 from app_constant import Id
@@ -15,12 +14,15 @@ transporter_dict = {
     Stef.name: Stef(),
     # Geodis.name: Geodis(),
     # DBSchenker.name: DBSchenker(),
-    Chronopost.name: Chronopost()
+    Chronopost.name: Chronopost(),
 }
 
-app = Dash(__name__, title="MoveMyWine",
-           external_stylesheets=[dbc.themes.BOOTSTRAP],
-           suppress_callback_exceptions=True)
+app = Dash(
+    __name__,
+    title="MoveMyWine",
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    suppress_callback_exceptions=True,
+)
 server = app.server
 
 transporter_dropdown = html.Div(
@@ -31,8 +33,8 @@ transporter_dropdown = html.Div(
             list(transporter_dict.keys()),
             Stef.name,
             id=Id.transporter_dropdown,
-            clearable=False
-        )
+            clearable=False,
+        ),
     ]
 )
 
@@ -46,7 +48,7 @@ transporter_dropdown = html.Div(
 
 destination_dropdown = html.Div(
     [
-        dcc.Store(id='data_df_id'),
+        dcc.Store(id="data_df_id"),
         dbc.Col(
             [
                 html.H4("Origine / Destination"),
@@ -54,40 +56,70 @@ destination_dropdown = html.Div(
                     [
                         html.Label("Origine"),
                         html.Br(),
-                        dcc.Dropdown(DEPARTMENTS_TO_CODE, '49', id=Id.origin_dropdown, disabled=True)
+                        dcc.Dropdown(
+                            DEPARTMENTS_TO_CODE,
+                            "49",
+                            id=Id.origin_dropdown,
+                            disabled=True,
+                        ),
                     ]
                 ),
                 dbc.Row(
                     [
                         html.Label("Destination"),
                         html.Br(),
-                        dcc.Dropdown(DEPARTMENTS_TO_CODE, '75', id=Id.destination_dropdown)
+                        dcc.Dropdown(
+                            DEPARTMENTS_TO_CODE, "75", id=Id.destination_dropdown
+                        ),
                     ]
-                )
+                ),
             ]
-        )
+        ),
     ]
 )
 
 quantity_selector = html.Div(
     [
         html.H4("Quantités"),
-        dbc.Row([dbc.Col([html.Label("Nombre de bouteilles", htmlFor="bottles-selector"),
-                          html.Br(),
-                          dcc.Input(id=Id.bottles_selector, type='number', min=1, max=2000, step=1)]),
-                 ]
-                )
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Label("Nombre de bouteilles", htmlFor="bottles-selector"),
+                        html.Br(),
+                        dcc.Input(
+                            id=Id.bottles_selector,
+                            type="number",
+                            min=1,
+                            max=2000,
+                            step=1,
+                        ),
+                    ]
+                ),
+            ]
+        ),
     ]
 )
 
 n_expedition_slider = html.Div(
     [
-        dbc.Row([dbc.Col([html.Label("Nombre d'expéditions par mois"),
-                          html.Br(),
-                          dcc.Slider(id=Id.n_expedition_slider, min=1, max=15, step=1,
-                                     value=N_EXPEDITION)]),
-                 ]
-                )
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.Label("Nombre d'expéditions par mois"),
+                        html.Br(),
+                        dcc.Slider(
+                            id=Id.n_expedition_slider,
+                            min=1,
+                            max=15,
+                            step=1,
+                            value=N_EXPEDITION,
+                        ),
+                    ]
+                ),
+            ]
+        )
     ]
 )
 
@@ -98,60 +130,95 @@ n_expedition_slider = html.Div(
 app.layout = dbc.Container(
     [
         html.H1("Move My Wine", className="text-center"),
-        html.P("Cette application permet de faire des comparaison de prix sur les transporteurs",
-               className="text-center"),
-        dcc.Tabs(id="tabs-example-graph", value='tab-1-example-graph', children=[
-            dcc.Tab(label='Comparaison par transporteur', value='tab-1-transporter-comparison'),
-            dcc.Tab(label='Calculateur de coût', value='tab-2-cost-calculator'),
-        ]),
-        html.Div(id='tabs-content-example-graph'),
+        html.P(
+            "Cette application permet de faire des comparaison de prix sur les transporteurs",
+            className="text-center",
+        ),
+        dcc.Tabs(
+            id="tabs-example-graph",
+            value="tab-1-example-graph",
+            children=[
+                dcc.Tab(
+                    label="Comparaison par transporteur",
+                    value="tab-1-transporter-comparison",
+                ),
+                dcc.Tab(label="Calculateur de coût", value="tab-2-cost-calculator"),
+            ],
+        ),
+        html.Div(id="tabs-content-example-graph"),
     ],
     fluid=True,
 )
-total_cost, cost_by_bottle, best_transporter, update_cost, copy_best_transporter_table = comp_tab.build_graphs_and_callbacks(app, transporter_dict)
-transporter_comparison_layout = html.Div([
-    dbc.Row([
-        dbc.Col([
-            comp_tab.build_transporter_dropdown(transporter_dict),
-            n_expedition_slider
-        ]),
-        dbc.Col(destination_dropdown),
-        dbc.Col(comp_tab.build_params_selector(app, transporter_dict))
-    ]),
-    dbc.Row([
-        dcc.Clipboard(id=Id.best_transporter + "_copy", style={"fontSize": 20}),
-        best_transporter
-    ]),
-    dbc.Row([
-        dcc.Clipboard(id="cost_by_bottle_copy", style={"fontSize": 20}),
-        cost_by_bottle
-    ]),
-    dbc.Row(total_cost),
-])
+(
+    total_cost,
+    cost_by_bottle,
+    best_transporter,
+    update_cost,
+    copy_best_transporter_table,
+) = comp_tab.build_graphs_and_callbacks(app, transporter_dict)
+transporter_comparison_layout = html.Div(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        comp_tab.build_transporter_dropdown(transporter_dict),
+                        n_expedition_slider,
+                    ]
+                ),
+                dbc.Col(destination_dropdown),
+                dbc.Col(comp_tab.build_params_selector(app, transporter_dict)),
+            ]
+        ),
+        dbc.Row(
+            [
+                dcc.Clipboard(id=Id.best_transporter + "_copy", style={"fontSize": 20}),
+                best_transporter,
+            ]
+        ),
+        dbc.Row(
+            [
+                dcc.Clipboard(id="cost_by_bottle_copy", style={"fontSize": 20}),
+                cost_by_bottle,
+            ]
+        ),
+        dbc.Row(total_cost),
+    ]
+)
 
-cost_calc_layout = html.Div([
-    dbc.Row([dbc.Col(transporter_dropdown),
-             # dbc.Col(quantity_selector),
-             dbc.Col(destination_dropdown),
-             # dbc.Col(params_selector)
-             ]), dbc.Row(dbc.Col(total_cost)),
-    dbc.Row(dbc.Col(cost_by_bottle)),
-])
+cost_calc_layout = html.Div(
+    [
+        dbc.Row(
+            [
+                dbc.Col(transporter_dropdown),
+                # dbc.Col(quantity_selector),
+                dbc.Col(destination_dropdown),
+                # dbc.Col(params_selector)
+            ]
+        ),
+        dbc.Row(dbc.Col(total_cost)),
+        dbc.Row(dbc.Col(cost_by_bottle)),
+    ]
+)
 
-app.validation_layout = html.Div([
-    app.layout,
-    transporter_comparison_layout,
-    cost_calc_layout,
-    # params_selector,
-])
+app.validation_layout = html.Div(
+    [
+        app.layout,
+        transporter_comparison_layout,
+        cost_calc_layout,
+        # params_selector,
+    ]
+)
 
 
-@app.callback(Output('tabs-content-example-graph', 'children'),
-              Input('tabs-example-graph', 'value'))
+@app.callback(
+    Output("tabs-content-example-graph", "children"),
+    Input("tabs-example-graph", "value"),
+)
 def render_content(tab):
-    if tab == 'tab-1-transporter-comparison':
+    if tab == "tab-1-transporter-comparison":
         return transporter_comparison_layout
-    elif tab == 'tab-2-cost-calculator':
+    elif tab == "tab-2-cost-calculator":
         return cost_calc_layout
 
 
@@ -168,5 +235,5 @@ def render_content(tab):
 #                                                       gas_price=gas_price)
 #     return px.bar(df), px.bar(df / df.index)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run_server(debug=True)

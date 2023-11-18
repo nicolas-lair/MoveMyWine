@@ -1,4 +1,10 @@
 from .stef import Stef
+from .chronopost import Chronopost
+
 # from .geodis import Geodis
 # from .dbschenker import DBSchenker
-from .chronopost import Chronopost
+
+__all__ = [
+    Stef,
+    Chronopost,
+]

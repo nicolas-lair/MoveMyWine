@@ -11,10 +11,9 @@ class DashCustomComponents(ABC):
     transporter_name: str
 
     def __init__(self, transporter_params, *args, **kwargs):
-        """ For cooperative multiple inheritance """
+        """For cooperative multiple inheritance"""
         super().__init__()
         self.transporter_name: Final[str] = transporter_params.name
-
 
     def build_params_selector_object(self, app, location, hidden):
         div_object = self._build_params_div_object(location, hidden)
@@ -27,8 +26,11 @@ class DashCustomComponents(ABC):
 
     def _build_params_selector_callback(self, app, location: str = ""):
         @app.callback(
-            Output("-".join([location, self.transporter_name, Id.params_selector]), 'hidden'),
-            Input(Id.transporter_dropdown, 'value')
+            Output(
+                "-".join([location, self.transporter_name, Id.params_selector]),
+                "hidden",
+            ),
+            Input(Id.transporter_dropdown, "value"),
         )
         def update_params_selector(transporter):
             return False if transporter == self.transporter_name else True
@@ -51,8 +53,12 @@ class GasFactorParam(DashCustomComponents):
     def _build_params_div_object(self, location: str = "", hidden: bool = True):
         params = html.Div(
             [
-                html.Label([f"{self.transporter_name} : Surcharge carburant, information disponible ",
-                            html.A("ici", href=self.gas_modulation_link, target="_blank")]),
+                html.Label(
+                    [
+                        f"{self.transporter_name} : Surcharge carburant, information disponible ",
+                        html.A("ici", href=self.gas_modulation_link, target="_blank"),
+                    ]
+                ),
                 html.Br(),
                 dcc.Input(
                     id=Id.gas_factor_input,
@@ -60,10 +66,10 @@ class GasFactorParam(DashCustomComponents):
                     min=0,
                     max=100,
                     value=self.default_gas_factor,
-                    step=0.01
+                    step=0.01,
                 ),
             ],
             hidden=hidden,
-            id=build_component_id(location, self.transporter_name, Id.params_selector)
+            id=build_component_id(location, self.transporter_name, Id.params_selector),
         )
         return params

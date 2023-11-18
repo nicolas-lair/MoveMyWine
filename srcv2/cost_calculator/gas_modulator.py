@@ -7,8 +7,7 @@ from src.file_structure import GasModulationFile
 class GasModulatorFromPrice:
     def __init__(self, data_folder: Path):
         self.gas_modulation = pd.read_csv(
-            data_folder / GasModulationFile.name,
-            **GasModulationFile.csv_format
+            data_folder / GasModulationFile.name, **GasModulationFile.csv_format
         )
         self.gas_modulation[GasModulationFile.Cols.modulation] = (
             self.gas_modulation[GasModulationFile.Cols.modulation]
@@ -19,11 +18,13 @@ class GasModulatorFromPrice:
         )
 
     def get_modulation_factor(self, gas_price: float):
-        min_condition = self.gas_modulation[GasModulationFile.Cols.min_price] <= gas_price
-        max_condition = self.gas_modulation[GasModulationFile.Cols.max_price] >= gas_price
-        factor = (
-            self.gas_modulation
-            .loc[min_condition & max_condition, GasModulationFile.Cols.modulation]
-            .item()
+        min_condition = (
+            self.gas_modulation[GasModulationFile.Cols.min_price] <= gas_price
         )
+        max_condition = (
+            self.gas_modulation[GasModulationFile.Cols.max_price] >= gas_price
+        )
+        factor = self.gas_modulation.loc[
+            min_condition & max_condition, GasModulationFile.Cols.modulation
+        ].item()
         return factor

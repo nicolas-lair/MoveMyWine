@@ -23,7 +23,10 @@ class SingleRefExpedition:
     @property
     def weight(self):
         n_package = self.n_packages
-        return self.n_bottles * self.bottle_type.weight + self.package.box_weight * n_package
+        return (
+            self.n_bottles * self.bottle_type.weight
+            + self.package.box_weight * n_package
+        )
 
     @property
     def n_bottles_equivalent(self):
