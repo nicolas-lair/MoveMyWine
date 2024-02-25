@@ -26,5 +26,5 @@ class TransporterParams(AbstractTransporterParams):
             "eco": 0.09,
         }
     )
-    default_gas_factor: float = 17.55
+    default_gas_factor: float = 19.3
     gas_modulation_link: str = "https://www.chronopost.fr/fr/surcharge-carburant"

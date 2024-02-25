@@ -103,6 +103,8 @@ if __name__ == "__main__":
     )
     print(
         cost_calculator.compute_cost(
-            gas_factor=1 + tp.default_gas_factor / 100, expedition=expedition
+            gas_factor=1 + tp.default_gas_factor / 100,
+            expedition=expedition,
+            department="73",
         )
     )

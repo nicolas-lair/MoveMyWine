@@ -1,3 +1,5 @@
+from typing import Union
+
 import pandas as pd
 
 from srcv2.cost_calculator import (
@@ -41,6 +43,11 @@ class StefCostByBottleCalculator(AbstractCost):
         ].max()
 
     def _get_tarif_unit(self, bottles: int) -> UnitType:
+        """
+        Get the tarif unit type from the number of bottles in the expedition
+        :param bottles: Number of bottles in an expedition
+        :return: bottle, palet or kg
+        """
         if bottles <= self.max_bottles_at_bottle_tarif:
             return UnitType.BOTTLE
         else:
@@ -62,7 +69,9 @@ class StefCostByBottleCalculator(AbstractCost):
         ]
         return tarif_unit, tarif_type, tarif_id
 
-    def _compute_cost_nationwide(self, expedition: MultiRefExpedition) -> pd.Series:
+    def _compute_cost_nationwide(
+        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
+    ) -> pd.DataFrame:
         n_bottles_eq = expedition.n_bottles_equivalent
         tarif_unit, tarif_type, tarif_id = self.get_tarif_conditions(
             n_bottles=n_bottles_eq
