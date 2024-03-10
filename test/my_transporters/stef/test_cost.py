@@ -40,7 +40,6 @@ class TestCostByBottle:
             expedition=SingleRefExpedition(n_bottles=n_bottles)
         )
         assert isinstance(cost, pd.DataFrame)
-        print(cost[n_bottles])
         assert cost[n_bottles].sum() == 2952.84
 
     def test_compute_cost_nationwide_variable(self):

@@ -24,4 +24,5 @@ class TotalCostCalculator(UserDict[CostType, AbstractCost]):
         if return_details:
             return detailed_cost
         total_cost = sum(detailed_cost.values(), 0)
+        total_cost = round(total_cost, 2)
         return total_cost
