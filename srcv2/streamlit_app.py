@@ -1,4 +1,9 @@
 import streamlit as st
+import sys
+from pathlib import Path
+
+sys.path.append(Path(__file__).parent.as_posix())
+
 
 from .my_transporters.stef.cost import StefTotalCost  # noqa: E402
 from .cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition  # noqa: E402
