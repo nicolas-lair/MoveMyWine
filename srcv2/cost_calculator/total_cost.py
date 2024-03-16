@@ -15,12 +15,15 @@ class TotalCostCalculator(UserDict[CostType, AbstractCost]):
         *args,
         **kwargs,
     ):
-        detailed_cost = {
-            k: cc.compute_cost(
-                expedition=expedition, *args, gas_factor=gas_factor, **kwargs
-            )
-            for k, cc in self.items()
-        }
+        if expedition.n_bottles == 0:
+            detailed_cost = {k: 0 for k in self}
+        else:
+            detailed_cost = {
+                k: cc.compute_cost(
+                    expedition=expedition, *args, gas_factor=gas_factor, **kwargs
+                )
+                for k, cc in self.items()
+            }
         if return_details:
             return detailed_cost
         total_cost = sum(detailed_cost.values(), 0)

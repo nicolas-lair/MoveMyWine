@@ -28,6 +28,16 @@ class TestTotalCost:
         }
     )
 
+    def test_total_cost_no_package(self):
+        assert (
+            self.total_cost.compute_cost(
+                gas_factor=2,
+                expedition=SingleRefExpedition(n_bottles=0),
+                n_expedition_by_month=2,
+            )
+            == 0
+        )
+
     def test_total_cost_one_package(self):
         assert (
             self.total_cost.compute_cost(
