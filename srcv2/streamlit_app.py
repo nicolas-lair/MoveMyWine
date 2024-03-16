@@ -1,6 +1,9 @@
 import streamlit as st
 import sys
 from pathlib import Path
+from loguru import logger
+
+logger.info(Path(__file__).parent.as_posix())
 
 sys.path.append(Path(__file__).parent.as_posix())
 
