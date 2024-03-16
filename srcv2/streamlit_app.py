@@ -1,10 +1,14 @@
 import streamlit as st
+import sys
+from pathlib import Path
 
-from srcv2.my_transporters.stef.cost import StefTotalCost
-from srcv2.cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition
-from srcv2.constant import BOTTLE, MAGNUM, Package
-from srcv2.departement import DEPARTMENTS_TO_CODE
-from srcv2.my_transporters.stef.gas_modulation_indicator import retrieve_indicator
+sys.path.append(Path(__file__).parent.as_posix())
+
+from srcv2.my_transporters.stef.cost import StefTotalCost  # noqa: E402
+from srcv2.cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition  # noqa: E402
+from srcv2.constant import BOTTLE, MAGNUM, Package  # noqa: E402
+from srcv2.departement import DEPARTMENTS_TO_CODE  # noqa: E402
+from srcv2.my_transporters.stef.gas_modulation_indicator import retrieve_indicator  # noqa: E402
 
 transporter = st.selectbox("Choix du transporteur", ["Stef"])
 
