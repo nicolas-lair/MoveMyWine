@@ -2,11 +2,9 @@ import streamlit as st
 import sys
 from pathlib import Path
 from loguru import logger
-import os
 
-logger.info(Path(__file__).parents[2].as_posix())
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(Path(__file__).parent.as_posix())
+logger.info(Path(__file__).parents[1].as_posix())
+sys.path.append(Path(__file__).parents[1].as_posix())
 logger.info(sys.path)
 
 from my_transporters.stef.cost import StefTotalCost  # noqa: E402
