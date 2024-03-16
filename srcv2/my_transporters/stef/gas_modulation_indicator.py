@@ -3,9 +3,10 @@ import requests
 from .constant import TransporterParams
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from loguru import logger
 
 
-def retrieve_indicator() -> (bool, float):
+def retrieve_indicator(url=TransporterParams.gas_modulation_link) -> (bool, float):
     """
     Retrieve the gas modulation input value from the CNR website
 
@@ -14,7 +15,7 @@ def retrieve_indicator() -> (bool, float):
         indicator: float, value of the indicator
     """
     try:
-        response = requests.get(TransporterParams.gas_modulation_link)
+        response = requests.get(url)
         soup = BeautifulSoup(response.text, "html.parser")
 
         last_value_info = soup.find(id="lastValue").get_text()
@@ -24,5 +25,6 @@ def retrieve_indicator() -> (bool, float):
         indicator = float(indicator.replace(",", "."))
 
         return valid_date, indicator
-    except Exception:
+    except Exception as e:
+        logger.info(f"Error retrieving gas modulation: {e}", feature="f-strings")
         return None, None
