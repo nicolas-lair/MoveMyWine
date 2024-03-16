@@ -6,12 +6,15 @@ from dateutil.relativedelta import relativedelta
 from loguru import logger
 
 
-def retrieve_indicator(url=TransporterParams.gas_modulation_link) -> (bool, float):
+def retrieve_indicator(
+    url=TransporterParams.gas_modulation_link
+) -> (bool, bool, float):
     """
     Retrieve the gas modulation input value from the CNR website
 
     Return
-        valid_date: bool, date of the last indicator should of last month
+        success: bool, indicate that the indicator successfully retrieved
+        valid_date: bool, date of the last indicator should be last month
         indicator: float, value of the indicator
     """
     try:
@@ -24,7 +27,7 @@ def retrieve_indicator(url=TransporterParams.gas_modulation_link) -> (bool, floa
         valid_date = last_month == year_month
         indicator = float(indicator.replace(",", "."))
 
-        return valid_date, indicator
+        return True, valid_date, indicator
     except Exception as e:
         logger.info(f"Error retrieving gas modulation: {e}", feature="f-strings")
-        return None, None
+        return False, None, 1.0
