@@ -8,11 +8,11 @@ logger.info(Path(__file__).parents[2].as_posix())
 sys.path.append(Path(__file__).parent.as_posix())
 logger.info(sys.path)
 
-from srcv2.my_transporters.stef.cost import StefTotalCost  # noqa: E402
-from srcv2.cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition  # noqa: E402
-from srcv2.constant import BOTTLE, MAGNUM, Package  # noqa: E402
-from srcv2.departement import DEPARTMENTS_TO_CODE  # noqa: E402
-from srcv2.my_transporters.stef.gas_modulation_indicator import retrieve_indicator  # noqa: E402
+from my_transporters.stef.cost import StefTotalCost  # noqa: E402
+from cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition  # noqa: E402
+from constant import BOTTLE, MAGNUM, Package  # noqa: E402
+from departement import DEPARTMENTS_TO_CODE  # noqa: E402
+from my_transporters.stef.gas_modulation_indicator import retrieve_indicator  # noqa: E402
 
 transporter = st.selectbox("Choix du transporteur", ["Stef"])
 
