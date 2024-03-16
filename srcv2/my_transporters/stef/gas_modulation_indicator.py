@@ -1,11 +1,14 @@
 from bs4 import BeautifulSoup
 import requests
-from .constant import TransporterParams
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from loguru import logger
+import streamlit as st
+
+from .constant import TransporterParams
 
 
+@st.cache_data
 def retrieve_indicator(
     url=TransporterParams.gas_modulation_link
 ) -> (bool, bool, float):
