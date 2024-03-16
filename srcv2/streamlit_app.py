@@ -2,9 +2,10 @@ import streamlit as st
 import sys
 from pathlib import Path
 from loguru import logger
+import os
 
 logger.info(Path(__file__).parents[2].as_posix())
-
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(Path(__file__).parent.as_posix())
 logger.info(sys.path)
 
@@ -17,7 +18,7 @@ from my_transporters.stef.gas_modulation_indicator import retrieve_indicator  # 
 transporter = st.selectbox("Choix du transporteur", ["Stef"])
 
 if transporter == "Stef":
-    from srcv2.my_transporters.stef.constant import TransporterParams
+    from my_transporters.stef.constant import TransporterParams
 
     cost_calculator = StefTotalCost()
 
