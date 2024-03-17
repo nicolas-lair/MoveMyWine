@@ -1,17 +1,16 @@
 import streamlit as st
 import sys
 from pathlib import Path
-from loguru import logger
 
-logger.info(Path(__file__).parents[1].as_posix())
 sys.path.append(Path(__file__).parents[1].as_posix())
-logger.info(sys.path)
 
 from my_transporters.stef.cost import StefTotalCost  # noqa: E402
 from cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition  # noqa: E402
 from constant import BOTTLE, MAGNUM, Package  # noqa: E402
 from departement import DEPARTMENTS_TO_CODE  # noqa: E402
 from my_transporters.stef.gas_modulation_indicator import retrieve_indicator  # noqa: E402
+
+st.title(":champagne: Move My Wine")
 
 transporter = st.selectbox("Choix du transporteur", ["Stef"])
 
@@ -37,6 +36,11 @@ if transporter == "Stef":
             "Nombre de magnums (1.5 L)", min_value=0, max_value=100, value="min", step=1
         )
     with col2:
+        postal_code = st.selectbox(
+            "Code Postal",
+            options=DEPARTMENTS_TO_CODE.keys(),
+            format_func=lambda c: DEPARTMENTS_TO_CODE[c],
+        )
         destination = st.selectbox(
             "Département",
             options=DEPARTMENTS_TO_CODE.keys(),
@@ -79,14 +83,25 @@ if transporter == "Stef":
             ),
         ]
     )
-    st.write(
-        cost_calculator.compute_cost(
-            gas_price=gas_modulation,
-            expedition=expedition,
-            department=destination,
-            return_details=cost_detail,
-        )
+    st.divider()
+    cost = cost_calculator.compute_cost(
+        gas_price=gas_modulation,
+        expedition=expedition,
+        department=destination,
+        return_details=cost_detail,
     )
+    st.markdown(
+        """
+    <style>
+    .big-font {
+        font-size:50px !important;
+        text-align: center
+    }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(f'<p class="big-font">{cost} € HT</p>', unsafe_allow_html=True)
 
 else:
     st.write("Déso pas dispo")
