@@ -19,4 +19,4 @@ class Id:
 
     total_cost_graph = "total-cost-graph"
     cost_by_bottle_graph = "cost-by-bottle-graph"
-    best_transporter = 'best-transporter'
+    best_transporter = "best-transporter"

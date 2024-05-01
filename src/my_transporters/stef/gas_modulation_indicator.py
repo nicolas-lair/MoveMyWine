@@ -9,9 +9,11 @@ from .constant import TransporterParams
 
 
 @st.cache_data
-def retrieve_indicator(
-    url=TransporterParams.gas_modulation_link
-) -> (bool, bool, float):
+def cache_indicator(url=TransporterParams.gas_modulation_link) -> (bool, bool, float):
+    return scrap_indicator(url=url)
+
+
+def scrap_indicator(url=TransporterParams.gas_modulation_link) -> (bool, bool, float):
     """
     Retrieve the gas modulation input value from the CNR website
 

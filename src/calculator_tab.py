@@ -1,8 +1,5 @@
-from dash import Dash, html, dcc, callback, Output, Input
-import dash_bootstrap_components as dbc
-import plotly.express as px
+from dash import html, dcc
 
-from departement import DEPARTMENTS_TO_CODE
 from app_constant import Id
 from app_utils import build_component_id
 
@@ -16,16 +13,20 @@ def build_transporter_dropdown(transporter_dict):
                 list(transporter_dict.keys()),
                 id=build_component_id(Id.calculator_tab, Id.transporter_dropdown),
                 clearable=False,
-            )
+            ),
         ]
     )
     return transporter_dropdown
 
 
 def build_params_selector(app, transporter_dict):
-    params_selector, params_callbacks = zip(*[
-        transporter.build_params_selector_object(app=app, location=Id.calculator_tab, hidden=True) for transporter in
-        transporter_dict.values()]
-                                            )
+    params_selector, params_callbacks = zip(
+        *[
+            transporter.build_params_selector_object(
+                app=app, location=Id.calculator_tab, hidden=True
+            )
+            for transporter in transporter_dict.values()
+        ]
+    )
     params_selector = html.Div([html.H4("Paramètres")] + list(params_selector))
     return params_selector, params_callbacks

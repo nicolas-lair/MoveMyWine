@@ -1,8 +1,8 @@
-from srcv2.my_transporters.stef.cost import StefTotalCost
-from srcv2.cost_calculator.gas_modulator import GasModulatorFromPrice
-from srcv2.cost_calculator.constant import CostType
-from srcv2.cost_calculator.expedition import MultiRefExpedition, SingleRefExpedition
-from srcv2.constant import BOTTLE, Package
+from src.my_transporters.stef.cost import StefTotalCost
+from src.cost_calculator.gas_modulator import GasModulatorFromPrice
+from src.cost_calculator.constant import CostType
+from src.cost_calculator.expedition import MultiRefExpedition, SingleRefExpedition
+from src.constant import BOTTLE, Package
 
 
 class TestTotalCost:

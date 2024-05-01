@@ -1,5 +1,5 @@
-from srcv2.cost_calculator.monthly_cost import MonthlyCostCalculator
-from srcv2.cost_calculator.constant import CostType
+from src.cost_calculator.monthly_cost import MonthlyCostCalculator
+from src.cost_calculator.constant import CostType
 
 
 class TestMonthlyCost:
