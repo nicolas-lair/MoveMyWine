@@ -1,7 +1,7 @@
 from typing import Final
 from dataclasses import dataclass, field
-from srcv2.transporter.transporter_params import AbstractTransporterParams
-from srcv2.cost_calculator.cost_by_package import ExtraPackageCost
+from src.transporter.transporter_params import AbstractTransporterParams
+from src.cost_calculator.cost_by_package import ExtraPackageCost
 
 
 @dataclass(kw_only=True)

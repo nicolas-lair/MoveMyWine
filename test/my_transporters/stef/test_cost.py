@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
 
-from srcv2.cost_calculator.expedition import SingleRefExpedition
-from srcv2.my_transporters.stef.cost import StefCostByBottleCalculator
-from srcv2.constant import UnitType, TarifType
+from src.cost_calculator.expedition import SingleRefExpedition
+from src.my_transporters.stef.cost import StefCostByBottleCalculator
+from src.constant import UnitType, TarifType
 
 
 class TestCostByBottle:

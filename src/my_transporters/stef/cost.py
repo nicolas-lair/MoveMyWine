@@ -2,7 +2,7 @@ from typing import Union
 
 import pandas as pd
 
-from srcv2.cost_calculator import (
+from src.cost_calculator import (
     AbstractCost,
     SingleRefExpedition,
     MultiRefExpedition,
@@ -10,10 +10,10 @@ from srcv2.cost_calculator import (
     FixedCostByExpe,
     GasModulatorFromPrice,
 )
-from srcv2.constant import UnitType, TarifType
-from srcv2.file_structure import TarifStructureFile, TarifDeptFile
-from srcv2.cost_calculator.constant import CostType
-from srcv2.my_transporters.stef.constant import TransporterParams
+from src.constant import UnitType, TarifType
+from src.file_structure import TarifStructureFile, TarifDeptFile
+from src.cost_calculator.constant import CostType
+from src.my_transporters.stef.constant import TransporterParams
 
 tp = TransporterParams()
 
@@ -111,13 +111,13 @@ class StefTotalCost(TotalCostCalculator):
 
 
 if __name__ == "__main__":
-    from srcv2.constant import BOTTLE, Package
+    from src.constant import BOTTLE, Package, MAGNUM
 
     cost_calculator = StefTotalCost()
     expedition = MultiRefExpedition(
         [
             SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),
-            # SingleRefExpedition(n_bottles=24, bottle_type=BOTTLE, package=Package()),
+            SingleRefExpedition(n_bottles=24, bottle_type=MAGNUM, package=Package()),
             # SingleRefExpedition(n_bottles=24, bottle_type=BOTTLE, package=Package()),
             # SingleRefExpedition(n_bottles=12, bottle_type=BOTTLE, package=Package()),
             # SingleRefExpedition(n_bottles=6, bottle_type=MAGNUM, package=Package(bottle_by_package=3))
@@ -125,6 +125,6 @@ if __name__ == "__main__":
     )
     print(
         cost_calculator.compute_cost(
-            gas_price=1.502, expedition=expedition, department="38"
+            gas_price=1, expedition=expedition, department="69", return_details=True
         )
     )

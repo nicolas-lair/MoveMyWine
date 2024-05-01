@@ -1,6 +1,6 @@
 from typing import Optional
 
-from srcv2.constant import N_EXPEDITION
+from src.constant import N_EXPEDITION
 from .abstract_cost import AbstractCost
 from .constant import CostType
 

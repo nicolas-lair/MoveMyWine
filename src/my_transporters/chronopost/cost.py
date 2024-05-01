@@ -1,6 +1,6 @@
 import pandas as pd
 
-from srcv2.cost_calculator import (
+from src.cost_calculator import (
     AbstractCost,
     SingleRefExpedition,
     MultiRefExpedition,
@@ -9,9 +9,9 @@ from srcv2.cost_calculator import (
     CostByPackageCalculator,
     FixedCostByExpe,
 )
-from srcv2.file_structure import TarifStructureFile
-from srcv2.departement import DEPARTMENTS_TO_CODE
-from srcv2.my_transporters.chronopost.constant import TransporterParams
+from src.file_structure import TarifStructureFile
+from src.departement import DEPARTMENTS_TO_CODE
+from src.my_transporters.chronopost.constant import TransporterParams
 
 tp = TransporterParams()
 
@@ -90,7 +90,7 @@ class ChronopostTotalCost(TotalCostCalculator):
 
 
 if __name__ == "__main__":
-    from srcv2.constant import BOTTLE, Package
+    from src.constant import BOTTLE, Package
 
     cost_calculator = ChronopostTotalCost()
     expedition = MultiRefExpedition(

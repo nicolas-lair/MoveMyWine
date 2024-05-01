@@ -1,6 +1,6 @@
 import loguru
 
-from srcv2.my_transporters.stef.gas_modulation_indicator import _retrieve_indicator
+from src.my_transporters.stef.gas_modulation_indicator import _retrieve_indicator
 
 
 class TestCNRIndicatorRetriever:

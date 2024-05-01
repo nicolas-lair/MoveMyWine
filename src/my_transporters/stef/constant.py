@@ -1,7 +1,7 @@
 from typing import Final
 from dataclasses import dataclass
 
-from srcv2.transporter.transporter_params import AbstractTransporterParams
+from src.transporter.transporter_params import AbstractTransporterParams
 
 
 @dataclass(kw_only=True)

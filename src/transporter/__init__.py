@@ -1,8 +1,7 @@
 import dataclasses
 
-from srcv2.cost_calculator import TotalCostCalculator
+from src.cost_calculator import TotalCostCalculator
 from .transporter_params import AbstractTransporterParams
-from srcv2.app_generics.dash_custom_component import DashCustomComponents
 
 
 @dataclasses.dataclass

@@ -1,5 +1,5 @@
-from srcv2.cost_calculator.fixed_cost_by_expedition import FixedCostByExpe
-from srcv2.cost_calculator.constant import CostType
+from src.cost_calculator.fixed_cost_by_expedition import FixedCostByExpe
+from src.cost_calculator.constant import CostType
 
 
 class TestFixedCostByExpedition:
