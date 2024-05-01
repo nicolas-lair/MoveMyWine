@@ -24,7 +24,6 @@ def get_postal_code_list():
         dtype=str,
     )
     df = df.drop_duplicates(keep="first")
-    df = df.fillna("")
     df[col_enum.commune] = df[col_enum.commune].str.title()
     df[col_enum.lieudit] = df[col_enum.lieudit].str.title()
     # df_commune = (df[[PostalCodeAPI.Cols.postal_code, PostalCodeAPI.Cols.commune]]
@@ -33,4 +32,7 @@ def get_postal_code_list():
     # df_lieu_dit = (df[[PostalCodeAPI.Cols.postal_code, PostalCodeAPI.Cols.lieudit]].dropna().rename(columns={PostalCodeAPI.Cols.lieudit: PostalCodeAPI.Cols.commune}))
     #
     # df = pd.merge([df_commune, df_lieu_dit])
-    return df[[c.value for c in col_enum]]
+    df["full_name"] = df[[c.value for c in col_enum]].apply(
+        lambda c: c.str.cat(sep=" - "), axis=1
+    )
+    return df

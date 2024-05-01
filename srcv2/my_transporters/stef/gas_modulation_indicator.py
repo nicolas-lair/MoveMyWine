@@ -12,6 +12,12 @@ from .constant import TransporterParams
 def retrieve_indicator(
     url=TransporterParams.gas_modulation_link
 ) -> (bool, bool, float):
+    return _retrieve_indicator(url=url)
+
+
+def _retrieve_indicator(
+    url=TransporterParams.gas_modulation_link
+) -> (bool, bool, float):
     """
     Retrieve the gas modulation input value from the CNR website
 

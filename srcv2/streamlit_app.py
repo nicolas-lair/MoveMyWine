@@ -36,7 +36,7 @@ if "department" not in st.session_state:
 
 
 def department_callback():
-    st.session_state.department = postal_code[0][:2]
+    st.session_state.department = postal_code[:2]
 
 
 df_postal_code = retrieve_postal_code()
@@ -56,15 +56,14 @@ if transporter == "Stef":
     with commune_col:
         postal_code = st.selectbox(
             "Destination",
-            options=set(map(tuple, df_postal_code.values)),
-            format_func=lambda c: " - ".join(c),
+            options=df_postal_code.full_name.values,
             on_change=department_callback,
         )
     with dept_col:
         # TODO : Update department
         st.text_input(
             "Département",
-            value=DEPARTMENTS_TO_CODE[postal_code[0][:2]],
+            value=DEPARTMENTS_TO_CODE[postal_code[:2]],
             disabled=True,
         )
 
