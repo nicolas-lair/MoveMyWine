@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Package to compute bottles transport price. Comes with a simple dash app"
 authors = ["Nicolas Lair <nl.nicolas.lair@gmail.com>"]
 readme = "README.md"
-packages = [ { include = "srcv2" }, { include = "src" } ]
+packages = [ { include = "src" } ]
 
 [tool.poetry.dependencies]
 python = ">=3.11.4,<3.13"
@@ -32,4 +32,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 ignore-init-module-imports = true
-exclude = ["src/*"]

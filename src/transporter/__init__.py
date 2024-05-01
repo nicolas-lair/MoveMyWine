@@ -8,4 +8,3 @@ from .transporter_params import AbstractTransporterParams
 class Transporter:
     cost_calculator: TotalCostCalculator
     transporter_config: AbstractTransporterParams
-    app_custom_component: DashCustomComponents
