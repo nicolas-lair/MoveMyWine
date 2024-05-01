@@ -8,7 +8,7 @@ from my_transporters.stef.cost import StefTotalCost  # noqa: E402
 from cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition  # noqa: E402
 from constant import BOTTLE, MAGNUM, Package  # noqa: E402
 from departement import DEPARTMENTS_TO_CODE  # noqa: E402
-from my_transporters.stef.gas_modulation_indicator import retrieve_indicator  # noqa: E402
+from my_transporters.stef.gas_modulation_indicator import cache_indicator  # noqa: E402
 from app_generics.postal_code import get_postal_code_list  # noqa: E402
 
 st.title(":champagne: Move My Wine")
@@ -46,7 +46,7 @@ st.markdown("#### Expédition")
 if transporter == "Stef":
     from my_transporters.stef.constant import TransporterParams
 
-    success_retrival, valid_date, current_gnr_indicator = retrieve_indicator()
+    success_retrival, valid_date, current_gnr_indicator = cache_indicator()
     cost_calculator = StefTotalCost()
 
     (
