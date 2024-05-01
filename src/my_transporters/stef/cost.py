@@ -1,70 +1,130 @@
+from typing import Union
+
 import pandas as pd
-from math import ceil
 
-from src.cost_calculator import *
-
-from src.constant import UnitType, Package, Bottle
+from src.cost_calculator import (
+    AbstractCost,
+    SingleRefExpedition,
+    MultiRefExpedition,
+    TotalCostCalculator,
+    FixedCostByExpe,
+    GasModulatorFromPrice,
+)
+from src.constant import UnitType, TarifType
+from src.file_structure import TarifStructureFile, TarifDeptFile
 from src.cost_calculator.constant import CostType
-from src.file_structure import TarifStructureFile
-from .constant import TransporterParams
+from src.my_transporters.stef.constant import TransporterParams
 
 tp = TransporterParams()
 
 
-class StefCostByBottleCalculator(CostByBottleCalculator):
-    def __init__(
-            self,
-            max_palet_weight: int = tp.max_palet_weight,
-    ):
-        # TODO remove ligne Relivraison
-        self.max_palet_weight = max_palet_weight
-        super().__init__(data_folder=tp.data_folder)
+class StefCostByBottleCalculator(AbstractCost):
+    def __init__(self):
+        super().__init__(gas_modulated=True)
+        self.tarif_structure = pd.read_csv(
+            tp.data_folder / TarifStructureFile.name,
+            **TarifStructureFile.csv_format,
+            index_col=[TarifStructureFile.Cols.unit],
+        )
+        self.tarif_by_dep = pd.read_csv(
+            tp.data_folder / TarifDeptFile.name,
+            **TarifDeptFile.csv_format,
+            index_col=[TarifDeptFile.Cols.dpt],
+        )
 
-    def get_max_bottles_in_palet(self, bottle_type: Bottle = Bottle()) -> int:
-        package_weight = Package().get_package_weight(bottle=bottle_type)
-        return ceil((self.max_palet_weight * Package.bottle_by_package) // package_weight)
+    @staticmethod
+    def _get_dpt_code(series_of_dpt: pd.Series) -> pd.Series:
+        return series_of_dpt.str.slice(2, 4)
 
     @property
-    def max_bottles(self) -> int:
-        max_palets = self.tarif_structure.loc[UnitType.PALET, TarifStructureFile.Cols.max_].max()
-        max_bottles = max_palets * self.get_max_bottles_in_palet()
-        return max_bottles
+    def max_bottles_at_bottle_tarif(self):
+        return self.tarif_structure.loc[
+            UnitType.BOTTLE, TarifStructureFile.Cols.max_
+        ].max()
 
-    def _get_dpt_code(self, dpt_series: pd.Series) -> pd.Series:
-        return dpt_series.str.slice(2, 4)
-
-    def _get_price_unit(self, volume: int) -> (UnitType, int):
-        max_bottles_for_bottle_price = self.tarif_structure.loc[UnitType.BOTTLE, TarifStructureFile.Cols.max_].max()
-        if volume <= max_bottles_for_bottle_price:
-            unit = UnitType.BOTTLE
+    def _get_tarif_unit(self, bottles: int) -> UnitType:
+        """
+        Get the tarif unit type from the number of bottles in the expedition
+        :param bottles: Number of bottles in an expedition
+        :return: bottle, palet or kg
+        """
+        if bottles <= self.max_bottles_at_bottle_tarif:
+            return UnitType.BOTTLE
         else:
-            unit = UnitType.PALET
-            volume = ceil(volume / self.get_max_bottles_in_palet())
-        return unit, volume
+            raise NotImplementedError
 
-    def _get_tarif_id(self, bottles: int) -> (pd.Series, int):
-        unit, volume = self._get_price_unit(bottles)
-        tarif_type = self.tarif_structure.loc[unit]
-        tarif_id = tarif_type[
-            (tarif_type[TarifStructureFile.Cols.min_] <= volume)
-            & (tarif_type[TarifStructureFile.Cols.max_] >= volume)
-            ]
-        return tarif_id, volume
+    def _get_tarif_info(self, bottles: int, tarif_unit: UnitType) -> pd.DataFrame:
+        tarif_structure = self.tarif_structure.loc[tarif_unit]
+        min_volume_condition = tarif_structure[TarifStructureFile.Cols.min_] <= bottles
+        max_volume_condition = tarif_structure[TarifStructureFile.Cols.max_] >= bottles
+        return tarif_structure[min_volume_condition & max_volume_condition]
+
+    def get_tarif_conditions(self, n_bottles: int) -> tuple[UnitType, TarifType, str]:
+        tarif_unit = self._get_tarif_unit(n_bottles)
+        assert tarif_unit == UnitType.BOTTLE
+        tarif_info = self._get_tarif_info(n_bottles, tarif_unit)
+        tarif_type, tarif_id = tarif_info.loc[
+            tarif_unit,
+            [TarifStructureFile.Cols.type_, TarifStructureFile.Cols.tarif_id],
+        ]
+        return tarif_unit, tarif_type, tarif_id
+
+    def _compute_cost_nationwide(
+        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
+    ) -> pd.DataFrame:
+        n_bottles_eq = expedition.n_bottles_equivalent
+        tarif_unit, tarif_type, tarif_id = self.get_tarif_conditions(
+            n_bottles=n_bottles_eq
+        )
+        cost = self.tarif_by_dep[tarif_id].to_frame(n_bottles_eq)
+        if tarif_type == TarifType.VARIABLE:
+            volume_in_tarif_unit = n_bottles_eq
+            cost *= volume_in_tarif_unit
+        return cost
+
+    def _compute_cost(
+        self, expedition: MultiRefExpedition, department: str, *args, **kwargs
+    ) -> float:
+        nation_wide_cost = self._compute_cost_nationwide(expedition)
+        nation_wide_cost.index = self._get_dpt_code(nation_wide_cost.index)
+        return nation_wide_cost.loc[department, expedition.n_bottles_equivalent].copy()
 
 
 class StefTotalCost(TotalCostCalculator):
-    costs = {
-        CostType.ByBottle: GasModulatedCost(StefCostByBottleCalculator(), gas_modulation_applicability=True),
-        CostType.Expedition: GasModulatedCost(FixedCostByExpe(position_cost = tp.position_cost), gas_modulation_applicability=True),
-        CostType.Security: GasModulatedCost(FixedCostByExpe(security_cost = tp.security_cost), gas_modulation_applicability=False),
-        CostType.Monthly: GasModulatedCost(MonthlyCostCalculator(), gas_modulation_applicability=False)
-    }
-    gasModulator = GasModulatorFromPrice(data_folder=tp.data_folder)
+    def __init__(self):
+        super().__init__(
+            {
+                CostType.ByBottle: StefCostByBottleCalculator(),
+                CostType.Expedition: FixedCostByExpe(
+                    position_cost=tp.position_cost, gas_modulated=True
+                ),
+                CostType.Security: FixedCostByExpe(
+                    security_cost=tp.security_cost, gas_modulated=False
+                ),
+            }
+        )
+        self.gasModulator = GasModulatorFromPrice(data_folder=tp.data_folder)
 
     def compute_cost(self, gas_price: float, *args, **kwargs) -> float:
         gas_factor = self.gasModulator.get_modulation_factor(gas_price)
         return super().compute_cost(gas_factor=gas_factor, *args, **kwargs)
 
-    def compute_cost_by_bottle(self, gas_price: float, *args, **kwargs) -> pd.DataFrame:
-        kwargs["gas_factor"] = self.gasModulator.get_modulation_factor(gas_price)
-        return super().compute_cost_by_bottle(*args, **kwargs)
+
+if __name__ == "__main__":
+    from src.constant import BOTTLE, Package, MAGNUM
+
+    cost_calculator = StefTotalCost()
+    expedition = MultiRefExpedition(
+        [
+            SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),
+            SingleRefExpedition(n_bottles=24, bottle_type=MAGNUM, package=Package()),
+            # SingleRefExpedition(n_bottles=24, bottle_type=BOTTLE, package=Package()),
+            # SingleRefExpedition(n_bottles=12, bottle_type=BOTTLE, package=Package()),
+            # SingleRefExpedition(n_bottles=6, bottle_type=MAGNUM, package=Package(bottle_by_package=3))
+        ]
+    )
+    print(
+        cost_calculator.compute_cost(
+            gas_price=1, expedition=expedition, department="69", return_details=True
+        )
+    )

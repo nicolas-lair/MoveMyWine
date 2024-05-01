@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from math import ceil
 from typing import Optional
 
-from srcv2.constant import Package, BaseBottle, BOTTLE
+from src.constant import Package, BaseBottle, BOTTLE
 
 
 @dataclass(kw_only=True)
