@@ -1,6 +1,7 @@
 from abc import ABC
+from dataclasses import dataclass
 from typing import Dict
-
+from pathlib import Path
 from enum import Enum
 
 from src.constant import CSV_PARAMS
@@ -35,12 +36,13 @@ class TarifDeptFile(CSVFile):
         dpt = "Département"
 
 
-class GasModulationFile(CSVFile):
-    name = "gas_modulation.csv"
+@dataclass
+class ModulationFileConfig(CSVFile):
+    path: Path
 
     class Cols(str, Enum):
-        min_price = "Min"
-        max_price = "Max"
+        lower_bound = "Min"
+        upper_bound = "Max"
         modulation = "Modulation"
 
 

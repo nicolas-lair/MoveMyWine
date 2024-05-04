@@ -5,7 +5,7 @@ from src.cost_calculator import (
     SingleRefExpedition,
     MultiRefExpedition,
     CostType,
-    TotalCostCalculator,
+    CostCollectionCalculator,
     CostByPackageCalculator,
     FixedCostByExpe,
 )
@@ -74,7 +74,7 @@ class MyCostByBottleCalculator(AbstractCost):
         return series_of_dpt
 
 
-class ChronopostTotalCost(TotalCostCalculator):
+class ChronopostCostCollection(CostCollectionCalculator):
     def __init__(self):
         super().__init__(
             {
@@ -92,7 +92,7 @@ class ChronopostTotalCost(TotalCostCalculator):
 if __name__ == "__main__":
     from src.constant import BOTTLE, Package
 
-    cost_calculator = ChronopostTotalCost()
+    cost_calculator = ChronopostCostCollection()
     expedition = MultiRefExpedition(
         [
             SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),

@@ -1,19 +1,11 @@
-from typing import Optional
-
-from .abstract_cost import AbstractCost
+from .base_cost import BaseCost
 from .constant import CostType
 
 
-class FixedCostByExpe(AbstractCost):
-    def __init__(
-        self,
-        gas_modulated: Optional[bool] = False,
-        name: Optional[str] = CostType.Expedition,
-        **kwargs,
-    ):
-        super().__init__(gas_modulated=gas_modulated)
-        self.fixed_cost_by_expedition = kwargs
+class FixedCostByExpe(BaseCost):
+    def __init__(self, name: str = CostType.Expedition, **kwargs):
         self.name = name
+        self.cost = kwargs
 
-    def _compute_cost(self, *args, **kwargs):
-        return sum(self.fixed_cost_by_expedition.values())
+    def compute_cost(self, **kwargs) -> float:
+        return sum(self.cost.values())

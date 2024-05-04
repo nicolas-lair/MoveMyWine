@@ -1,22 +1,25 @@
-from .abstract_cost import AbstractCost
-from .total_cost import TotalCostCalculator
+from .base_cost import BaseCost
+from .cost_collection import CostCollectionCalculator
 from .cost_by_package import CostByPackageCalculator, ExtraPackageCost
 from .fixed_cost_by_expedition import FixedCostByExpe
 from .monthly_cost import MonthlyCostCalculator
 from .constant import CostType
-from .gas_modulator import GasModulatorFromPrice
+from .cost_modulator import ModulatorFromIndicator
 from .expedition import MultiRefExpedition, SingleRefExpedition
-
+from .total_cost_calculator import TotalCostCalculator
+from .cost_modulator import ModulatedCostCollection
 
 __all__ = [
-    AbstractCost,
-    TotalCostCalculator,
+    BaseCost,
+    CostCollectionCalculator,
     CostByPackageCalculator,
     ExtraPackageCost,
     FixedCostByExpe,
     MonthlyCostCalculator,
     CostType,
-    GasModulatorFromPrice,
+    ModulatorFromIndicator,
     MultiRefExpedition,
     SingleRefExpedition,
+    TotalCostCalculator,
+    ModulatedCostCollection,
 ]

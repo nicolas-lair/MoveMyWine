@@ -6,9 +6,9 @@ from src.cost_calculator import (
     AbstractCost,
     SingleRefExpedition,
     MultiRefExpedition,
-    TotalCostCalculator,
+    CostCollectionCalculator,
     FixedCostByExpe,
-    GasModulatorFromPrice,
+    ModulatorFromIndicator,
 )
 from src.constant import UnitType, TarifType
 from src.file_structure import TarifStructureFile, TarifDeptFile
@@ -90,30 +90,34 @@ class StefCostByBottleCalculator(AbstractCost):
         return nation_wide_cost.loc[department, expedition.n_bottles_equivalent].copy()
 
 
-class StefTotalCost(TotalCostCalculator):
+class StefCostCollection(CostCollectionCalculator):
     def __init__(self):
         super().__init__(
             {
                 CostType.ByBottle: StefCostByBottleCalculator(),
                 CostType.Expedition: FixedCostByExpe(
-                    position_cost=tp.position_cost, gas_modulated=True
+                    {"position_cost": tp.position_cost}
                 ),
-                CostType.Security: FixedCostByExpe(
-                    security_cost=tp.security_cost, gas_modulated=False
-                ),
+                CostType.Security: FixedCostByExpe({"security_cost": tp.security_cost}),
             }
         )
-        self.gasModulator = GasModulatorFromPrice(data_folder=tp.data_folder)
+        self.gnr_modulator = ModulatorFromIndicator(
+            file_path=tp.data_folder / tp.gnr_modulation_file
+        )
+        self.cold_modulator = ModulatorFromIndicator(
+            file_path=tp.data_folder / tp.cold_modulation_file
+        )
 
     def compute_cost(self, gas_price: float, *args, **kwargs) -> float:
-        gas_factor = self.gasModulator.get_modulation_factor(gas_price)
-        return super().compute_cost(gas_factor=gas_factor, *args, **kwargs)
+        gnr_factor = self.gnr_modulator.get_mod_factor(gas_price)
+        # cold_factor = self.gnr_modulator.get_mod_factor(gas_price)
+        return super().compute_cost(gas_factor=gnr_factor, *args, **kwargs)
 
 
 if __name__ == "__main__":
     from src.constant import BOTTLE, Package, MAGNUM
 
-    cost_calculator = StefTotalCost()
+    cost_calculator = StefCostCollection()
     expedition = MultiRefExpedition(
         [
             SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),
