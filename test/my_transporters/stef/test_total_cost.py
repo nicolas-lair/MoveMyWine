@@ -1,16 +1,16 @@
-from src.my_transporters.stef.cost import StefTotalCost
-from src.cost_calculator.gas_modulator import GasModulatorFromPrice
+from src.my_transporters.stef.cost import StefCostCollection
+from src.cost_calculator.cost_modulator import ModulatorFromIndicator
 from src.cost_calculator.constant import CostType
 from src.cost_calculator.expedition import MultiRefExpedition, SingleRefExpedition
 from src.constant import BOTTLE, Package
 
 
 class TestTotalCost:
-    cost_calculator = StefTotalCost()
+    cost_calculator = StefCostCollection()
 
     def test_init(self):
         assert len(self.cost_calculator) == 3
-        assert isinstance(self.cost_calculator.gasModulator, GasModulatorFromPrice)
+        assert isinstance(self.cost_calculator.gnr_modulator, ModulatorFromIndicator)
         assert self.cost_calculator[CostType.ByBottle].gas_modulated
         assert self.cost_calculator[CostType.Expedition].gas_modulated
         assert not self.cost_calculator[CostType.Security].gas_modulated
