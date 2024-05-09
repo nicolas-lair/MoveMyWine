@@ -12,4 +12,14 @@ class TransporterParams(AbstractTransporterParams):
     position_cost: float = 5.2
     security_cost: float = 0.7
 
-    gas_modulation_link: str = "https://www.cnr.fr/espaces/13/indicateurs/41"
+    gnr_modulation_link: str = "https://www.cnr.fr/espaces/13/indicateurs/41"
+    _gnr_modulation_file: str = "gnr_modulation.csv"
+    gnr_arg_name = "gnr_factor"
+
+    cold_modulation_link: str = "https://www.cnr.fr/espaces/13/indicateurs/36"
+    _cold_modulation_file: str = "modulation_froid.csv"
+    cold_arg_name = "cold_factor"
+
+    def __post_init__(self):
+        self.gnr_modulation_file = self.data_folder / self._gnr_modulation_file
+        self.cold_modulation_file = self.data_folder / self._cold_modulation_file

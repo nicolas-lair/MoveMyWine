@@ -1,18 +1,19 @@
 import loguru
 
-from src.my_transporters.stef.gas_modulation_indicator import scrap_indicator
+from src.my_transporters.stef.indicator_scrapper import scrap_indicator
+from src.my_transporters.stef.constant import TransporterParams
 
 
 class TestCNRIndicatorRetriever:
     def test_retrieve_indicator(self):
-        success, valid_date, indicator = scrap_indicator()
-        assert success
-        assert isinstance(valid_date, bool)
-        assert isinstance(indicator, float)
+        indicator = scrap_indicator(TransporterParams.gnr_modulation_link)
+        assert indicator.retrieved
+        assert isinstance(indicator.value, float)
+        assert isinstance(indicator.valid_date, bool)
 
     def test_failed_retrieval(self):
         loguru.logger.remove()
-        fail, valid_date, indicator = scrap_indicator(url="dummy_url")
-        assert not fail
-        assert indicator == 1.0
-        assert valid_date is None
+        indicator = scrap_indicator(url="dummy_url")
+        assert not indicator.retrieved
+        assert indicator.value == 1.0
+        assert not indicator.valid_date

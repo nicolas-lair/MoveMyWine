@@ -1,8 +1,8 @@
-from dataclasses import dataclass
-from typing import Optional
+from collections import defaultdict
+from dataclasses import dataclass, field
 
 from .constant import CostType
-from .abstract_cost import AbstractCost
+from .base_cost import BaseCost
 from .expedition import MultiRefExpedition
 
 
@@ -20,26 +20,17 @@ class ExtraPackageCost:
         return extra_cost
 
 
-class CostByPackageCalculator(AbstractCost):
-    def __init__(
-        self,
-        gas_modulated: bool,
-        extra_package_costs: ExtraPackageCost,
-        costs_by_package: Optional[dict[str, float]] = None,
-        name: str = CostType.ByPackage,
-    ):
-        super().__init__(gas_modulated=gas_modulated)
-        if costs_by_package is None:
-            costs_by_package = {}
-        self.name: str = name
-        self.costs_by_package: dict[str, float] = costs_by_package
-        self.extra_package_costs: ExtraPackageCost = extra_package_costs
+@dataclass
+class CostByPackageCalculator(BaseCost):
+    extra_package_costs: ExtraPackageCost
+    costs_by_package: dict[str, float] = field(default_factory=lambda: defaultdict())
+    name: str = CostType.ByPackage
 
     @property
     def base_cost_by_package(self) -> float:
         return sum(self.costs_by_package.values())
 
-    def _compute_cost(self, expedition: MultiRefExpedition, *args, **kwargs) -> float:
+    def compute_cost(self, expedition: MultiRefExpedition, **kwargs) -> float:
         n_packages = expedition.n_packages
         base_cost = n_packages * self.base_cost_by_package
         extra_cost = self.extra_package_costs.compute_extra_cost(n_packages)
