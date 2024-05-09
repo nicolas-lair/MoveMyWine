@@ -1,7 +1,7 @@
 import pandas as pd
 
 from src.cost_calculator import (
-    AbstractCost,
+    BaseCost,
     SingleRefExpedition,
     MultiRefExpedition,
     CostType,
@@ -16,7 +16,7 @@ from src.my_transporters.chronopost.constant import TransporterParams
 tp = TransporterParams()
 
 
-class MyCostByBottleCalculator(AbstractCost):
+class MyCostByBottleCalculator(BaseCost):
     def __init__(self):
         super().__init__(gas_modulated=True)
         self.extra_kg_cost = tp.extra_kg_cost
@@ -64,7 +64,7 @@ class MyCostByBottleCalculator(AbstractCost):
         )
         return df_cost
 
-    def _compute_cost(
+    def compute_cost(
         self, expedition: MultiRefExpedition, department: str, *args, **kwargs
     ):
         return self.compute_cost_nationwide(expedition).loc[department]
@@ -80,11 +80,9 @@ class ChronopostCostCollection(CostCollectionCalculator):
             {
                 CostType.ByBottle: MyCostByBottleCalculator(),
                 CostType.ByPackage: CostByPackageCalculator(
-                    gas_modulated=True, extra_package_costs=tp.extra_package_cost
+                    extra_package_costs=tp.extra_package_cost
                 ),
-                CostType.Expedition: FixedCostByExpe(
-                    gas_modulated=True, **tp.fixed_cost
-                ),
+                CostType.Expedition: FixedCostByExpe(**tp.fixed_cost),
             }
         )
 

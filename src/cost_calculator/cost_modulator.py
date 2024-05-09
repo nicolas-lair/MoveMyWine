@@ -37,7 +37,8 @@ class ModulatedCostCollection:
 
     def compute_cost(self, cost_by_type: dict[CostType, float], **kwargs) -> float:
         modulator = kwargs[self.modulator_arg_name]
-        modulated_cost = sum([cost_by_type[c] for c in self.modulated_cost], 0)
+        cost_to_modulate = sum([cost_by_type[c] for c in self.modulated_cost], 0)
         if self.modulator_retriever is not None:
             modulator = self.modulator_retriever.get_mod_factor(indicator=modulator)
-        return modulated_cost * (modulator - 1)
+        modulated_cost = cost_to_modulate * (modulator - 1)
+        return round(modulated_cost, 2)
