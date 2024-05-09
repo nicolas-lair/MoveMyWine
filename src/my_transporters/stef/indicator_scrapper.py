@@ -1,19 +1,25 @@
 from bs4 import BeautifulSoup
+from dataclasses import dataclass
 import requests
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from loguru import logger
 import streamlit as st
 
-from .constant import TransporterParams
+
+@dataclass
+class CNRIndicator:
+    retrieved: bool
+    valid_date: bool = False
+    value: float = 1.0
 
 
 @st.cache_data
-def cache_indicator(url=TransporterParams.gas_modulation_link) -> (bool, bool, float):
+def cache_indicator(url: str) -> CNRIndicator:
     return scrap_indicator(url=url)
 
 
-def scrap_indicator(url=TransporterParams.gas_modulation_link) -> (bool, bool, float):
+def scrap_indicator(url: str) -> CNRIndicator:
     """
     Retrieve the gas modulation input value from the CNR website
 
@@ -32,7 +38,7 @@ def scrap_indicator(url=TransporterParams.gas_modulation_link) -> (bool, bool, f
         valid_date = last_month == year_month
         indicator = float(indicator.replace(",", "."))
 
-        return True, valid_date, indicator
+        return CNRIndicator(retrieved=True, valid_date=valid_date, value=indicator)
     except Exception as e:
         logger.info(f"Error retrieving gas modulation: {e}", feature="f-strings")
-        return False, None, 1.0
+        return CNRIndicator(retrieved=False)

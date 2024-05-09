@@ -8,7 +8,7 @@ from my_transporters.stef.cost import StefTotalCost  # noqa: E402
 from cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition  # noqa: E402
 from constant import BOTTLE, MAGNUM, Package  # noqa: E402
 from departement import DEPARTMENTS_TO_CODE  # noqa: E402
-from my_transporters.stef.gas_modulation_indicator import cache_indicator  # noqa: E402
+from my_transporters.stef.indicator_scrapper import cache_indicator  # noqa: E402
 from app_generics.postal_code import get_postal_code_list  # noqa: E402
 
 st.title(":champagne: Move My Wine")
@@ -44,10 +44,9 @@ df_postal_code = retrieve_postal_code()
 st.markdown("#### Expédition")
 
 if transporter == "Stef":
-    from my_transporters.stef.constant import TransporterParams
-
-    success_retrival, valid_date, current_gnr_indicator = cache_indicator()
-    cost_calculator = StefTotalCost()
+    cost_calculator = StefTotalCost
+    gnr_indicator = cache_indicator(StefTotalCost.params.gnr_modulation_link)
+    cold_indicator = cache_indicator(StefTotalCost.params.cold_modulation_link)
 
     (
         commune_col,
@@ -88,20 +87,40 @@ if transporter == "Stef":
         col1, col2 = st.columns([0.2, 0.5])
         with col2:
             st.text("")
-            if not success_retrival:
+            if not gnr_indicator.retrieved:
                 st.error("Indicateur GNR non récupéré ! :disappointed:")
-            elif not valid_date:
+            elif not gnr_indicator.valid_date:
                 st.warning("Indicateur GNR à vérifier ! :neutral_face:")
             else:
                 st.success("Indicateur GNR récupéré !", icon="✅")
         with col1:
-            gas_modulation = st.number_input(
+            gnr_modulation = st.number_input(
                 "Indice Coût GNR - [Source](%s)"
-                % TransporterParams.gas_modulation_link,
+                % StefTotalCost.params.gnr_modulation_link,
                 min_value=1.0,
                 max_value=2.0,
-                value=current_gnr_indicator,
+                value=gnr_indicator.value,
                 format="%.4f",
+                help="Récupéré automatiquement si possible",
+            )
+
+        col1, col2 = st.columns([0.2, 0.5])
+        with col2:
+            st.text("")
+            if not cold_indicator.retrieved:
+                st.error("Indicateur Froid non récupéré ! :disappointed:")
+            elif not cold_indicator.valid_date:
+                st.warning("Indicateur Froid à vérifier ! :neutral_face:")
+            else:
+                st.success("Indicateur Froid récupéré !", icon="✅")
+        with col1:
+            cold_modulation = st.number_input(
+                "Indice Coût Froid - [Source](%s)"
+                % StefTotalCost.params.cold_modulation_link,
+                min_value=0.0,
+                max_value=750.0,
+                value=cold_indicator.value,
+                format="%.2f",
                 help="Récupéré automatiquement si possible",
             )
 
@@ -115,18 +134,18 @@ if transporter == "Stef":
             ),
         ]
     )
-    detail_cost = cost_calculator.compute_cost(
-        gas_price=gas_modulation,
-        expedition=expedition,
-        department=st.session_state.department,
-        return_details=True,
-    )
-    st.session_state.cost = cost_calculator.compute_cost(
-        gas_price=gas_modulation,
-        expedition=expedition,
-        department=st.session_state.department,
-        return_details=False,
-    )
+
+    computation_kwargs = {
+        StefTotalCost.params.gnr_arg_name: gnr_modulation,
+        StefTotalCost.params.cold_arg_name: cold_modulation,
+        "expedition": expedition,
+        "department": st.session_state.department,
+        "agg": False,
+    }
+
+    detail_cost = cost_calculator.compute_cost(**computation_kwargs)
+    st.session_state.cost = sum(detail_cost.values(), 0)
+
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(

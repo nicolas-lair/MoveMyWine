@@ -1,31 +1,38 @@
 from src.cost_calculator import (
-    TotalCostCalculator,
+    CostCollectionCalculator,
     CostType,
     FixedCostByExpe,
     MonthlyCostCalculator,
     CostByPackageCalculator,
     ExtraPackageCost,
     SingleRefExpedition,
+    TotalCostCalculator,
+    ModulatedCostCollection,
 )
 
 
 class TestTotalCost:
     total_cost = TotalCostCalculator(
-        {
-            CostType.ByPackage: CostByPackageCalculator(
-                gas_modulated=True,
-                extra_package_costs=ExtraPackageCost(
-                    extra_package_cost=1, max_free_package=3, multi_package_max_fee=3.5
+        cost_collection=CostCollectionCalculator(
+            {
+                CostType.ByPackage: CostByPackageCalculator(
+                    costs_by_package={"base_cost": 2},
+                    extra_package_costs=ExtraPackageCost(
+                        extra_package_cost=1,
+                        max_free_package=3,
+                        multi_package_max_fee=3.5,
+                    ),
                 ),
-                costs_by_package={"base_cost": 2},
-            ),
-            CostType.Expedition: FixedCostByExpe(
-                gas_modulated=True, security=0.3, expedition=0.7
-            ),
-            CostType.Monthly: MonthlyCostCalculator(
-                gas_modulated=False, billing_cost=15
-            ),
-        }
+                CostType.Expedition: FixedCostByExpe(security=0.3, expedition=0.7),
+                CostType.Monthly: MonthlyCostCalculator(billing_cost=15),
+            }
+        ),
+        cost_modulator={
+            CostType.GNRMod: ModulatedCostCollection(
+                modulated_cost=[CostType.ByPackage, CostType.Expedition],
+                modulator_arg_name="gas_factor",
+            )
+        },
     )
 
     def test_total_cost_no_package(self):

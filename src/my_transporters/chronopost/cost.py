@@ -1,11 +1,11 @@
 import pandas as pd
 
 from src.cost_calculator import (
-    AbstractCost,
+    BaseCost,
     SingleRefExpedition,
     MultiRefExpedition,
     CostType,
-    TotalCostCalculator,
+    CostCollectionCalculator,
     CostByPackageCalculator,
     FixedCostByExpe,
 )
@@ -16,7 +16,7 @@ from src.my_transporters.chronopost.constant import TransporterParams
 tp = TransporterParams()
 
 
-class MyCostByBottleCalculator(AbstractCost):
+class MyCostByBottleCalculator(BaseCost):
     def __init__(self):
         super().__init__(gas_modulated=True)
         self.extra_kg_cost = tp.extra_kg_cost
@@ -64,7 +64,7 @@ class MyCostByBottleCalculator(AbstractCost):
         )
         return df_cost
 
-    def _compute_cost(
+    def compute_cost(
         self, expedition: MultiRefExpedition, department: str, *args, **kwargs
     ):
         return self.compute_cost_nationwide(expedition).loc[department]
@@ -74,17 +74,15 @@ class MyCostByBottleCalculator(AbstractCost):
         return series_of_dpt
 
 
-class ChronopostTotalCost(TotalCostCalculator):
+class ChronopostCostCollection(CostCollectionCalculator):
     def __init__(self):
         super().__init__(
             {
                 CostType.ByBottle: MyCostByBottleCalculator(),
                 CostType.ByPackage: CostByPackageCalculator(
-                    gas_modulated=True, extra_package_costs=tp.extra_package_cost
+                    extra_package_costs=tp.extra_package_cost
                 ),
-                CostType.Expedition: FixedCostByExpe(
-                    gas_modulated=True, **tp.fixed_cost
-                ),
+                CostType.Expedition: FixedCostByExpe(**tp.fixed_cost),
             }
         )
 
@@ -92,7 +90,7 @@ class ChronopostTotalCost(TotalCostCalculator):
 if __name__ == "__main__":
     from src.constant import BOTTLE, Package
 
-    cost_calculator = ChronopostTotalCost()
+    cost_calculator = ChronopostCostCollection()
     expedition = MultiRefExpedition(
         [
             SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),

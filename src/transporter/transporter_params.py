@@ -7,7 +7,7 @@ class AbstractTransporterParams:
     name: str = ""
 
     default_gas_factor: float = None
-    gas_modulation_link: str = ""
+    gnr_modulation_link: str = ""
 
     @property
     def data_folder(self) -> Path:

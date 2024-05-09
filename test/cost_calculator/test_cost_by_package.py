@@ -28,13 +28,12 @@ class TestExtraPackageCost:
 
 class TestCostByPackageCalculator:
     no_cost = CostByPackageCalculator(
-        gas_modulated=False, extra_package_costs=free_extra_package_cost, name="free"
+        extra_package_costs=free_extra_package_cost, name="free"
     )
     no_base_cost = CostByPackageCalculator(
-        gas_modulated=False, extra_package_costs=custom_extra_package_cost
+        extra_package_costs=custom_extra_package_cost
     )
     cost_calc = CostByPackageCalculator(
-        gas_modulated=True,
         costs_by_package=base_package_cost,
         extra_package_costs=custom_extra_package_cost,
     )
@@ -65,7 +64,6 @@ class TestCostByPackageCalculator:
         )
 
     def test_cost_without_gas_mod(self):
-        self.cost_calc.gas_modulated = False
         assert (
             self.cost_calc.compute_cost(expedition=SingleRefExpedition(n_bottles=12))
             == 2 * base_package_cost["package_cost"]
@@ -78,18 +76,6 @@ class TestCostByPackageCalculator:
             self.cost_calc.compute_cost(expedition=SingleRefExpedition(n_bottles=240))
             == 40 * base_package_cost["package_cost"] + 3.5
         )
-
-    def test_cost_with_gas_mod(self):
-        self.cost_calc.gas_modulated = True
-        assert self.cost_calc.compute_cost(
-            gas_factor=2, expedition=SingleRefExpedition(n_bottles=12)
-        ) == 2 * (2 * base_package_cost["package_cost"])
-        assert self.cost_calc.compute_cost(
-            gas_factor=2, expedition=SingleRefExpedition(n_bottles=24)
-        ) == 2 * (4 * base_package_cost["package_cost"] + 1)
-        assert self.cost_calc.compute_cost(
-            gas_factor=2, expedition=SingleRefExpedition(n_bottles=240)
-        ) == 2 * (40 * base_package_cost["package_cost"] + 3.5)
 
     def test_name(self):
         assert self.no_cost.name == "free"

@@ -8,3 +8,6 @@ class CostType(str, Enum):
     ByPackage = "ByPackageCost"
     Monthly = "MonthlyCost"
     Total = "TotalCost"
+
+    GNRMod = "gnr_modulation"
+    ColdMod = "cold_modulation"

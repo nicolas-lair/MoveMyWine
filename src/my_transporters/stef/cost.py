@@ -3,12 +3,14 @@ from typing import Union
 import pandas as pd
 
 from src.cost_calculator import (
-    AbstractCost,
+    BaseCost,
     SingleRefExpedition,
     MultiRefExpedition,
-    TotalCostCalculator,
+    CostCollectionCalculator,
     FixedCostByExpe,
-    GasModulatorFromPrice,
+    ModulatorFromIndicator,
+    TotalCostCalculator,
+    ModulatedCostCollection,
 )
 from src.constant import UnitType, TarifType
 from src.file_structure import TarifStructureFile, TarifDeptFile
@@ -18,9 +20,8 @@ from src.my_transporters.stef.constant import TransporterParams
 tp = TransporterParams()
 
 
-class StefCostByBottleCalculator(AbstractCost):
+class StefCostByBottleCalculator(BaseCost):
     def __init__(self):
-        super().__init__(gas_modulated=True)
         self.tarif_structure = pd.read_csv(
             tp.data_folder / TarifStructureFile.name,
             **TarifStructureFile.csv_format,
@@ -82,7 +83,7 @@ class StefCostByBottleCalculator(AbstractCost):
             cost *= volume_in_tarif_unit
         return cost
 
-    def _compute_cost(
+    def compute_cost(
         self, expedition: MultiRefExpedition, department: str, *args, **kwargs
     ) -> float:
         nation_wide_cost = self._compute_cost_nationwide(expedition)
@@ -90,30 +91,35 @@ class StefCostByBottleCalculator(AbstractCost):
         return nation_wide_cost.loc[department, expedition.n_bottles_equivalent].copy()
 
 
-class StefTotalCost(TotalCostCalculator):
-    def __init__(self):
-        super().__init__(
-            {
-                CostType.ByBottle: StefCostByBottleCalculator(),
-                CostType.Expedition: FixedCostByExpe(
-                    position_cost=tp.position_cost, gas_modulated=True
-                ),
-                CostType.Security: FixedCostByExpe(
-                    security_cost=tp.security_cost, gas_modulated=False
-                ),
-            }
-        )
-        self.gasModulator = GasModulatorFromPrice(data_folder=tp.data_folder)
+StefCostCollection = CostCollectionCalculator(
+    {
+        CostType.ByBottle: StefCostByBottleCalculator(),
+        CostType.Expedition: FixedCostByExpe(position_cost=tp.position_cost),
+        CostType.Security: FixedCostByExpe(security_cost=tp.security_cost),
+    }
+)
 
-    def compute_cost(self, gas_price: float, *args, **kwargs) -> float:
-        gas_factor = self.gasModulator.get_modulation_factor(gas_price)
-        return super().compute_cost(gas_factor=gas_factor, *args, **kwargs)
-
+StefTotalCost = TotalCostCalculator(
+    cost_collection=StefCostCollection,
+    cost_modulator={
+        CostType.GNRMod: ModulatedCostCollection(
+            modulated_cost=[CostType.ByBottle, CostType.Expedition],
+            modulator_arg_name=tp.gnr_arg_name,
+            modulator_retriever=ModulatorFromIndicator(tp.gnr_modulation_file),
+        ),
+        CostType.ColdMod: ModulatedCostCollection(
+            modulated_cost=[CostType.ByBottle, CostType.Expedition],
+            modulator_arg_name=tp.cold_arg_name,
+            modulator_retriever=ModulatorFromIndicator(tp.cold_modulation_file),
+        ),
+    },
+    params=tp,
+)
 
 if __name__ == "__main__":
     from src.constant import BOTTLE, Package, MAGNUM
 
-    cost_calculator = StefTotalCost()
+    cost_calculator = StefCostCollection()
     expedition = MultiRefExpedition(
         [
             SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),
