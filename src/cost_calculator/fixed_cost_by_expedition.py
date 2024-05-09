@@ -3,7 +3,7 @@ from .constant import CostType
 
 
 class FixedCostByExpe(BaseCost):
-    def __init__(self, name: str = CostType.Expedition, **kwargs):
+    def __init__(self, name: str = CostType.Expedition, **kwargs: float):
         self.name = name
         self.cost = kwargs
 

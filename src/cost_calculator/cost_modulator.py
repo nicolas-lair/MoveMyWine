@@ -15,7 +15,7 @@ class ModulatorFromIndicator:
         self.modulation[ModFileConf.Cols.modulation] = (
             self.modulation[ModFileConf.Cols.modulation]
             .str.replace("%", "")
-            .astype(int)
+            .astype(float)
             .div(100)
             .add(1)
         )

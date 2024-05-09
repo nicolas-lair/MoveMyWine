@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import Any
+
 from src.cost_calculator.cost_collection import CostCollectionCalculator
 from src.cost_calculator.constant import CostType
 from src.cost_calculator.cost_modulator import ModulatedCostCollection
@@ -9,6 +11,7 @@ class TotalCostCalculator:
     cost_collection: CostCollectionCalculator
     cost_modulator: dict[CostType, ModulatedCostCollection]
     name: CostType = CostType.Total
+    params: Any = None
 
     def compute_cost(self, agg: bool = True, **kwargs) -> float | dict[CostType, float]:
         cost_by_type = self.cost_collection.compute_cost(**kwargs)
