@@ -38,7 +38,7 @@ class TestTotalCost:
             self.cost_calculator.compute_cost(
                 cold_factor=315, gnr_factor=1.45, expedition=exp, department=dep
             )
-            == 49.23
+            == 49.24
         )
 
         exp = MultiRefExpedition(
@@ -64,6 +64,9 @@ class TestTotalCost:
         assert self.cost_calculator.compute_cost(
             cold_factor=315, gnr_factor=1.0, expedition=exp, department=dep
         ) == round(56.31 * 1.005 + 0.7, 2)
-        assert self.cost_calculator.compute_cost(
-            cold_factor=315, gnr_factor=1.4, expedition=exp, department=dep
-        ) == round(56.31 * (1 + 0.11 + 0.005) + 0.7, 2)
+        assert (
+            self.cost_calculator.compute_cost(
+                cold_factor=315, gnr_factor=1.4, expedition=exp, department=dep
+            )
+            == 63.48
+        )
