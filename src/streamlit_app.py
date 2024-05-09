@@ -144,7 +144,7 @@ if transporter == "Stef":
     }
 
     detail_cost = cost_calculator.compute_cost(**computation_kwargs)
-    st.session_state.cost = sum(detail_cost.values(), 0)
+    st.session_state.cost = round(sum(detail_cost.values(), 0), 2)
 
     col1, col2 = st.columns(2)
     with col1:
