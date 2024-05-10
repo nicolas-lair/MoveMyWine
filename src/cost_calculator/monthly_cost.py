@@ -1,9 +1,9 @@
 from src.constant import N_EXPEDITION
-from .base_cost import BaseCost
+from .base_cost import BaseCostCalculator
 from .constant import CostType
 
 
-class MonthlyCostCalculator(BaseCost):
+class MonthlyCostCalculator(BaseCostCalculator):
     def __init__(self, name: str = CostType.Monthly, **kwargs):
         self.name = name
         self.cost = kwargs

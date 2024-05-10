@@ -3,7 +3,7 @@ from typing import Union
 import pandas as pd
 
 from src.cost_calculator import (
-    BaseCost,
+    BaseCostCalculator,
     SingleRefExpedition,
     MultiRefExpedition,
     CostCollectionCalculator,
@@ -20,7 +20,7 @@ from src.my_transporters.stef.constant import TransporterParams
 tp = TransporterParams()
 
 
-class StefCostByBottleCalculator(BaseCost):
+class StefCostByBottleCalculator(BaseCostCalculator):
     def __init__(self):
         self.tarif_structure = pd.read_csv(
             tp.data_folder / TarifStructureFile.name,

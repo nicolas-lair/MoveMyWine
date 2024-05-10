@@ -1,7 +1,7 @@
 import pandas as pd
 
 from src.cost_calculator import (
-    BaseCost,
+    BaseCostCalculator,
     SingleRefExpedition,
     MultiRefExpedition,
     CostType,
@@ -16,7 +16,7 @@ from src.my_transporters.chronopost.constant import TransporterParams
 tp = TransporterParams()
 
 
-class MyCostByBottleCalculator(BaseCost):
+class MyCostByBottleCalculator(BaseCostCalculator):
     def __init__(self):
         super().__init__(gas_modulated=True)
         self.extra_kg_cost = tp.extra_kg_cost

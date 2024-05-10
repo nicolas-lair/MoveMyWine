@@ -2,11 +2,11 @@ from collections import UserDict
 from typing import Union
 
 from .constant import CostType
-from .base_cost import BaseCost
+from .base_cost import BaseCostCalculator
 from .expedition import MultiRefExpedition, SingleRefExpedition
 
 
-class CostCollectionCalculator(UserDict[CostType, BaseCost]):
+class CostCollectionCalculator(UserDict[CostType, BaseCostCalculator]):
     def compute_cost(
         self,
         expedition: Union[SingleRefExpedition, MultiRefExpedition],

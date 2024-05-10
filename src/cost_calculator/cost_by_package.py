@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 
 from .constant import CostType
-from .base_cost import BaseCost
+from .base_cost import BaseCostCalculator
 from .expedition import MultiRefExpedition
 
 
@@ -21,7 +21,7 @@ class ExtraPackageCost:
 
 
 @dataclass
-class CostByPackageCalculator(BaseCost):
+class CostByPackageCalculator(BaseCostCalculator):
     extra_package_costs: ExtraPackageCost
     costs_by_package: dict[str, float] = field(default_factory=lambda: defaultdict())
     name: str = CostType.ByPackage

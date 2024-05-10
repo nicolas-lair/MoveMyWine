@@ -1,8 +1,8 @@
-from .base_cost import BaseCost
+from .base_cost import BaseCostCalculator
 from .constant import CostType
 
 
-class FixedCostByExpe(BaseCost):
+class FixedCostByExpe(BaseCostCalculator):
     def __init__(self, name: str = CostType.Expedition, **kwargs: float):
         self.name = name
         self.cost = kwargs
