@@ -74,7 +74,7 @@ if transporter == "Stef":
         bottle = st.number_input(
             "Bouteilles (75 cL)",
             min_value=0,
-            max_value=100,
+            max_value=198,
             value="min",
             step=1,
         )
