@@ -1,4 +1,4 @@
-from .base_cost import BaseCostCalculator
+from .base_cost import BaseCostCalculator, round_cost
 from .constant import CostType
 
 
@@ -7,5 +7,6 @@ class FixedCostByExpe(BaseCostCalculator):
         self.name = name
         self.cost = kwargs
 
+    @round_cost()
     def compute_cost(self, **kwargs) -> float:
         return sum(self.cost.values())

@@ -1,5 +1,5 @@
 from src.cost_calculator import (
-    CostCollectionCalculator,
+    BaseCostList,
     CostType,
     FixedCostByExpe,
     MonthlyCostCalculator,
@@ -10,9 +10,9 @@ from src.cost_calculator import (
 
 
 class TestCostCollectionCalc:
-    cost_collection = CostCollectionCalculator(
-        {
-            CostType.ByPackage: CostByPackageCalculator(
+    cost_collection = BaseCostList(
+        [
+            CostByPackageCalculator(
                 costs_by_package={"base_cost": 2},
                 extra_package_costs=ExtraPackageCost(
                     extra_package_cost=1,
@@ -20,9 +20,9 @@ class TestCostCollectionCalc:
                     multi_package_max_fee=3.5,
                 ),
             ),
-            CostType.Expedition: FixedCostByExpe(security=0.3, expedition=0.7),
-            CostType.Monthly: MonthlyCostCalculator(billing_cost=15),
-        }
+            FixedCostByExpe(security=0.3, expedition=0.7),
+            MonthlyCostCalculator(billing_cost=15),
+        ]
     )
 
     def test_total_cost_no_package(self):
@@ -31,7 +31,7 @@ class TestCostCollectionCalc:
             n_expedition_by_month=2,
         )
         assert isinstance(cost_dict, dict)
-        assert cost_dict.keys() == self.cost_collection.keys()
+        assert len(cost_dict.keys()) == len(self.cost_collection)
         assert all([c == 0 for c in cost_dict.values()])
 
     def test_total_cost_one_package(self):
@@ -40,7 +40,7 @@ class TestCostCollectionCalc:
             n_expedition_by_month=2,
         )
         assert isinstance(cost_dict, dict)
-        assert cost_dict.keys() == self.cost_collection.keys()
+        assert len(cost_dict.keys()) == len(self.cost_collection)
         assert cost_dict.pop(CostType.ByPackage) == 2
         assert cost_dict.pop(CostType.Expedition) == 1
         assert cost_dict.pop(CostType.Monthly) == 7.5
@@ -52,7 +52,7 @@ class TestCostCollectionCalc:
             n_expedition_by_month=2,
         )
         assert isinstance(cost_dict, dict)
-        assert cost_dict.keys() == self.cost_collection.keys()
+        assert len(cost_dict.keys()) == len(self.cost_collection)
         assert cost_dict.pop(CostType.ByPackage) == 4 * 2 + 1
         assert cost_dict.pop(CostType.Expedition) == 1
         assert cost_dict.pop(CostType.Monthly) == 7.5
@@ -64,7 +64,7 @@ class TestCostCollectionCalc:
             n_expedition_by_month=2,
         )
         assert isinstance(cost_dict, dict)
-        assert cost_dict.keys() == self.cost_collection.keys()
+        assert len(cost_dict.keys()) == len(self.cost_collection)
         assert cost_dict.pop(CostType.ByPackage) == 40 * 2 + 3.5
         assert cost_dict.pop(CostType.Expedition) == 1
         assert cost_dict.pop(CostType.Monthly) == 7.5

@@ -9,12 +9,9 @@ class TestMonthlyCost:
     )
 
     def test_cost_value_without_gas_mod(self):
-        assert (
-            self.cost_without_gas_mod.compute_cost(
-                n_expedition_by_month=self.n_expedition_by_month
-            )
-            == self.billing_cost / self.n_expedition_by_month
-        )
+        assert self.cost_without_gas_mod.compute_cost(
+            n_expedition_by_month=self.n_expedition_by_month
+        ) == round(self.billing_cost / self.n_expedition_by_month, 2)
 
     def test_name(self):
         assert self.cost_without_gas_mod.name == "no_mod"

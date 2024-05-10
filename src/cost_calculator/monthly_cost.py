@@ -1,5 +1,5 @@
 from src.constant import N_EXPEDITION
-from .base_cost import BaseCostCalculator
+from .base_cost import BaseCostCalculator, round_cost
 from .constant import CostType
 
 
@@ -8,6 +8,7 @@ class MonthlyCostCalculator(BaseCostCalculator):
         self.name = name
         self.cost = kwargs
 
+    @round_cost()
     def compute_cost(
         self, n_expedition_by_month: int = N_EXPEDITION, **kwargs
     ) -> float:

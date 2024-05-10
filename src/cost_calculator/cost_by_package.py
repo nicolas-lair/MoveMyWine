@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 
 from .constant import CostType
-from .base_cost import BaseCostCalculator
+from .base_cost import BaseCostCalculator, round_cost
 from .expedition import MultiRefExpedition
 
 
@@ -30,6 +30,7 @@ class CostByPackageCalculator(BaseCostCalculator):
     def base_cost_by_package(self) -> float:
         return sum(self.costs_by_package.values())
 
+    @round_cost()
     def compute_cost(self, expedition: MultiRefExpedition, **kwargs) -> float:
         n_packages = expedition.n_packages
         base_cost = n_packages * self.base_cost_by_package
