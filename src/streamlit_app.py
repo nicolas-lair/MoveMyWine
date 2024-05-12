@@ -4,11 +4,10 @@ from pathlib import Path
 
 sys.path.append(Path(__file__).parents[1].as_posix())
 
-from my_transporters.stef.cost import StefTotalCost  # noqa: E402
+from my_transporters.stef import StefTotalCost, cache_indicator  # noqa: E402
 from cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition  # noqa: E402
 from constant import BOTTLE, MAGNUM, Package  # noqa: E402
 from departement import DEPARTMENTS_TO_CODE  # noqa: E402
-from my_transporters.stef.indicator_scrapper import cache_indicator  # noqa: E402
 from app_generics.postal_code import get_postal_code_list  # noqa: E402
 
 st.title(":champagne: Move My Wine")
@@ -74,7 +73,7 @@ if transporter == "Stef":
         bottle = st.number_input(
             "Bouteilles (75 cL)",
             min_value=0,
-            max_value=100,
+            max_value=198,
             value="min",
             step=1,
         )
