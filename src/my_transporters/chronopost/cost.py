@@ -1,13 +1,14 @@
 import pandas as pd
 
 from src.cost_calculator import (
-    BaseCost,
+    BaseCostCalculator,
     SingleRefExpedition,
     MultiRefExpedition,
     CostType,
-    CostCollectionCalculator,
+    BaseCostList,
     CostByPackageCalculator,
     FixedCostByExpe,
+    round_cost,
 )
 from src.file_structure import TarifStructureFile
 from src.departement import DEPARTMENTS_TO_CODE
@@ -16,7 +17,9 @@ from src.my_transporters.chronopost.constant import TransporterParams
 tp = TransporterParams()
 
 
-class MyCostByBottleCalculator(BaseCost):
+class MyCostByBottleCalculator(BaseCostCalculator):
+    name: CostType = CostType.ByBottle
+
     def __init__(self):
         super().__init__(gas_modulated=True)
         self.extra_kg_cost = tp.extra_kg_cost
@@ -64,6 +67,7 @@ class MyCostByBottleCalculator(BaseCost):
         )
         return df_cost
 
+    @round_cost
     def compute_cost(
         self, expedition: MultiRefExpedition, department: str, *args, **kwargs
     ):
@@ -74,23 +78,19 @@ class MyCostByBottleCalculator(BaseCost):
         return series_of_dpt
 
 
-class ChronopostCostCollection(CostCollectionCalculator):
-    def __init__(self):
-        super().__init__(
-            {
-                CostType.ByBottle: MyCostByBottleCalculator(),
-                CostType.ByPackage: CostByPackageCalculator(
-                    extra_package_costs=tp.extra_package_cost
-                ),
-                CostType.Expedition: FixedCostByExpe(**tp.fixed_cost),
-            }
-        )
+ChronopostCostCollection = BaseCostList(
+    [
+        MyCostByBottleCalculator(),
+        CostByPackageCalculator(extra_package_costs=tp.extra_package_cost),
+        FixedCostByExpe(**tp.fixed_cost),
+    ]
+)
 
 
 if __name__ == "__main__":
     from src.constant import BOTTLE, Package
 
-    cost_calculator = ChronopostCostCollection()
+    cost_calculator = ChronopostCostCollection
     expedition = MultiRefExpedition(
         [
             SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),

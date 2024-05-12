@@ -1,10 +1,11 @@
 from typing import Optional
 from pathlib import Path
 from dataclasses import dataclass
-from .constant import CostType
 
 import pandas as pd
 
+from .constant import CostType
+from .base_cost import BaseCostCalculator, round_cost
 from src.file_structure import ModulationFileConfig as ModFileConf
 
 
@@ -30,11 +31,13 @@ class ModulatorFromIndicator:
 
 
 @dataclass
-class ModulatedCostCollection:
+class ModulatedCostCalculator(BaseCostCalculator):
+    name: str
     modulated_cost: list[CostType]
     modulator_arg_name: str
     modulator_retriever: Optional[ModulatorFromIndicator] = None
 
+    @round_cost()
     def compute_cost(self, cost_by_type: dict[CostType, float], **kwargs) -> float:
         modulator = kwargs[self.modulator_arg_name]
         cost_to_modulate = sum([cost_by_type[c] for c in self.modulated_cost], 0)

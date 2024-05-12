@@ -3,14 +3,16 @@ from typing import Union
 import pandas as pd
 
 from src.cost_calculator import (
-    BaseCost,
+    BaseCostCalculator,
     SingleRefExpedition,
     MultiRefExpedition,
-    CostCollectionCalculator,
+    BaseCostList,
     FixedCostByExpe,
     ModulatorFromIndicator,
     TotalCostCalculator,
-    ModulatedCostCollection,
+    ModulatedCostCalculator,
+    ModCostCollection,
+    round_cost,
 )
 from src.constant import UnitType, TarifType
 from src.file_structure import TarifStructureFile, TarifDeptFile
@@ -20,7 +22,9 @@ from src.my_transporters.stef.constant import TransporterParams
 tp = TransporterParams()
 
 
-class StefCostByBottleCalculator(BaseCost):
+class StefCostByBottleCalculator(BaseCostCalculator):
+    name: CostType = CostType.ByBottle
+
     def __init__(self):
         self.tarif_structure = pd.read_csv(
             tp.data_folder / TarifStructureFile.name,
@@ -83,6 +87,7 @@ class StefCostByBottleCalculator(BaseCost):
             cost *= volume_in_tarif_unit
         return cost
 
+    @round_cost()
     def compute_cost(
         self, expedition: MultiRefExpedition, department: str, *args, **kwargs
     ) -> float:
@@ -91,28 +96,34 @@ class StefCostByBottleCalculator(BaseCost):
         return nation_wide_cost.loc[department, expedition.n_bottles_equivalent].copy()
 
 
-StefCostCollection = CostCollectionCalculator(
-    {
-        CostType.ByBottle: StefCostByBottleCalculator(),
-        CostType.Expedition: FixedCostByExpe(position_cost=tp.position_cost),
-        CostType.Security: FixedCostByExpe(security_cost=tp.security_cost),
-    }
+StefCostCollection = BaseCostList(
+    [
+        StefCostByBottleCalculator(),
+        FixedCostByExpe(position_cost=tp.position_cost),
+        FixedCostByExpe(name=CostType.Security, security_cost=tp.security_cost),
+    ]
 )
 
-StefTotalCost = TotalCostCalculator(
-    cost_collection=StefCostCollection,
-    cost_modulator={
-        CostType.GNRMod: ModulatedCostCollection(
+StefCostModulator = ModCostCollection(
+    [
+        ModulatedCostCalculator(
+            name=CostType.GNRMod,
             modulated_cost=[CostType.ByBottle, CostType.Expedition],
             modulator_arg_name=tp.gnr_arg_name,
             modulator_retriever=ModulatorFromIndicator(tp.gnr_modulation_file),
         ),
-        CostType.ColdMod: ModulatedCostCollection(
+        ModulatedCostCalculator(
+            name=CostType.ColdMod,
             modulated_cost=[CostType.ByBottle, CostType.Expedition],
             modulator_arg_name=tp.cold_arg_name,
             modulator_retriever=ModulatorFromIndicator(tp.cold_modulation_file),
         ),
-    },
+    ]
+)
+
+StefTotalCost = TotalCostCalculator(
+    cost_collection=StefCostCollection,
+    cost_modulator=StefCostModulator,
     params=tp,
 )
 
