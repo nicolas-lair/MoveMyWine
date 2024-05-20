@@ -17,8 +17,6 @@ class ModulatorFromIndicator:
             self.modulation[ModFileConf.Cols.modulation]
             .str.replace("%", "")
             .astype(float)
-            .div(100)
-            .add(1)
         )
 
     def get_mod_factor(self, indicator: float):
@@ -43,5 +41,5 @@ class ModulatedCostCalculator(BaseCostCalculator):
         cost_to_modulate = sum([cost_by_type[c] for c in self.modulated_cost], 0)
         if self.modulator_retriever is not None:
             modulator = self.modulator_retriever.get_mod_factor(indicator=modulator)
-        modulated_cost = cost_to_modulate * (modulator - 1)
+        modulated_cost = cost_to_modulate * (modulator / 100.0)
         return round(modulated_cost, 2)
