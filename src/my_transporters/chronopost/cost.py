@@ -9,6 +9,9 @@ from src.cost_calculator import (
     CostByPackageCalculator,
     FixedCostByExpe,
     round_cost,
+    TotalCostCalculator,
+    ModCostCollection,
+    ModulatedCostCalculator,
 )
 from src.file_structure import TarifStructureFile
 from src.departement import DEPARTMENTS_TO_CODE
@@ -67,11 +70,13 @@ class MyCostByBottleCalculator(BaseCostCalculator):
         )
         return df_cost
 
-    @round_cost
-    def compute_cost(
-        self, expedition: MultiRefExpedition, department: str, *args, **kwargs
-    ):
-        return self.compute_cost_nationwide(expedition).loc[department]
+    @round_cost()
+    def compute_cost(self, expedition: MultiRefExpedition, *args, **kwargs):
+        expedition_weight = expedition.weight
+        overweight = self.get_tarif_overweight(expedition_weight)
+        base_cost = self.get_base_cost(expedition_weight, overweight)
+        cost = base_cost + overweight * self.extra_kg_cost
+        return cost
 
     @staticmethod
     def _get_dpt_code(series_of_dpt: pd.Series) -> pd.Series:
@@ -84,6 +89,23 @@ ChronopostCostCollection = BaseCostList(
         CostByPackageCalculator(extra_package_costs=tp.extra_package_cost),
         FixedCostByExpe(**tp.fixed_cost),
     ]
+)
+
+ChronopostTotalCost = TotalCostCalculator(
+    cost_collection=ChronopostCostCollection,
+    cost_modulator=ModCostCollection(
+        [
+            ModulatedCostCalculator(
+                name=CostType.GNRMod,
+                modulated_cost=[
+                    CostType.ByBottle,
+                    CostType.ByPackage,
+                    CostType.Expedition,
+                ],
+                modulator_arg_name=tp.modulators["GNR"].arg_name,
+            )
+        ]
+    ),
 )
 
 
