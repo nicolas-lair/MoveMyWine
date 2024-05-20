@@ -6,7 +6,7 @@ from src.my_transporters.stef.constant import TransporterParams
 
 class TestCNRIndicatorRetriever:
     def test_retrieve_indicator(self):
-        indicator = scrap_indicator(TransporterParams.gnr_modulation_link)
+        indicator = scrap_indicator(TransporterParams.modulators["GNR"].modulation_link)
         assert indicator.retrieved
         assert isinstance(indicator.value, float)
         assert isinstance(indicator.valid_date, bool)
