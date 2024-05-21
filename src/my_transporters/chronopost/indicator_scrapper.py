@@ -1,8 +1,12 @@
-from bs4 import BeautifulSoup
+from io import StringIO
 import requests
 from datetime import date
-from dateutil.relativedelta import relativedelta
+
+from bs4 import BeautifulSoup
 from loguru import logger
+from babel.dates import format_date
+
+import pandas as pd
 
 from src.app_generics.fetched_indicator import FetchedIndicator
 
@@ -18,15 +22,24 @@ def scrap_indicator(url: str) -> FetchedIndicator:
     """
     try:
         response = requests.get(url)
+
         soup = BeautifulSoup(response.text, "html.parser")
+        table = soup.find("table")
+        df = pd.read_html(StringIO(str(table)), index_col=0)[0]
 
-        last_value_info = soup.find(id="lastValue").get_text()
-        year_month, indicator = [c.strip() for c in last_value_info.split(":")]
-        last_month = (date.today() - relativedelta(months=1)).strftime("%Y-%m")
-        valid_date = last_month == year_month
-        indicator = float(indicator.replace(",", "."))
+        valid_date = (
+            format_date(date.today(), format="MMMM  Y", locale="fr")
+            == df.columns[-1].lower()
+        )
+        assert (
+            df.index[0]
+            == "Routier Services concernés : Tous les produits nationaux et le Chrono Classic"
+        )
 
-        return FetchedIndicator(retrieved=True, valid_date=valid_date, value=indicator)
+        gas_factor = df.loc[df.index[0], df.columns[-1]]
+        gas_factor = float(gas_factor[:-1])
+
+        return FetchedIndicator(retrieved=True, valid_date=valid_date, value=gas_factor)
     except Exception as e:
         logger.info(f"Error retrieving gas modulation: {e}", feature="f-strings")
         return FetchedIndicator(retrieved=False)

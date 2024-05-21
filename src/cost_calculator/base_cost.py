@@ -1,5 +1,7 @@
 from typing import Protocol, runtime_checkable, Callable
 
+from .constant import CostType
+
 PRECISION = 2
 
 CostFunc = Callable[..., float]
@@ -17,5 +19,5 @@ def round_cost(digits: int = PRECISION) -> Callable[[CostFunc], CostFunc]:
 
 @runtime_checkable
 class BaseCostCalculator(Protocol):
-    name: str
+    name: CostType
     compute_cost: Callable[..., float]

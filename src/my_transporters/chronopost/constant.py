@@ -1,6 +1,9 @@
 from typing import Final
 from dataclasses import dataclass, field
-from src.transporter.transporter_params import AbstractTransporterParams
+from src.transporter.transporter_params import (
+    AbstractTransporterParams,
+    ModulatorConfig,
+)
 from src.cost_calculator.cost_by_package import ExtraPackageCost
 
 
@@ -26,5 +29,13 @@ class TransporterParams(AbstractTransporterParams):
             "eco": 0.09,
         }
     )
-    default_gas_factor: float = 18.25
-    gas_modulation_link: str = "https://www.chronopost.fr/fr/surcharge-carburant"
+
+    modulators = {
+        "GNR": ModulatorConfig(
+            modulation_link="https://www.chronopost.fr/fr/surcharge-carburant",
+            arg_name="gnr_factor",
+            min_value=0.0,
+            max_value=100.0,
+            input_format="%2.f",
+        )
+    }

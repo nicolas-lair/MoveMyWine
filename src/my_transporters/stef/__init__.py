@@ -1,9 +1,5 @@
 from .cost import StefTotalCost
-from .indicator_scrapper import CNRIndicator, cache_indicator, scrap_indicator
+from .indicator_scrapper import scrap_indicator
+from .app_calculator import StefApp
 
-__all__ = [
-    "StefTotalCost",
-    "CNRIndicator",
-    "cache_indicator",
-    "scrap_indicator",
-]
+__all__ = ["StefTotalCost", "scrap_indicator", "StefApp"]

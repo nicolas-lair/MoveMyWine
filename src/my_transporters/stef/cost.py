@@ -109,14 +109,18 @@ StefCostModulator = ModCostCollection(
         ModulatedCostCalculator(
             name=CostType.GNRMod,
             modulated_cost=[CostType.ByBottle, CostType.Expedition],
-            modulator_arg_name=tp.gnr_arg_name,
-            modulator_retriever=ModulatorFromIndicator(tp.gnr_modulation_file),
+            modulator_arg_name=tp.modulators["GNR"].arg_name,
+            modulator_retriever=ModulatorFromIndicator(
+                tp.data_folder / tp.modulators["GNR"].modulation_file
+            ),
         ),
         ModulatedCostCalculator(
             name=CostType.ColdMod,
             modulated_cost=[CostType.ByBottle, CostType.Expedition],
-            modulator_arg_name=tp.cold_arg_name,
-            modulator_retriever=ModulatorFromIndicator(tp.cold_modulation_file),
+            modulator_arg_name=tp.modulators["Froid"].arg_name,
+            modulator_retriever=ModulatorFromIndicator(
+                tp.data_folder / tp.modulators["Froid"].modulation_file
+            ),
         ),
     ]
 )
@@ -124,7 +128,6 @@ StefCostModulator = ModCostCollection(
 StefTotalCost = TotalCostCalculator(
     cost_collection=StefCostCollection,
     cost_modulator=StefCostModulator,
-    params=tp,
 )
 
 if __name__ == "__main__":

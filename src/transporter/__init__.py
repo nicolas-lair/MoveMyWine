@@ -1,5 +1,3 @@
-from .transporter_params import AbstractTransporterParams
+from .transporter_params import AbstractTransporterParams, ModulatorConfig
 
-__all__ = [
-    "AbstractTransporterParams",
-]
+__all__ = ["AbstractTransporterParams", "ModulatorConfig"]
