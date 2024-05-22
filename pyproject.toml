@@ -20,6 +20,7 @@ python-dateutil = "^2.9.0.post0"
 loguru = "^0.7.2"
 openpyxl = "^3.1.2"
 lxml = "^5.2.2"
+babel = "^2.15.0"
 
 [tool.poetry.group.dev.dependencies]
 jupyter = "^1.0.0"
