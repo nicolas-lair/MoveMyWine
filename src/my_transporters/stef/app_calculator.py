@@ -34,7 +34,5 @@ class StefApp(TransporterApp):
     @validate_transporter
     def compute_cost(self) -> float:
         kwargs = self._build_kwargs()
-        print(kwargs)
         cost = self.cost_calculator.compute_cost(**kwargs)
-        print(sum(cost.values(), 0))
         return cost

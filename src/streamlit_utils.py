@@ -5,12 +5,12 @@ from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
 from src.constant import BOTTLE, MAGNUM, Package
 from src.app_generics.postal_code import get_postal_code_list
 from src.departement import DEPARTMENTS_TO_CODE
-from my_transporters import StefApp
+from my_transporters import StefApp, ChronopostApp
 
 
 COST_CALCULATOR = {
     "Stef": StefApp(),
-    # "Chronopost": ChronopostApp(),
+    "Chronopost": ChronopostApp(),
 }
 
 
