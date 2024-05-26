@@ -86,6 +86,25 @@ def test_app(monkeypatch):
         CostType.ColdMod: 0.0,
     }
 
+    app.number_input(key="bottle").set_value(130).run()
+    assert app.session_state.detail_cost == {
+        CostType.ByBottle: round(0.7 * 130, 2),
+        CostType.Security: 0.7,
+        CostType.Expedition: 5.2,
+        CostType.GNRMod: 0,
+        CostType.ColdMod: 0.0,
+    }
+
+    app.number_input(key="bottle").set_value(170).run()
+    app.selectbox(key="postal_code").set_value("49100 - Angers").run()
+    assert app.session_state.detail_cost == {
+        CostType.ByBottle: round(170 * 0.35, 2),
+        CostType.Security: 0.7,
+        CostType.Expedition: 5.2,
+        CostType.GNRMod: 0,
+        CostType.ColdMod: 0.0,
+    }
+
     # app.selectbox(key="transporter").set_value(ChronopostApp())
     # assert app.session_state.detail_cost == {
     #     CostType.ByBottle: 51.11,
