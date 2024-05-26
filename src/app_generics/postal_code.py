@@ -14,7 +14,7 @@ class PostalCodeAPI:
         lieudit = "Ligne_5"
 
 
-def get_postal_code_list():
+def get_postal_code_df():
     col_enum = PostalCodeAPI.Cols
     df = pd.read_csv(
         PostalCodeAPI.endpoint,
@@ -26,12 +26,6 @@ def get_postal_code_list():
     df = df.drop_duplicates(keep="first")
     df[col_enum.commune] = df[col_enum.commune].str.title()
     df[col_enum.lieudit] = df[col_enum.lieudit].str.title()
-    # df_commune = (df[[PostalCodeAPI.Cols.postal_code, PostalCodeAPI.Cols.commune]]
-    #               .drop_duplicates()
-    #               )
-    # df_lieu_dit = (df[[PostalCodeAPI.Cols.postal_code, PostalCodeAPI.Cols.lieudit]].dropna().rename(columns={PostalCodeAPI.Cols.lieudit: PostalCodeAPI.Cols.commune}))
-    #
-    # df = pd.merge([df_commune, df_lieu_dit])
     df["full_name"] = df[[c.value for c in col_enum]].apply(
         lambda c: c.str.cat(sep=" - "), axis=1
     )
