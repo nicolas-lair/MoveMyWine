@@ -44,12 +44,8 @@ def define_style():
     )
 
 
-def postal_code_callback():
-    st.session_state.department = st.session_state.postal_code[:2]
-    cost_callback()
-
-
 def cost_callback():
+    st.session_state["department"] = st.session_state.postal_code[:2]
     st.session_state.expedition = MultiRefExpedition(
         [
             SingleRefExpedition(
@@ -102,13 +98,14 @@ def destination_city_input(df_postal_code):
                 "Destination",
                 options=df_postal_code.full_name.values.tolist(),
                 key="postal_code",
-                on_change=postal_code_callback,
+                on_change=cost_callback,
             )
         with dept_col:
             st.text_input(
                 "Département",
-                value=DEPARTMENTS_TO_CODE[st.session_state.department],
+                value=DEPARTMENTS_TO_CODE[st.session_state.postal_code[:2]],
                 disabled=True,
+                on_change=cost_callback,
             )
 
 
