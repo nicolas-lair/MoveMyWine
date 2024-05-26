@@ -8,8 +8,8 @@ import streamlit as st
 
 sys.path.append(Path(__file__).parents[1].as_posix())
 
-from my_transporters import StefApp, ChronopostApp  # noqa: E402
-from streamlit_utils import (  # noqa: E402
+from src.my_transporters import StefApp, ChronopostApp  # noqa: E402
+from src.streamlit_utils import (  # noqa: E402
     define_style,
     bottle_input,
     retrieve_postal_code,
