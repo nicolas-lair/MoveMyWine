@@ -13,13 +13,19 @@ from .indicator_scrapper import scrap_indicator
 
 
 class StefApp(TransporterApp):
-    cost_calculator = StefTotalCost
-    params = TransporterParams()
+    def __init__(self):
+        self.cost_calculator = StefTotalCost
+        self.params = TransporterParams()
+        st.session_state["stef"] = {"gnr_modulator": 1, "cold_modulator": 1}
 
     def _build_kwargs(self) -> dict[str, Any]:
         computation_kwargs = {
-            self.params.modulators["GNR"].arg_name: st.session_state.GNR_modulation,
-            self.params.modulators["Froid"].arg_name: st.session_state.Froid_modulation,
+            self.params.modulators["GNR"].arg_name: st.session_state.stef[
+                "gnr_modulator"
+            ],
+            self.params.modulators["Froid"].arg_name: st.session_state.stef[
+                "cold_modulator"
+            ],
             "expedition": st.session_state.expedition,
             "department": st.session_state.department,
             "agg": False,

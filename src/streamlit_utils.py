@@ -5,13 +5,6 @@ from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
 from src.constant import BOTTLE, MAGNUM, Package
 from src.app_generics.postal_code import get_postal_code_list
 from src.departement import DEPARTMENTS_TO_CODE
-from my_transporters import StefApp, ChronopostApp
-
-
-COST_CALCULATOR = {
-    "Stef": StefApp(),
-    "Chronopost": ChronopostApp(),
-}
 
 
 def init_session_state(var_name: str, init_value: Any = None):
@@ -51,12 +44,12 @@ def define_style():
     )
 
 
-def cost_calculator_callback():
-    st.session_state.cost_calculator = COST_CALCULATOR[st.session_state.transporter]
+def postal_code_callback():
+    st.session_state.department = st.session_state.postal_code[:2]
+    cost_callback()
 
 
 def cost_callback():
-    st.session_state.department = st.session_state.postal_code[:2]
     st.session_state.expedition = MultiRefExpedition(
         [
             SingleRefExpedition(
@@ -67,7 +60,7 @@ def cost_callback():
             ),
         ]
     )
-    st.session_state.detail_cost = st.session_state.cost_calculator.compute_cost()
+    st.session_state.detail_cost = st.session_state.transporter.compute_cost()
     st.session_state.cost = round(sum(st.session_state.detail_cost.values(), 0), 2)
 
 
@@ -109,7 +102,7 @@ def destination_city_input(df_postal_code):
                 "Destination",
                 options=df_postal_code.full_name.values,
                 key="postal_code",
-                on_change=cost_callback,
+                on_change=postal_code_callback,
             )
         with dept_col:
             st.text_input(

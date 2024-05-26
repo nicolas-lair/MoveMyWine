@@ -14,12 +14,16 @@ from .indicator_scrapper import scrap_indicator
 
 
 class ChronopostApp(TransporterApp):
-    cost_calculator = ChronopostTotalCost
-    params = TransporterParams()
+    def __init__(self):
+        self.cost_calculator = ChronopostTotalCost
+        self.params = TransporterParams()
+        st.session_state["chronopost"] = {"gnr_modulator": 100}
 
     def _build_kwargs(self) -> dict[str, Any]:
         computation_kwargs = {
-            self.params.modulators["GNR"].arg_name: st.session_state.GNR_modulation,
+            self.params.modulators["GNR"].arg_name: st.session_state.chronopost[
+                "gnr_modulator"
+            ],
             "expedition": st.session_state.expedition,
             "department": st.session_state.department,
             "agg": False,
