@@ -16,7 +16,10 @@ class StefApp(TransporterApp):
     def __init__(self):
         self.cost_calculator = StefTotalCost
         self.params = TransporterParams()
-        st.session_state["stef"] = {"gnr_modulator": 1, "cold_modulator": 1}
+        st.session_state["stef"] = {
+            "gnr_modulator": self.params.modulators["GNR"].default,
+            "cold_modulator": self.params.modulators["Froid"].default,
+        }
 
     def _build_kwargs(self) -> dict[str, Any]:
         computation_kwargs = {

@@ -35,6 +35,7 @@ class TransporterParams(AbstractTransporterParams):
             modulation_link="https://www.chronopost.fr/fr/surcharge-carburant",
             arg_name="gnr_factor",
             min_value=0.0,
+            default=0.0,
             max_value=100.0,
             input_format="%2.f",
         )

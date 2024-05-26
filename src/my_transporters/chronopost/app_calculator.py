@@ -17,7 +17,9 @@ class ChronopostApp(TransporterApp):
     def __init__(self):
         self.cost_calculator = ChronopostTotalCost
         self.params = TransporterParams()
-        st.session_state["chronopost"] = {"gnr_modulator": 100}
+        st.session_state["chronopost"] = {
+            "gnr_modulator": self.params.modulators["GNR"].default,
+        }
 
     def _build_kwargs(self) -> dict[str, Any]:
         computation_kwargs = {
