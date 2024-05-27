@@ -28,12 +28,7 @@ st.title(":champagne: Move My Wine")
 define_style()
 
 init_session_state("detail_cost", {})
-init_session_state("cost", 0)
-
-init_session_state("bottle", 0)
-init_session_state("magnum", 0)
-
-init_session_state("department", "01")
+init_session_state("cost", 0.0)
 
 col1, col2 = st.columns(2)
 with col1:
@@ -77,4 +72,5 @@ with st.expander("Surcharges", expanded=True):
     for mod_name, mod in st.session_state.transporter.params.modulators.items():
         input_factor(indicator_dict[mod_name], name=mod_name, **asdict(mod))
 
-display_result()
+cost_callback()
+display_result(result)

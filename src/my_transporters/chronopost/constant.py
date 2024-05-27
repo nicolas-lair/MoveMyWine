@@ -17,8 +17,8 @@ class TransporterParams(AbstractTransporterParams):
 
     extra_package_cost: ExtraPackageCost = field(
         default_factory=lambda: ExtraPackageCost(
-            extra_package_cost=0.89,  # Frais par colis (sureté + ecolo - Chronopost
-            max_free_package=0,  # Nombre de colis max sans frais multi-colis - Chronopost
+            extra_package_cost=1.5,  # Frais par colis (sureté + ecolo - Chronopost
+            max_free_package=3,  # Nombre de colis max sans frais multi-colis - Chronopost
             multi_package_max_fee=9999,  # Coût max de la gestion multi-colis - Chronopost
         )
     )

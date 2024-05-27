@@ -45,7 +45,6 @@ def define_style():
 
 
 def cost_callback():
-    st.session_state["department"] = st.session_state.postal_code[:2]
     st.session_state.expedition = MultiRefExpedition(
         [
             SingleRefExpedition(
@@ -72,7 +71,6 @@ def bottle_input():
             max_value=198,
             value="min",
             step=1,
-            on_change=cost_callback,
             key="bottle",
         )
     with col2:
@@ -82,7 +80,6 @@ def bottle_input():
             max_value=100,
             value="min",
             step=1,
-            on_change=cost_callback,
             key="magnum",
         )
 
@@ -98,14 +95,13 @@ def destination_city_input(df_postal_code):
                 "Destination",
                 options=df_postal_code.full_name.values.tolist(),
                 key="postal_code",
-                on_change=cost_callback,
             )
+            st.session_state["department"] = st.session_state.postal_code[:2]
         with dept_col:
             st.text_input(
                 "Département",
-                value=DEPARTMENTS_TO_CODE[st.session_state.postal_code[:2]],
+                value=DEPARTMENTS_TO_CODE[st.session_state.department],
                 disabled=True,
-                on_change=cost_callback,
             )
 
 
@@ -135,12 +131,15 @@ def input_factor(
             value=indicator.value,
             format=input_format,
             help="Récupéré automatiquement si possible",
-            key=f"{name}_modulation",
-            on_change=cost_callback,
+            key=f"{st.session_state.transporter.params.name.lower()}_{name.lower()}_modulator",
         )
 
 
-def display_result():
+def display_result(result):
+    result.markdown(
+        f'<p class="big-font">{st.session_state.cost} €</p>',
+        unsafe_allow_html=True,
+    )
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(
