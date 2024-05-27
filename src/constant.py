@@ -33,8 +33,8 @@ class BaseBottle:
         return self.empty_weight + self.volume
 
 
-BOTTLE = BaseBottle(empty_weight=0.580, volume=0.75, bottle_eq=1)
-MAGNUM = BaseBottle(empty_weight=2 * 0.580, volume=1.5, bottle_eq=2)
+BOTTLE = BaseBottle(empty_weight=0.380, volume=0.75, bottle_eq=1)
+MAGNUM = BaseBottle(empty_weight=1.0, volume=1.5, bottle_eq=2)
 
 
 @dataclass(kw_only=True)

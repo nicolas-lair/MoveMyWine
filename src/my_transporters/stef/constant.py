@@ -1,7 +1,10 @@
 from typing import Final
 from dataclasses import dataclass
 
-from src.transporter.transporter_params import AbstractTransporterParams
+from src.transporter.transporter_params import (
+    AbstractTransporterParams,
+    ModulatorConfig,
+)
 
 
 @dataclass(kw_only=True)
@@ -12,14 +15,23 @@ class TransporterParams(AbstractTransporterParams):
     position_cost: float = 5.2
     security_cost: float = 0.7
 
-    gnr_modulation_link: str = "https://www.cnr.fr/espaces/13/indicateurs/41"
-    _gnr_modulation_file: str = "gnr_modulation.csv"
-    gnr_arg_name = "gnr_factor"
-
-    cold_modulation_link: str = "https://www.cnr.fr/espaces/13/indicateurs/36"
-    _cold_modulation_file: str = "modulation_froid.csv"
-    cold_arg_name = "cold_factor"
-
-    def __post_init__(self):
-        self.gnr_modulation_file = self.data_folder / self._gnr_modulation_file
-        self.cold_modulation_file = self.data_folder / self._cold_modulation_file
+    modulators = {
+        "GNR": ModulatorConfig(
+            modulation_link="https://www.cnr.fr/espaces/13/indicateurs/41",
+            modulation_file="gnr_modulation.csv",
+            arg_name="gnr_factor",
+            min_value=0.0,
+            default=1.0,
+            max_value=2.0,
+            input_format="%4.f",
+        ),
+        "Froid": ModulatorConfig(
+            modulation_link="https://www.cnr.fr/espaces/13/indicateurs/36",
+            modulation_file="modulation_froid.csv",
+            arg_name="cold_factor",
+            min_value=0.0,
+            default=300.0,
+            max_value=750.0,
+            input_format="%.2f",
+        ),
+    }

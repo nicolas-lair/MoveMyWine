@@ -56,7 +56,7 @@ class TestTotalCost:
                 expedition=SingleRefExpedition(n_bottles=6),
                 n_expedition_by_month=2,
             )
-            == 2 * (2 + 1) + 15 / 2
+            == 1.02 * (2 + 1) + 15 / 2
         )
 
     def test_total_cost_four_package(self):
@@ -66,7 +66,7 @@ class TestTotalCost:
                 expedition=SingleRefExpedition(n_bottles=24),
                 n_expedition_by_month=2,
             )
-            == 2 * (4 * 2 + 1 + 1) + 15 / 2
+            == 1.02 * (4 * 2 + 1 + 1) + 15 / 2
         )
 
     def test_total_cost_fourty_package(self):
@@ -76,5 +76,5 @@ class TestTotalCost:
                 expedition=SingleRefExpedition(n_bottles=240),
                 n_expedition_by_month=2,
             )
-            == 2 * (40 * 2 + 1 + 3.5) + 15 / 2
+            == 1.02 * (40 * 2 + 1 + 3.5) + 15 / 2
         )
