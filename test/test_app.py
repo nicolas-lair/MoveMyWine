@@ -6,6 +6,7 @@ from src.app_generics.fetched_indicator import FetchedIndicator
 from src.my_transporters.chronopost import app_calculator as chronopost_app
 from src.my_transporters.stef import app_calculator as stef_app
 from src.cost_calculator import CostType
+from src.streamlit_utils import TRANSPORTER_LIST
 
 
 def mock_stef_indicator(url):
@@ -58,6 +59,42 @@ def test_app(monkeypatch):
         CostType.GNRMod: 0,
         CostType.ColdMod: 0.0,
     }
+
+    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[1]).run()
+    assert app.session_state.transporter.params.name == "Chronopost"
+    assert app.session_state.detail_cost == {
+        CostType.ByBottle: round(21.06 + 14.52 * 1.13, 2),
+        CostType.ByPackage: 1.5,
+        CostType.Expedition: 0.89,
+        CostType.GNRMod: 0,
+    }
+
+    app.number_input(key="bottle").set_value(6).run()
+    assert app.session_state.detail_cost == {
+        CostType.ByBottle: 21.06,
+        CostType.ByPackage: 0.0,
+        CostType.Expedition: 0.89,
+        CostType.GNRMod: 0,
+    }
+
+    app.number_input(key="bottle").set_value(12).run()
+    assert app.session_state.detail_cost == {
+        CostType.ByBottle: 21.06,
+        CostType.ByPackage: 0.0,
+        CostType.Expedition: 0.89,
+        CostType.GNRMod: 0,
+    }
+
+    app.number_input(key="bottle").set_value(18).run()
+    assert app.session_state.detail_cost == {
+        CostType.ByBottle: round(21.06 + 7.14 * 1.13, 2),
+        CostType.ByPackage: 0.0,
+        CostType.Expedition: 0.89,
+        CostType.GNRMod: 0,
+    }
+
+    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[0]).run()
+    assert app.session_state.transporter.params.name == "Stef"
 
     app.number_input(key="bottle").set_value(36).run()
     assert app.session_state.detail_cost == {

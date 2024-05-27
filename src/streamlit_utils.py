@@ -5,6 +5,9 @@ from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
 from src.constant import BOTTLE, MAGNUM, Package
 from src.app_generics.postal_code import get_postal_code_df
 from src.departement import DEPARTMENTS_TO_CODE
+from src.my_transporters import StefApp, ChronopostApp
+
+TRANSPORTER_LIST = [StefApp(), ChronopostApp()]
 
 
 def init_session_state(var_name: str, init_value: Any = None):

@@ -8,7 +8,6 @@ import streamlit as st
 
 sys.path.append(Path(__file__).parents[1].as_posix())
 
-from src.my_transporters import StefApp, ChronopostApp  # noqa: E402
 from src.streamlit_utils import (  # noqa: E402
     define_style,
     bottle_input,
@@ -18,10 +17,8 @@ from src.streamlit_utils import (  # noqa: E402
     init_session_state,
     display_result,
     cost_callback,
+    TRANSPORTER_LIST,
 )
-
-
-TRANSPORTER_LIST = [StefApp(), ChronopostApp()]
 
 st.title(":champagne: Move My Wine")
 
@@ -38,7 +35,6 @@ with col1:
         TRANSPORTER_LIST,
         label_visibility="hidden",
         key="transporter",
-        on_change=cost_callback,
         format_func=lambda x: x.params.name,
     )
 
