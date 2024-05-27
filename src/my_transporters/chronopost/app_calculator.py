@@ -19,7 +19,9 @@ class ChronopostApp(TransporterApp):
 
     def _build_kwargs(self) -> dict[str, Any]:
         computation_kwargs = {
-            self.params.modulators["GNR"].arg_name: st.session_state.GNR_modulation,
+            self.params.modulators["GNR"].arg_name: st.session_state[
+                "chronopost_gnr_modulator"
+            ],
             "expedition": st.session_state.expedition,
             "department": st.session_state.department,
             "agg": False,

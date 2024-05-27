@@ -9,6 +9,7 @@ class ModulatorConfig:
     modulation_link: str
     arg_name: str
     min_value: float
+    default: float
     max_value: float
     input_format: str
     modulation_file: Optional[str] = None

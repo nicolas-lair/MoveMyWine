@@ -8,7 +8,7 @@ import streamlit as st
 
 sys.path.append(Path(__file__).parents[1].as_posix())
 
-from streamlit_utils import (  # noqa: E402
+from src.streamlit_utils import (  # noqa: E402
     define_style,
     bottle_input,
     retrieve_postal_code,
@@ -16,8 +16,8 @@ from streamlit_utils import (  # noqa: E402
     input_factor,
     init_session_state,
     display_result,
-    COST_CALCULATOR,
-    cost_calculator_callback,
+    cost_callback,
+    TRANSPORTER_LIST,
 )
 
 st.title(":champagne: Move My Wine")
@@ -25,24 +25,17 @@ st.title(":champagne: Move My Wine")
 define_style()
 
 init_session_state("detail_cost", {})
-init_session_state("cost", 0)
-
-init_session_state("bottle", 0)
-init_session_state("magnum", 0)
-
-init_session_state("transporter", "Stef")
-init_session_state("department", "01")
-cost_calculator_callback()
+init_session_state("cost", 0.0)
 
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("#### Transporteur")
     st.selectbox(
         "Choix du transporteur",
-        COST_CALCULATOR.keys(),
+        TRANSPORTER_LIST,
         label_visibility="hidden",
         key="transporter",
-        on_change=cost_calculator_callback,
+        format_func=lambda x: x.params.name,
     )
 
 with col2:
@@ -69,10 +62,11 @@ bottle_input()
 
 with st.expander("Surcharges", expanded=True):
     indicator_dict = {
-        mod_name: st.session_state.cost_calculator.scrap_indicator(mod)
-        for mod_name, mod in st.session_state.cost_calculator.params.modulators.items()
+        mod_name: st.session_state.transporter.scrap_indicator(mod)
+        for mod_name, mod in st.session_state.transporter.params.modulators.items()
     }
-    for mod_name, mod in st.session_state.cost_calculator.params.modulators.items():
+    for mod_name, mod in st.session_state.transporter.params.modulators.items():
         input_factor(indicator_dict[mod_name], name=mod_name, **asdict(mod))
 
-display_result()
+cost_callback()
+display_result(result)

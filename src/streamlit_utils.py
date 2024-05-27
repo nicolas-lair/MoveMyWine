@@ -3,15 +3,11 @@ import streamlit as st
 
 from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
 from src.constant import BOTTLE, MAGNUM, Package
-from src.app_generics.postal_code import get_postal_code_list
+from src.app_generics.postal_code import get_postal_code_df
 from src.departement import DEPARTMENTS_TO_CODE
-from my_transporters import StefApp
+from src.my_transporters import StefApp, ChronopostApp
 
-
-COST_CALCULATOR = {
-    "Stef": StefApp(),
-    # "Chronopost": ChronopostApp(),
-}
+TRANSPORTER_LIST = [StefApp(), ChronopostApp()]
 
 
 def init_session_state(var_name: str, init_value: Any = None):
@@ -21,7 +17,7 @@ def init_session_state(var_name: str, init_value: Any = None):
 
 @st.cache_data
 def retrieve_postal_code():
-    return get_postal_code_list()
+    return get_postal_code_df()
 
 
 @st.experimental_fragment
@@ -51,12 +47,7 @@ def define_style():
     )
 
 
-def cost_calculator_callback():
-    st.session_state.cost_calculator = COST_CALCULATOR[st.session_state.transporter]
-
-
 def cost_callback():
-    st.session_state.department = st.session_state.postal_code[:2]
     st.session_state.expedition = MultiRefExpedition(
         [
             SingleRefExpedition(
@@ -67,7 +58,7 @@ def cost_callback():
             ),
         ]
     )
-    st.session_state.detail_cost = st.session_state.cost_calculator.compute_cost()
+    st.session_state.detail_cost = st.session_state.transporter.compute_cost()
     st.session_state.cost = round(sum(st.session_state.detail_cost.values(), 0), 2)
 
 
@@ -83,7 +74,6 @@ def bottle_input():
             max_value=198,
             value="min",
             step=1,
-            on_change=cost_callback,
             key="bottle",
         )
     with col2:
@@ -93,7 +83,6 @@ def bottle_input():
             max_value=100,
             value="min",
             step=1,
-            on_change=cost_callback,
             key="magnum",
         )
 
@@ -107,10 +96,10 @@ def destination_city_input(df_postal_code):
         with commune_col:
             st.selectbox(
                 "Destination",
-                options=df_postal_code.full_name.values,
+                options=df_postal_code.full_name.values.tolist(),
                 key="postal_code",
-                on_change=cost_callback,
             )
+            st.session_state["department"] = st.session_state.postal_code[:2]
         with dept_col:
             st.text_input(
                 "Département",
@@ -145,12 +134,15 @@ def input_factor(
             value=indicator.value,
             format=input_format,
             help="Récupéré automatiquement si possible",
-            key=f"{name}_modulation",
-            on_change=cost_callback,
+            key=f"{st.session_state.transporter.params.name.lower()}_{name.lower()}_modulator",
         )
 
 
-def display_result():
+def display_result(result):
+    result.markdown(
+        f'<p class="big-font">{st.session_state.cost} €</p>',
+        unsafe_allow_html=True,
+    )
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(
