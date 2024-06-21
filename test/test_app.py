@@ -1,4 +1,8 @@
+from typing import Callable
+
+from datetime import date
 import pandas as pd
+from dateutil.relativedelta import relativedelta
 from streamlit.testing.v1 import AppTest
 
 from src import streamlit_utils
@@ -7,6 +11,13 @@ from src.my_transporters.chronopost import app_calculator as chronopost_app
 from src.my_transporters.stef import app_calculator as stef_app
 from src.cost_calculator import CostType
 from src.streamlit_utils import TRANSPORTER_LIST
+
+
+def mock_indicator_factory(value: float) -> Callable[[...], FetchedIndicator]:
+    def func(*args, **kwargs) -> FetchedIndicator:
+        return FetchedIndicator(retrieved=True, valid_date=True, value=value)
+
+    return func
 
 
 def mock_stef_indicator(url):
@@ -170,3 +181,38 @@ def test_app(monkeypatch):
         CostType.GNRMod: 0,
         CostType.ColdMod: 0.0,
     }
+
+
+def test_indicator_monthly_reload(monkeypatch, time_machine):
+    monkeypatch.setattr(stef_app, "scrap_indicator", mock_indicator_factory(value=1.0))
+    monkeypatch.setattr(
+        streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
+    )
+    app = AppTest.from_file("../src/streamlit_app.py").run()
+
+    transporter = app.session_state.transporter.params.name
+    mod_name = list(app.session_state.transporter.params.modulators.keys())[0]
+    assert not app.exception
+    assert app.session_state.init_date == date.today()
+    assert (
+        app.session_state[f"{transporter.lower()}_{mod_name.lower()}_modulator"] == 1.0
+    )
+
+    # Record the current day
+    today = date.today()
+
+    # Move to next month
+    time_machine.move_to(today + relativedelta(months=1))
+
+    # Change the indicator value
+    monkeypatch.setattr(stef_app, "scrap_indicator", mock_indicator_factory(value=2.0))
+
+    # Change something in the app to trigger an update
+    app.selectbox(key="postal_code").set_value("69001 - Lyon 01").run()
+
+    # Check what we have changed month
+    assert app.session_state.init_date.month == today.month + 1
+    # Check that we have a new indicator value
+    assert (
+        app.session_state[f"{transporter.lower()}_{mod_name.lower()}_modulator"] == 2.0
+    )
