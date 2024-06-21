@@ -18,10 +18,14 @@ from src.streamlit_utils import (  # noqa: E402
     display_result,
     cost_callback,
     TRANSPORTER_LIST,
+    store_init_date,
+    clear_cache_on_new_month,
 )
 
 st.title(":champagne: Move My Wine")
 
+store_init_date()
+clear_cache_on_new_month()
 define_style()
 
 init_session_state("detail_cost", {})

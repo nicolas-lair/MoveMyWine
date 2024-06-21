@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 import streamlit as st
 
@@ -18,6 +19,16 @@ def init_session_state(var_name: str, init_value: Any = None):
 @st.cache_data
 def retrieve_postal_code():
     return get_postal_code_df()
+
+
+@st.cache_data
+def store_init_date():
+    st.session_state["init_date"] = datetime.today()
+
+
+def clear_cache_on_new_month():
+    if datetime.today().month != st.session_state["init_date"].month:
+        st.cache_data.clear()
 
 
 @st.experimental_fragment
