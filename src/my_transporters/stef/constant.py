@@ -12,7 +12,7 @@ class TransporterParams(AbstractTransporterParams):
     name: Final[str] = "Stef"
     max_palet_weight: int = 600
 
-    position_cost: float = 5.2
+    position_cost: float = 5.41
     security_cost: float = 0.7
 
     modulators = {
