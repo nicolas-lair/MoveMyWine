@@ -64,28 +64,28 @@ def test_app(monkeypatch):
 
     app.number_input(key="bottle").set_value(24).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 37.94,
+        CostType.ByBottle: 39.46,
         CostType.Security: 0.7,
-        CostType.Expedition: 5.2,
+        CostType.Expedition: 5.41,
         CostType.GNRMod: 0,
         CostType.ColdMod: 0.0,
     }
 
     app.number_input(key="stef_gnr_modulator").set_value(1.42).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 37.94,
+        CostType.ByBottle: 39.46,
         CostType.Security: 0.7,
-        CostType.Expedition: 5.2,
-        CostType.GNRMod: 4.75,
+        CostType.Expedition: 5.41,
+        CostType.GNRMod: 4.94,
         CostType.ColdMod: 0.0,
     }
 
     app.number_input(key="stef_froid_modulator").set_value(330).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 37.94,
+        CostType.ByBottle: 39.46,
         CostType.Security: 0.7,
-        CostType.Expedition: 5.2,
-        CostType.GNRMod: 4.75,
+        CostType.Expedition: 5.41,
+        CostType.GNRMod: 4.94,
         CostType.ColdMod: 0.22,
     }
 
@@ -138,36 +138,36 @@ def test_app(monkeypatch):
     app.number_input(key="stef_froid_modulator").set_value(300.0).run()
     app.number_input(key="bottle").set_value(36).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 37.94,
+        CostType.ByBottle: 39.46,
         CostType.Security: 0.7,
-        CostType.Expedition: 5.2,
+        CostType.Expedition: 5.41,
         CostType.GNRMod: 0,
         CostType.ColdMod: 0.0,
     }
 
     app.number_input(key="bottle").set_value(48).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 49.2,
+        CostType.ByBottle: 51.17,
         CostType.Security: 0.7,
-        CostType.Expedition: 5.2,
+        CostType.Expedition: 5.41,
         CostType.GNRMod: 0,
         CostType.ColdMod: 0.0,
     }
 
     app.selectbox(key="postal_code").set_value("69001 - Lyon 01").run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 51.11,
+        CostType.ByBottle: 53.15,
         CostType.Security: 0.7,
-        CostType.Expedition: 5.2,
+        CostType.Expedition: 5.41,
         CostType.GNRMod: 0,
         CostType.ColdMod: 0.0,
     }
 
     app.number_input(key="bottle").set_value(130).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: round(0.7 * 130, 2),
+        CostType.ByBottle: round(0.73 * 130, 2),
         CostType.Security: 0.7,
-        CostType.Expedition: 5.2,
+        CostType.Expedition: 5.41,
         CostType.GNRMod: 0,
         CostType.ColdMod: 0.0,
     }
@@ -175,10 +175,10 @@ def test_app(monkeypatch):
     app.number_input(key="bottle").set_value(170).run()
     app.selectbox(key="postal_code").set_value("49100 - Angers").run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: round(170 * 0.35, 2),
+        CostType.ByBottle: round(170 * 0.36, 2),
         CostType.Security: 0.7,
-        CostType.Expedition: 5.2,
-        CostType.GNRMod: 0,
+        CostType.Expedition: 5.41,
+        CostType.GNRMod: 0.0,
         CostType.ColdMod: 0.0,
     }
 
