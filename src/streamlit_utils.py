@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 import streamlit as st
 
@@ -20,7 +21,14 @@ def retrieve_postal_code():
     return get_postal_code_df()
 
 
-@st.experimental_fragment
+def clear_cache_on_new_month():
+    init_session_state("init_date", date.today())
+    if date.today().month != st.session_state["init_date"].month:
+        st.cache_data.clear()
+        st.session_state["init_date"] = date.today()
+
+
+@st.fragment
 def define_style():
     st.markdown(
         """

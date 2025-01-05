@@ -40,7 +40,8 @@ class TestCostByBottle:
             expedition=SingleRefExpedition(n_bottles=n_bottles)
         )
         assert isinstance(cost, pd.DataFrame)
-        assert cost[n_bottles].sum() == 2952.84
+        sum_tarif1 = 3070.97
+        assert round(cost[n_bottles].sum(), 2) == sum_tarif1
 
     def test_compute_cost_nationwide_variable(self):
         n_bottles = 79
@@ -48,4 +49,5 @@ class TestCostByBottle:
             expedition=SingleRefExpedition(n_bottles=n_bottles)
         )
         assert isinstance(cost, pd.DataFrame)
-        assert cost[n_bottles].sum() == 61.4 * n_bottles
+        sum_tarif3 = 63.92
+        assert cost[n_bottles].sum() == sum_tarif3 * n_bottles
