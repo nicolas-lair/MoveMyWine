@@ -28,7 +28,7 @@ def clear_cache_on_new_month():
         st.session_state["init_date"] = date.today()
 
 
-@st.experimental_fragment
+@st.fragment
 def define_style():
     st.markdown(
         """
