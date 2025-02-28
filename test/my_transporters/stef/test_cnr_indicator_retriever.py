@@ -1,6 +1,6 @@
 import loguru
 
-from src.my_transporters.stef.indicator_scrapper import scrap_indicator
+from src.app_generics.scrap_cnr_indicator import scrap_indicator
 from src.my_transporters.stef.constant import TransporterParams
 
 
