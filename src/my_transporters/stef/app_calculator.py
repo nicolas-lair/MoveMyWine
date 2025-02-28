@@ -9,7 +9,7 @@ from src.app_generics.transporter_app import (
     FetchedIndicator,
 )
 from .cost import StefTotalCost, TransporterParams
-from .indicator_scrapper import scrap_indicator
+from src.app_generics.scrap_cnr_indicator import scrap_indicator
 
 
 class StefApp(TransporterApp):

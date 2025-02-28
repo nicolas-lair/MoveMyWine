@@ -9,29 +9,21 @@ from src.transporter.transporter_params import (
 
 @dataclass(kw_only=True)
 class TransporterParams(AbstractTransporterParams):
-    name: Final[str] = "Stef"
+    name: Final[str] = "Kuehne-Nagel"
+    # TODO check that
     max_palet_weight: int = 600
 
-    position_cost: float = 5.41
-    security_cost: float = 0.7
+    position_cost: float = 0.0
+    security_cost: float = 1.9
 
     modulators = {
         "GNR": ModulatorConfig(
-            modulation_link="https://www.cnr.fr/espaces/13/indicateurs/41",
+            modulation_link="https://www.cnr.fr/espaces/13/indicateurs/43",
             modulation_file="gnr_modulation.csv",
             arg_name="gnr_factor",
-            min_value=0.0,
+            min_value=0.7,
             default=1.0,
-            max_value=2.0,
+            max_value=2.6,
             input_format="%4.f",
-        ),
-        "Froid": ModulatorConfig(
-            modulation_link="https://www.cnr.fr/espaces/13/indicateurs/36",
-            modulation_file="modulation_froid.csv",
-            arg_name="cold_factor",
-            min_value=0.0,
-            default=300.0,
-            max_value=750.0,
-            input_format="%.2f",
         ),
     }

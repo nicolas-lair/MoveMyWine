@@ -8,21 +8,19 @@ from src.app_generics.transporter_app import (
     validate_transporter,
     FetchedIndicator,
 )
-from .cost import StefTotalCost, TransporterParams
-from .indicator_scrapper import scrap_indicator
+from .cost import KNGTotalCost
+from .constant import TransporterParams
+from src.app_generics.scrap_cnr_indicator import scrap_indicator
 
 
-class StefApp(TransporterApp):
-    cost_calculator = StefTotalCost
+class KNGApp(TransporterApp):
+    cost_calculator = KNGTotalCost
     params = TransporterParams()
 
     def _build_kwargs(self) -> dict[str, Any]:
         computation_kwargs = {
             self.params.modulators["GNR"].arg_name: st.session_state[
-                "stef_gnr_modulator"
-            ],
-            self.params.modulators["Froid"].arg_name: st.session_state[
-                "stef_froid_modulator"
+                f"{self.params.name.lower()}_gnr_modulator"
             ],
             "expedition": st.session_state.expedition,
             "department": st.session_state.department,
