@@ -2,37 +2,37 @@ import pandas as pd
 import pytest
 
 from src.cost_calculator.expedition import SingleRefExpedition
-from src.my_transporters.stef.cost import StefCostByBottleCalculator
+from src.my_transporters.kuehne_nagel.cost import KNGCostByBottleCalculator
 from src.constant import UnitType, TarifType
 
 
 class TestCostByBottle:
-    cost_calc = StefCostByBottleCalculator()
+    cost_calc = KNGCostByBottleCalculator()
 
-    def test_get_tarif_unit(self):
-        assert self.cost_calc._get_tarif_unit(30) == UnitType.BOTTLE
-        assert self.cost_calc._get_tarif_unit(198) == UnitType.BOTTLE
+    @pytest.mark.parametrize("n_col", [30, 150, 200, 1200])
+    def test_get_tarif_unit(self, n_col):
+        assert self.cost_calc._get_tarif_unit(n_col) == UnitType.BOTTLE
+
+    def test_max_unit_tarif(self):
         with pytest.raises(NotImplementedError):
-            _ = self.cost_calc._get_tarif_unit(199)
+            _ = self.cost_calc._get_tarif_unit(1201)
 
-    def test_get_tarif_conditions(self):
-        t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(30)
-        assert t_unit == UnitType.BOTTLE
-        assert t_type == TarifType.FORFAIT
-        assert t_id == "Tarif 1"
-
-        t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(78)
-        assert t_unit == UnitType.BOTTLE
-        assert t_type == TarifType.FORFAIT
-        assert t_id == "Tarif 2"
-
-        t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(79)
-        assert t_unit == UnitType.BOTTLE
-        assert t_type == TarifType.VARIABLE
-        assert t_id == "Tarif 3"
-
-        with pytest.raises(NotImplementedError):
-            _ = self.cost_calc._get_tarif_unit(199)
+    @pytest.mark.parametrize(
+        ("n_col", "valid_unit", "valid_tarif", "valid_id"),
+        [
+            (6, UnitType.BOTTLE, TarifType.FORFAIT, "Tarif 1"),
+            (15, UnitType.BOTTLE, TarifType.FORFAIT, "Tarif 2"),
+            (21, UnitType.BOTTLE, TarifType.FORFAIT, "Tarif 3"),
+            (450, UnitType.BOTTLE, TarifType.VARIABLE, "Tarif 12"),
+        ],
+    )
+    def test_get_tarif_conditions(
+        self, n_col: int, valid_unit: UnitType, valid_tarif: TarifType, valid_id: str
+    ):
+        t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(n_col)
+        assert t_unit == valid_unit
+        assert t_type == valid_tarif
+        assert t_id == valid_id
 
     def test_compute_cost_nationwide_forfait(self):
         n_bottles = 30
