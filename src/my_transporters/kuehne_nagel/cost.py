@@ -2,99 +2,44 @@ from typing import Union
 
 import pandas as pd
 
+from src.constant import UnitType
 from src.cost_calculator import (
-    BaseCostCalculator,
-    SingleRefExpedition,
-    MultiRefExpedition,
     BaseCostList,
     FixedCostByExpe,
-    ModulatorFromIndicator,
-    TotalCostCalculator,
-    ModulatedCostCalculator,
     ModCostCollection,
-    round_cost,
+    ModulatedCostCalculator,
+    ModulatorFromIndicator,
+    MultiRefExpedition,
+    SingleRefExpedition,
+    TotalCostCalculator,
 )
-from src.constant import UnitType, TarifType
-from src.file_structure import TarifStructureFile, TarifDeptFile
 from src.cost_calculator.constant import CostType
+from src.cost_calculator.cost_by_bottle import CostByBottleCalculator
+
 from .constant import TransporterParams
 
 tp = TransporterParams()
 
 
-# TODO Check the palet system, not exactly equivalent to Stef
-class KNGCostByBottleCalculator(BaseCostCalculator):
+class KNGCostByBottleCalculator(CostByBottleCalculator):
     name: CostType = CostType.ByBottle
 
-    def __init__(self):
-        self.tarif_structure = pd.read_csv(
-            tp.data_folder / TarifStructureFile.name,
-            **TarifStructureFile.csv_format,
-            index_col=[TarifStructureFile.Cols.unit],
-        )
-        self.tarif_by_dep = pd.read_csv(
-            tp.data_folder / TarifDeptFile.name,
-            **TarifDeptFile.csv_format,
-            index_col=[TarifDeptFile.Cols.dpt],
-        )
+    def __init__(self, transporter_params: TransporterParams = tp):
+        super().__init__(transporter_params)
 
     @staticmethod
     def _get_dpt_code(series_of_dpt: pd.Series) -> pd.Series:
         return series_of_dpt.astype(str).str.zfill(2)
 
-    @property
-    def max_bottles_at_bottle_tarif(self):
-        return self.tarif_structure.loc[
-            UnitType.BOTTLE, TarifStructureFile.Cols.max_
-        ].max()
-
-    def _get_tarif_unit(self, bottles: int) -> UnitType:
+    def _get_tarif_unit(
+        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
+    ) -> tuple[UnitType, int]:
         """
         Get the tarif unit type from the number of bottles in the expedition
-        :param bottles: Number of bottles in an expedition
-        :return: bottle, palet or kg
+        :param expedition: Single ref or Multi ref expedition
+        :return: tarif unit and number of corresponding units (bottle or palet)
         """
-        if bottles <= self.max_bottles_at_bottle_tarif:
-            return UnitType.BOTTLE
-        else:
-            raise NotImplementedError
-
-    def _get_tarif_info(self, bottles: int, tarif_unit: UnitType) -> pd.DataFrame:
-        tarif_structure = self.tarif_structure.loc[tarif_unit]
-        min_volume_condition = tarif_structure[TarifStructureFile.Cols.min_] <= bottles
-        max_volume_condition = tarif_structure[TarifStructureFile.Cols.max_] >= bottles
-        return tarif_structure[min_volume_condition & max_volume_condition]
-
-    def get_tarif_conditions(self, n_bottles: int) -> tuple[UnitType, TarifType, str]:
-        tarif_unit = self._get_tarif_unit(n_bottles)
-        assert tarif_unit == UnitType.BOTTLE
-        tarif_info = self._get_tarif_info(n_bottles, tarif_unit)
-        tarif_type, tarif_id = tarif_info.loc[
-            tarif_unit,
-            [TarifStructureFile.Cols.type_, TarifStructureFile.Cols.tarif_id],
-        ]
-        return tarif_unit, tarif_type, tarif_id
-
-    def _compute_cost_nationwide(
-        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
-    ) -> pd.DataFrame:
-        n_bottles_eq = expedition.n_bottles_equivalent
-        tarif_unit, tarif_type, tarif_id = self.get_tarif_conditions(
-            n_bottles=n_bottles_eq
-        )
-        cost = self.tarif_by_dep[tarif_id].to_frame(n_bottles_eq)
-        if tarif_type == TarifType.VARIABLE:
-            volume_in_tarif_unit = n_bottles_eq
-            cost *= volume_in_tarif_unit
-        return cost
-
-    @round_cost()
-    def compute_cost(
-        self, expedition: MultiRefExpedition, department: str, *args, **kwargs
-    ) -> float:
-        nation_wide_cost = self._compute_cost_nationwide(expedition)
-        nation_wide_cost.index = self._get_dpt_code(nation_wide_cost.index)
-        return nation_wide_cost.loc[department, expedition.n_bottles_equivalent].copy()
+        return UnitType.BOTTLE, expedition.n_bottles_equivalent
 
 
 # TODO Add cost by destination
@@ -125,7 +70,7 @@ KNGTotalCost = TotalCostCalculator(
 )
 
 if __name__ == "__main__":
-    from src.constant import BOTTLE, Package, MAGNUM
+    from src.constant import BOTTLE, MAGNUM, Package
 
     cost_calculator = KNGCostCollection()
     expedition = MultiRefExpedition(

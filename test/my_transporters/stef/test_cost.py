@@ -1,21 +1,29 @@
 import pandas as pd
 import pytest
 
+from src.constant import TarifType, UnitType
 from src.cost_calculator.expedition import SingleRefExpedition
 from src.my_transporters.stef.cost import StefCostByBottleCalculator
-from src.constant import UnitType, TarifType
 
 
 class TestCostByBottle:
     cost_calc = StefCostByBottleCalculator()
 
-    @pytest.mark.parametrize("n_col", [30, 198])
-    def test_get_tarif_unit(self, n_col):
-        assert self.cost_calc._get_tarif_unit(n_col) == UnitType.BOTTLE
-
-    def test_max_unit_tarif(self):
-        with pytest.raises(NotImplementedError):
-            _ = self.cost_calc._get_tarif_unit(199)
+    @pytest.mark.parametrize(
+        ("n_col", "unit_type", "n_unit"),
+        [
+            (30, UnitType.BOTTLE, 30),
+            (198, UnitType.BOTTLE, 198),
+            (199, UnitType.PALET, 1),
+            (300, UnitType.PALET, 1),
+            (600, UnitType.PALET, 2),
+        ],
+    )
+    def test_get_tarif_unit(self, n_col, unit_type, n_unit):
+        assert self.cost_calc._get_tarif_unit(SingleRefExpedition(n_bottles=n_col)) == (
+            unit_type,
+            n_unit,
+        )
 
     @pytest.mark.parametrize(
         ("n_col", "valid_unit", "valid_tarif", "valid_id"),
@@ -28,7 +36,9 @@ class TestCostByBottle:
     def test_get_tarif_conditions(
         self, n_col: int, valid_unit: UnitType, valid_tarif: TarifType, valid_id: str
     ):
-        t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(n_col)
+        n_unit, t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(
+            SingleRefExpedition(n_bottles=n_col)
+        )
         assert t_unit == valid_unit
         assert t_type == valid_tarif
         assert t_id == valid_id
