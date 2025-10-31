@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "movemywine"
-version = "0.3.0"
+version = "0.3.1"
 description = "Package to compute transport price of wine bottles. Comes with a simple stramlit app"
 authors = ["Nicolas Lair <nl.nicolas.lair@gmail.com>"]
 readme = "README.md"
