@@ -43,7 +43,7 @@ class TestCostByBottle:
         assert t_type == valid_tarif
         assert t_id == valid_id
 
-    @pytest.mark.parametrize(("n_col", "total_cost"), [(30, 3070.97)])
+    @pytest.mark.parametrize(("n_col", "total_cost"), [(30, 3243.55)])
     def test_compute_cost_nationwide_forfait(self, n_col, total_cost):
         cost = self.cost_calc._compute_cost_nationwide(
             expedition=SingleRefExpedition(n_bottles=n_col)
@@ -51,7 +51,8 @@ class TestCostByBottle:
         assert isinstance(cost, pd.DataFrame)
         assert round(cost[n_col].sum(), 2) == total_cost
 
-    @pytest.mark.parametrize(("n_col", "unit_cost"), [(79, 63.92)])
+    # unit_cost is the sum of the prices for all departments (and relivraison) for given number of bottles
+    @pytest.mark.parametrize(("n_col", "unit_cost"), [(79, 67.49)])
     def test_compute_cost_nationwide_variable(self, n_col, unit_cost):
         cost = self.cost_calc._compute_cost_nationwide(
             expedition=SingleRefExpedition(n_bottles=n_col)
