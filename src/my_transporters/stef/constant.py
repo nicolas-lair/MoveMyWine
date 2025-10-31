@@ -1,5 +1,5 @@
-from typing import Final
 from dataclasses import dataclass
+from typing import Final
 
 from src.transporter.transporter_params import (
     AbstractTransporterParams,
@@ -14,6 +14,7 @@ class TransporterParams(AbstractTransporterParams):
 
     position_cost: float = 5.41
     security_cost: float = 0.7
+    palet_movement_cost: float = 1.0
 
     modulators = {
         "GNR": ModulatorConfig(

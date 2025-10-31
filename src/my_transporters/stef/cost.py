@@ -58,6 +58,7 @@ StefCostCollection = BaseCostList(
         StefCostByBottleCalculator(),
         FixedCostByExpe(position_cost=tp.position_cost),
         FixedCostByExpe(name=CostType.Security, security_cost=tp.security_cost),
+        FixedCostByExpe(name=CostType.Palet, palet_cost=tp.palet_movement_cost),
     ]
 )
 
