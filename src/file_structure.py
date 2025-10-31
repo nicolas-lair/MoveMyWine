@@ -1,13 +1,13 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Dict
+from enum import StrEnum
 from pathlib import Path
-from enum import Enum
+from typing import Dict
 
 from src.constant import CSV_PARAMS
 
 
-class AbstractCols(str, Enum):
+class AbstractCols(StrEnum):
     pass
 
 
@@ -20,7 +20,7 @@ class CSVFile(ABC):
 class TarifStructureFile(CSVFile):
     name = "tarif_structure.csv"
 
-    class Cols(str, Enum):
+    class Cols(AbstractCols):
         tarif_id = "Tarif"
         tarif = "Tarif"
         unit = "Unité"
@@ -32,7 +32,7 @@ class TarifStructureFile(CSVFile):
 class TarifDeptFile(CSVFile):
     name = "tarif_par_departement.csv"
 
-    class Cols(str, Enum):
+    class Cols(AbstractCols):
         dpt = "Département"
 
 
@@ -40,7 +40,7 @@ class TarifDeptFile(CSVFile):
 class ModulationFileConfig(CSVFile):
     path: Path
 
-    class Cols(str, Enum):
+    class Cols(AbstractCols):
         lower_bound = "Min"
         upper_bound = "Max"
         modulation = "Modulation"
@@ -49,7 +49,7 @@ class ModulationFileConfig(CSVFile):
 class TarifZoneFile(CSVFile):
     name = "tarif_par_zone.csv"
 
-    class Cols(str, Enum):
+    class Cols(AbstractCols):
         zone = "Zone"
 
 
@@ -57,6 +57,6 @@ class CorrespondanceZoneDpt(CSVFile):
     name = "correspondance_zone_dpt.csv"
     csv_format = {**CSVFile.csv_format, "dtype": str}
 
-    class Cols(str, Enum):
-        zone = TarifZoneFile.Cols.zone.value
-        dpt = TarifDeptFile.Cols.dpt.value
+    class Cols(AbstractCols):
+        zone = TarifZoneFile.Cols.zone
+        dpt = TarifDeptFile.Cols.dpt
