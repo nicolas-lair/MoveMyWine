@@ -1,14 +1,15 @@
 from datetime import date
 from typing import Any
+
 import streamlit as st
 
-from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
-from src.constant import BOTTLE, MAGNUM, Package
 from src.app_generics.postal_code import get_postal_code_df
+from src.constant import BOTTLE, MAGNUM, Package
+from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
 from src.departement import DEPARTMENTS_TO_CODE
-from src.my_transporters import StefApp, ChronopostApp
+from src.my_transporters import ChronopostApp, KNGApp, StefApp
 
-TRANSPORTER_LIST = [StefApp(), ChronopostApp()]
+TRANSPORTER_LIST = [StefApp(), ChronopostApp(), KNGApp()]
 
 
 def init_session_state(var_name: str, init_value: Any = None):
@@ -79,9 +80,9 @@ def bottle_input():
         st.number_input(
             "Bouteilles (75 cL)",
             min_value=0,
-            max_value=198,
+            max_value=1200,
             value="min",
-            step=1,
+            step=6,
             key="bottle",
         )
     with col2:
@@ -90,7 +91,7 @@ def bottle_input():
             min_value=0,
             max_value=100,
             value="min",
-            step=1,
+            step=3,
             key="magnum",
         )
 

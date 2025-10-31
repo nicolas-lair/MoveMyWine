@@ -1,4 +1,3 @@
-from math import ceil
 from typing import Union
 
 import pandas as pd
@@ -16,27 +15,21 @@ from src.cost_calculator import (
 )
 from src.cost_calculator.constant import CostType
 from src.cost_calculator.cost_by_bottle import CostByBottleCalculator
-from src.file_structure import TarifStructureFile
-from src.my_transporters.stef.constant import TransporterParams
+
+from .constant import TransporterParams
 
 tp = TransporterParams()
 
 
-class StefCostByBottleCalculator(CostByBottleCalculator):
+class KNGCostByBottleCalculator(CostByBottleCalculator):
     name: CostType = CostType.ByBottle
 
-    def __init__(self, transportation_params: TransporterParams = tp):
-        super().__init__(transportation_params)
+    def __init__(self, transporter_params: TransporterParams = tp):
+        super().__init__(transporter_params)
 
     @staticmethod
     def _get_dpt_code(series_of_dpt: pd.Series) -> pd.Series:
-        return series_of_dpt.str.slice(2, 4)
-
-    @property
-    def max_bottles_at_bottle_tarif(self):
-        return self.tarif_structure.loc[
-            UnitType.BOTTLE, TarifStructureFile.Cols.max_
-        ].max()
+        return series_of_dpt.astype(str).str.zfill(2)
 
     def _get_tarif_unit(
         self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
@@ -46,22 +39,19 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
         :param expedition: Single ref or Multi ref expedition
         :return: tarif unit and number of corresponding units (bottle or palet)
         """
-        if expedition.n_bottles_equivalent <= self.max_bottles_at_bottle_tarif:
-            return UnitType.BOTTLE, expedition.n_bottles_equivalent
-        else:
-            n_palet = ceil(expedition.weight / tp.max_palet_weight)
-            return UnitType.PALET, n_palet
+        return UnitType.BOTTLE, expedition.n_bottles_equivalent
 
 
-StefCostCollection = BaseCostList(
+# TODO Add cost by destination
+KNGCostCollection = BaseCostList(
     [
-        StefCostByBottleCalculator(),
+        KNGCostByBottleCalculator(),
         FixedCostByExpe(position_cost=tp.position_cost),
         FixedCostByExpe(name=CostType.Security, security_cost=tp.security_cost),
     ]
 )
 
-StefCostModulator = ModCostCollection(
+KNGCostModulator = ModCostCollection(
     [
         ModulatedCostCalculator(
             name=CostType.GNRMod,
@@ -71,26 +61,18 @@ StefCostModulator = ModCostCollection(
                 tp.data_folder / tp.modulators["GNR"].modulation_file
             ),
         ),
-        ModulatedCostCalculator(
-            name=CostType.ColdMod,
-            modulated_cost=[CostType.ByBottle, CostType.Expedition],
-            modulator_arg_name=tp.modulators["Froid"].arg_name,
-            modulator_retriever=ModulatorFromIndicator(
-                tp.data_folder / tp.modulators["Froid"].modulation_file
-            ),
-        ),
     ]
 )
 
-StefTotalCost = TotalCostCalculator(
-    cost_collection=StefCostCollection,
-    cost_modulator=StefCostModulator,
+KNGTotalCost = TotalCostCalculator(
+    cost_collection=KNGCostCollection,
+    cost_modulator=KNGCostModulator,
 )
 
 if __name__ == "__main__":
     from src.constant import BOTTLE, MAGNUM, Package
 
-    cost_calculator = StefCostCollection()
+    cost_calculator = KNGCostCollection()
     expedition = MultiRefExpedition(
         [
             SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),

@@ -1,3 +1,5 @@
+import pytest
+
 from src.cost_calculator.cost_by_package import (
     ExtraPackageCost,
     CostByPackageCalculator,
@@ -13,17 +15,15 @@ base_package_cost = {"package_cost": 3}
 
 
 class TestExtraPackageCost:
-    def test_free_extra_package(self):
-        assert free_extra_package_cost.compute_extra_cost(0) == 0
-        assert free_extra_package_cost.compute_extra_cost(1) == 0
-        assert free_extra_package_cost.compute_extra_cost(10) == 0
+    @pytest.mark.parametrize("n_pack", [0, 1, 10])
+    def test_free_extra_package(self, n_pack):
+        assert free_extra_package_cost.compute_extra_cost(n_pack) == 0
 
-    def test_custom_extra_package_cost(self):
-        assert custom_extra_package_cost.compute_extra_cost(1) == 0
-        assert custom_extra_package_cost.compute_extra_cost(3) == 0
-        assert custom_extra_package_cost.compute_extra_cost(4) == 1
-        assert custom_extra_package_cost.compute_extra_cost(5) == 2
-        assert custom_extra_package_cost.compute_extra_cost(10) == 3.5
+    @pytest.mark.parametrize(
+        ("n_pack", "extra_cost"), [(1, 0), (3, 0), (4, 1), (5, 2), (10, 3.5)]
+    )
+    def test_custom_extra_package_cost(self, n_pack, extra_cost):
+        assert custom_extra_package_cost.compute_extra_cost(n_pack) == extra_cost
 
 
 class TestCostByPackageCalculator:

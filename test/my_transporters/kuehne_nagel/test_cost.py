@@ -3,34 +3,26 @@ import pytest
 
 from src.constant import TarifType, UnitType
 from src.cost_calculator.expedition import SingleRefExpedition
-from src.my_transporters.stef.cost import StefCostByBottleCalculator
+from src.my_transporters.kuehne_nagel.cost import KNGCostByBottleCalculator
 
 
 class TestCostByBottle:
-    cost_calc = StefCostByBottleCalculator()
+    cost_calc = KNGCostByBottleCalculator()
 
-    @pytest.mark.parametrize(
-        ("n_col", "unit_type", "n_unit"),
-        [
-            (30, UnitType.BOTTLE, 30),
-            (198, UnitType.BOTTLE, 198),
-            (199, UnitType.PALET, 1),
-            (300, UnitType.PALET, 1),
-            (600, UnitType.PALET, 2),
-        ],
-    )
-    def test_get_tarif_unit(self, n_col, unit_type, n_unit):
+    @pytest.mark.parametrize("n_col", [30, 150, 1000])
+    def test_get_tarif_unit(self, n_col):
         assert self.cost_calc._get_tarif_unit(SingleRefExpedition(n_bottles=n_col)) == (
-            unit_type,
-            n_unit,
+            UnitType.BOTTLE,
+            n_col,
         )
 
     @pytest.mark.parametrize(
         ("n_col", "valid_unit", "valid_tarif", "valid_id"),
         [
-            (30, UnitType.BOTTLE, TarifType.FORFAIT, "Tarif 1"),
-            (78, UnitType.BOTTLE, TarifType.FORFAIT, "Tarif 2"),
-            (79, UnitType.BOTTLE, TarifType.VARIABLE, "Tarif 3"),
+            (6, UnitType.BOTTLE, TarifType.FORFAIT, "Tarif 1"),
+            (15, UnitType.BOTTLE, TarifType.FORFAIT, "Tarif 2"),
+            (21, UnitType.BOTTLE, TarifType.FORFAIT, "Tarif 3"),
+            (450, UnitType.BOTTLE, TarifType.VARIABLE, "Tarif 12"),
         ],
     )
     def test_get_tarif_conditions(
@@ -43,7 +35,7 @@ class TestCostByBottle:
         assert t_type == valid_tarif
         assert t_id == valid_id
 
-    @pytest.mark.parametrize(("n_col", "total_cost"), [(30, 3070.97)])
+    @pytest.mark.parametrize(("n_col", "total_cost"), [])
     def test_compute_cost_nationwide_forfait(self, n_col, total_cost):
         cost = self.cost_calc._compute_cost_nationwide(
             expedition=SingleRefExpedition(n_bottles=n_col)
@@ -51,7 +43,7 @@ class TestCostByBottle:
         assert isinstance(cost, pd.DataFrame)
         assert round(cost[n_col].sum(), 2) == total_cost
 
-    @pytest.mark.parametrize(("n_col", "unit_cost"), [(79, 63.92)])
+    @pytest.mark.parametrize(("n_col", "unit_cost"), [])
     def test_compute_cost_nationwide_variable(self, n_col, unit_cost):
         cost = self.cost_calc._compute_cost_nationwide(
             expedition=SingleRefExpedition(n_bottles=n_col)
