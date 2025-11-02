@@ -19,8 +19,6 @@ jobs:
           python-version: 3.12.3
           # Use uv venv to activate a venv ready to be used by later steps.
           activate-environment: true
-          # Glob pattern to match files relative to the repository root to control the cache.
-          cache-dependency-glob: "**/pyproject.toml"
 
       # And finally run tests. I'm using pytest and all my pytest config is in my `pyproject.toml`
       # so this line is super-simple. But it could be as complex as you need.
