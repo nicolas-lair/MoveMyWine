@@ -16,7 +16,7 @@ jobs:
         uses: astral-sh/setup-uv@v7.1.2
         with:
           # The version of Python to set UV_PYTHON to
-          python-version: .python-version
+          python-version: 3.12.3
           # Use uv venv to activate a venv ready to be used by later steps.
           activate-environment: true
           # Glob pattern to match files relative to the repository root to control the cache.
