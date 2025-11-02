@@ -5,7 +5,7 @@ repos:
   rev: 0.9.6
   hooks:
     - id: uv-export
-      args: [ --no-hashes ]
+      args: [ --frozen --output-file=requirements.txt --no-hashes ]
     - id: uv-lock
 - repo: https://github.com/pycqa/isort
   rev: 6.0.1
@@ -15,9 +15,11 @@ repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
+    -   id: fix-byte-order-marker
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
     -   id: mixed-line-ending
+        args: [ --fix=lf ]
     -   id: check-toml
     -   id: check-added-large-files
     -   id: name-tests-test
