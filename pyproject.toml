@@ -1,7 +1,7 @@
 [project]
 name = "movemywine"
-version = "0.3.3"
-description = "Package to compute transport price of wine bottles. Comes with a simple stramlit app"
+version = "0.4.0"
+description = "Package to compute transport price of wine bottles. Comes with a simple streamlit app"
 authors = [{ name = "Nicolas Lair", email = "nl.nicolas.lair@gmail.com" }]
 requires-python = ">=3.11.4,<3.13"
 readme = "README.md"
