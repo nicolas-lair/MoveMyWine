@@ -5,6 +5,7 @@ repos:
   rev: 0.9.6
   hooks:
     - id: uv-export
+      args: [ --no-hashes ]
     - id: uv-lock
 - repo: https://github.com/pycqa/isort
   rev: 6.0.1
