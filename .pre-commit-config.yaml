@@ -1,11 +1,11 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-- repo: https://github.com/python-poetry/poetry-plugin-export
-  rev: '1.9.0'  # add version here
+- repo: https://github.com/astral-sh/uv-pre-commit
+  rev: 0.9.6
   hooks:
-    -   id: poetry-export
-        args: ["-f", "requirements.txt", "-o", "requirements.txt"]
+    - id: uv-export
+    - id: uv-lock
 - repo: https://github.com/pycqa/isort
   rev: 6.0.1
   hooks:
