@@ -9,7 +9,7 @@ dependencies = [
     "pandas>=2.2.2,<3",
     "plotly~=6.0",
     "numpy~=2.2",
-    "streamlit~=1.42",
+    "streamlit~=1.54",
     "beautifulsoup4~=4.13",
     "python-dateutil>=2.9.0.post0,<3",
     "loguru>=0.7,<0.8",
@@ -21,11 +21,10 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ipython~=8.31",
-    "ruff>=0.8,<0.9",
+    "ruff",
     "pre-commit~=4.0",
-    "pytest~=8.3",
+    "pytest>=9",
     "time-machine~=2.16",
-    "poetry-plugin-export~=1.8",
     "importlib_metadata>=8,<9",
 ]
 
