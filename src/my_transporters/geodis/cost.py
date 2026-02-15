@@ -83,6 +83,7 @@ GeodisTotalCost = TotalCostCalculator(
                 name=CostType.GNRMod,
                 modulated_cost=[
                     CostType.ByBottle,
+                    CostType.Expedition,
                 ],
                 modulator_arg_name=tp.modulators["GNR"].arg_name,
             )
