@@ -92,7 +92,7 @@ def test_app(monkeypatch):
         CostType.ColdMod: 0.24,
     }
 
-    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[1]).run()
+    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[2]).run()
     assert app.session_state.transporter.params.name == "Chronopost"
     assert app.session_state.detail_cost == {
         CostType.ByBottle: round(21.06 + 14.52 * 1.13, 2),

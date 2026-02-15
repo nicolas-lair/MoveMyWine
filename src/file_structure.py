@@ -2,7 +2,9 @@ from abc import ABC
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import Dict
+from typing import ClassVar, Dict, Type
+
+import pandas as pd
 
 from src.constant import CSV_PARAMS
 
@@ -13,8 +15,16 @@ class AbstractCols(StrEnum):
 
 class CSVFile(ABC):
     name: str
-    Cols: AbstractCols
-    csv_format: Dict[str, str] = CSV_PARAMS
+    Cols: Type[AbstractCols]
+    csv_format: ClassVar[Dict[str, str]] = CSV_PARAMS
+
+    @classmethod
+    def load(cls, data_folder: Path, index_col: str | list[str] = None) -> pd.DataFrame:
+        return pd.read_csv(
+            data_folder / cls.name,
+            **cls.csv_format,
+            index_col=index_col,
+        )
 
 
 class TarifStructureFile(CSVFile):

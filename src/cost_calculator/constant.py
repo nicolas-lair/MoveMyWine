@@ -7,6 +7,7 @@ class CostType(str, Enum):
     Palet = "Frais Palette"
     ByBottle = "Coût Bouteilles"
     ByPackage = "Coût Colis"
+    ByDestination = "Supplément Destination"
     Monthly = "Coût Mensuel"
     Total = "Coût Total"
 
