@@ -11,16 +11,18 @@ class TestTotalCost:
     @pytest.mark.parametrize(
         ("gnr_factor", "true_cost"),
         [
-            (0, round((42.88 + 2.2), 2)),
-            (10, round((42.88 + 2.2) * 1.1, 2)),
+            (0, round((42.88 + 2.2 + 6.8), 2)),
+            (10, round((42.88 + 2.2 + 6.8) * 1.1, 2)),
         ],
     )
     def test_single_exp_computation(self, gnr_factor, true_cost):
         exp = SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package())
-        dep = "75"
+        postal_code = "75001"
+        dep = postal_code[:2]
         assert (
             self.cost_calculator.compute_cost(
                 gnr_factor=gnr_factor,
+                postal_code=postal_code,
                 expedition=exp,
                 department=dep,
             )
@@ -30,8 +32,8 @@ class TestTotalCost:
     @pytest.mark.parametrize(
         ("gnr_factor", "true_cost"),
         [
-            (0, round((57.99 + 2.2), 2)),
-            (10, round((57.99 + 2.2) * 1.1, 2)),
+            (0, round((57.99 + 2.2 + 6.8), 2)),
+            (10, round((57.99 + 2.2 + 6.8) * 1.1, 2)),
         ],
     )
     def test_multi_exp_computation(self, gnr_factor, true_cost):
@@ -45,10 +47,12 @@ class TestTotalCost:
                 ),
             ]
         )
-        dep = "69"
+        postal_code = "69001"
+        dep = postal_code[:2]
         assert (
             self.cost_calculator.compute_cost(
                 gnr_factor=gnr_factor,
+                postal_code=postal_code,
                 expedition=exp,
                 department=dep,
             )

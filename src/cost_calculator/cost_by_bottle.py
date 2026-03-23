@@ -19,11 +19,11 @@ class CostByBottleCalculator(ABC, BaseCostCalculator):
     name: CostType = CostType.ByBottle
 
     def __init__(self, transporter_params: AbstractTransporterParams):
-        self.tarif_structure = TarifStructureFile.load(
+        self.tarif_structure = TarifStructureFile().load(
             transporter_params.data_folder,
             index_col=[TarifStructureFile.Cols.unit],
         )
-        self.tarif_by_dep = TarifDeptFile.load(
+        self.tarif_by_dep = TarifDeptFile().load(
             transporter_params.data_folder,
             index_col=[TarifDeptFile.Cols.dpt],
         )

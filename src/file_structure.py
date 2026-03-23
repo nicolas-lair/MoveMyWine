@@ -18,11 +18,12 @@ class CSVFile(ABC):
     Cols: Type[AbstractCols]
     csv_format: ClassVar[Dict[str, str]] = CSV_PARAMS
 
-    @classmethod
-    def load(cls, data_folder: Path, index_col: str | list[str] = None) -> pd.DataFrame:
+    def load(
+        self, data_folder: Path, index_col: str | list[str] = None
+    ) -> pd.DataFrame:
         return pd.read_csv(
-            data_folder / cls.name,
-            **cls.csv_format,
+            data_folder / self.name,
+            **self.csv_format,
             index_col=index_col,
         )
 
@@ -70,3 +71,14 @@ class CorrespondanceZoneDpt(CSVFile):
     class Cols(AbstractCols):
         zone = TarifZoneFile.Cols.zone
         dpt = TarifDeptFile.Cols.dpt
+
+
+@dataclass(kw_only=True)
+class MapZone2PostalCode(CSVFile):
+    name: str
+
+    class Cols(AbstractCols):
+        zone = TarifZoneFile.Cols.zone
+        destination = "Destination"
+
+    csv_format = {**CSVFile.csv_format, "dtype": {Cols.destination: str}}

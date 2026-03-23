@@ -2,7 +2,7 @@ import pytest
 
 from src.constant import TarifType, UnitType
 from src.cost_calculator.expedition import SingleRefExpedition
-from src.my_transporters.geodis.cost import MyCostByBottleCalculator
+from src.my_transporters.geodis.cost import CostByDestination, MyCostByBottleCalculator
 
 
 class TestCostByBottle:
@@ -54,3 +54,39 @@ class TestCostByBottle:
             department=dpt,
         )
         assert cost == round(unit_cost * n_col, 2)
+
+
+class TestDestinationCost:
+    cost_calc = CostByDestination()
+
+    @pytest.mark.parametrize(
+        ("value", "interval_list", "idx"),
+        [
+            (0, [1, 3], 0),
+            (1, [1, 3], 0),
+            (2, [1, 3], 1),
+            (3, [1, 3], 1),
+            (4, [1, 3], 2),
+        ],
+    )
+    def test_get_index_from_interval(self, value, interval_list, idx):
+        assert self.cost_calc._get_index_from_interval(value, interval_list) == idx
+
+    @pytest.mark.parametrize(
+        ("n_col", "postal_code", "dpt", "cost"),
+        [
+            (12, "01001", "01", 0),
+            (12, "75001", "75", 3.4),
+            (36, "44100", "44", 6.8),
+            (120, "69009", "69", 10.4),
+            (36, "89100", "89", 4.1),
+        ],
+    )
+    def test_cost(self, n_col, postal_code, dpt, cost):
+        expedition = SingleRefExpedition(n_bottles=n_col)
+        assert (
+            self.cost_calc.compute_cost(
+                expedition, postal_code=postal_code, department=dpt
+            )
+            == cost
+        )
