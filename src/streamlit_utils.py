@@ -1,16 +1,22 @@
 from datetime import date
 from typing import Any
 
+import pandas as pd
 import streamlit as st
 
 from src.app_generics.postal_code import PostalCodeAPI, get_postal_code_df
 from src.constant import BOTTLE, MAGNUM, Package
 from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
 from src.departement import DEPARTMENTS_TO_CODE
-from src.my_transporters import ChronopostApp, KNGApp, StefApp
+from src.my_transporters import ChronopostApp, StefApp
 from src.my_transporters.geodis import GeodisApp
 
-TRANSPORTER_LIST = [StefApp(), GeodisApp(), ChronopostApp(), KNGApp()]
+TRANSPORTER_LIST = [
+    StefApp(),
+    GeodisApp(),
+    ChronopostApp(),
+    # KNGApp(),
+]
 
 
 def init_session_state(var_name: str, init_value: Any = None):
@@ -57,7 +63,7 @@ def define_style():
     )
 
 
-def cost_callback():
+def build_expedition():
     st.session_state.expedition = MultiRefExpedition(
         [
             SingleRefExpedition(
@@ -68,6 +74,10 @@ def cost_callback():
             ),
         ]
     )
+
+
+def cost_callback():
+    build_expedition()
     st.session_state.detail_cost = st.session_state.transporter.compute_cost()
     st.session_state.cost = round(sum(st.session_state.detail_cost.values(), 0), 2)
 
@@ -164,3 +174,81 @@ def display_result(result):
         )
     with col2:
         st.write(st.session_state.detail_cost)
+
+
+def display_comparison():
+    if not st.session_state.get("bottle") and not st.session_state.get("magnum"):
+        st.info("Renseignez le nombre de bouteilles pour comparer les transporteurs.")
+        return
+
+    st.caption(
+        "Les surcharges utilisent les valeurs récupérées automatiquement pour chaque transporteur."
+    )
+
+    indicator_issues = []
+
+    # Phase 1 : scraping et initialisation du session state
+    for transporter in TRANSPORTER_LIST:
+        name_lower = transporter.params.name.lower()
+        for mod_name, mod in transporter.params.modulators.items():
+            main_key = f"{name_lower}_{mod_name.lower()}_modulator"
+            indicator = transporter.scrap_indicator(mod)
+            fallback = indicator.value if indicator is not None else mod.default
+            init_session_state(main_key, fallback)
+            if indicator is None or not indicator.retrieved:
+                indicator_issues.append(
+                    (transporter.params.name, mod_name, "non récupéré")
+                )
+            elif not indicator.valid_date:
+                indicator_issues.append(
+                    (transporter.params.name, mod_name, "date à vérifier")
+                )
+
+    # Phase 2 : expander indicateurs (toujours affiché)
+    n_issues = len(indicator_issues)
+    expander_title = (
+        f"⚠️ {n_issues} alerte{'s' if n_issues > 1 else ''} concernant les Indicateurs"
+        if n_issues
+        else "✅ Indicateurs OK"
+    )
+    with st.expander(expander_title, expanded=False):
+        if not indicator_issues:
+            st.success("Tous les indicateurs ont été récupérés correctement.")
+        else:
+            for transporter_name, mod_name, reason in indicator_issues:
+                st.warning(
+                    f"**{transporter_name} / {mod_name}** ({reason}) "
+                    f"— valeur ajustable manuellement dans l'onglet *Tarif détaillé*"
+                )
+
+    # Phase 3 : calcul des coûts
+    results = {}
+    errors = []
+    for transporter in TRANSPORTER_LIST:
+        try:
+            detail = transporter.compute_cost()
+            results[transporter.params.name] = detail
+        except Exception:
+            errors.append(transporter.params.name)
+
+    if errors:
+        st.warning(f"Calcul impossible pour : {', '.join(errors)}")
+
+    if not results:
+        st.error("Impossible de calculer les coûts pour aucun transporteur.")
+        return
+
+    totals = {name: round(sum(detail.values()), 2) for name, detail in results.items()}
+
+    st.markdown("#### Coût total par transporteur (HT)")
+    df_totals = pd.DataFrame.from_dict(totals, orient="index", columns=["Coût HT (€)"])
+    st.dataframe(df_totals.style.format("{:.2f} €"))
+
+    with st.expander("Détail par poste de coût"):
+        df_detail = pd.DataFrame(
+            {
+                name: {k.value: round(v, 2) for k, v in detail.items()}
+                for name, detail in results.items()
+            }
+        ).fillna(0)
+        st.dataframe(df_detail.style.format("{:.2f} €"))
