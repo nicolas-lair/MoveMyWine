@@ -22,7 +22,7 @@ class TransporterParams(AbstractTransporterParams):
             modulation_file="gnr_modulation.csv",
             arg_name="gnr_factor",
             min_value=0.0,
-            default=1.0,
+            default=1.3218,
             max_value=2.0,
             input_format="%4.f",
         ),

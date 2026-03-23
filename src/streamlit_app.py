@@ -1,24 +1,24 @@
 import sys
-from pathlib import Path
 from dataclasses import asdict
-
+from pathlib import Path
 from urllib.error import URLError
+
 import pandas as pd
 import streamlit as st
 
 sys.path.append(Path(__file__).parents[1].as_posix())
 
 from src.streamlit_utils import (  # noqa: E402
-    define_style,
-    bottle_input,
-    retrieve_postal_code,
-    destination_city_input,
-    input_factor,
-    init_session_state,
-    display_result,
-    cost_callback,
     TRANSPORTER_LIST,
+    bottle_input,
     clear_cache_on_new_month,
+    cost_callback,
+    define_style,
+    destination_city_input,
+    display_result,
+    init_session_state,
+    input_factor,
+    retrieve_postal_code,
 )
 
 st.title(":champagne: Move My Wine")
@@ -52,7 +52,7 @@ with col2:
 
 try:
     df_postal_code = retrieve_postal_code()
-    init_session_state("postal_code", df_postal_code.loc[0, "full_name"])
+    init_session_state("destination", df_postal_code.index[0])
 except URLError as e:
     print(e)
     df_postal_code = pd.DataFrame()

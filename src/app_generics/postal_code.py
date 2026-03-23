@@ -1,4 +1,5 @@
 from enum import StrEnum
+
 import pandas as pd
 
 
@@ -29,4 +30,4 @@ def get_postal_code_df():
     df["full_name"] = df[[c.value for c in col_enum]].apply(
         lambda c: c.str.cat(sep=" - "), axis=1
     )
-    return df
+    return df.set_index("full_name")

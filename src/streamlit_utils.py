@@ -3,13 +3,14 @@ from typing import Any
 
 import streamlit as st
 
-from src.app_generics.postal_code import get_postal_code_df
+from src.app_generics.postal_code import PostalCodeAPI, get_postal_code_df
 from src.constant import BOTTLE, MAGNUM, Package
 from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
 from src.departement import DEPARTMENTS_TO_CODE
 from src.my_transporters import ChronopostApp, KNGApp, StefApp
+from src.my_transporters.geodis import GeodisApp
 
-TRANSPORTER_LIST = [StefApp(), ChronopostApp(), KNGApp()]
+TRANSPORTER_LIST = [StefApp(), GeodisApp(), ChronopostApp(), KNGApp()]
 
 
 def init_session_state(var_name: str, init_value: Any = None):
@@ -105,10 +106,13 @@ def destination_city_input(df_postal_code):
         with commune_col:
             st.selectbox(
                 "Destination",
-                options=df_postal_code.full_name.values.tolist(),
-                key="postal_code",
+                options=df_postal_code.index.tolist(),
+                key="destination",
             )
-            st.session_state["department"] = st.session_state.postal_code[:2]
+            st.session_state["department"] = st.session_state.destination[:2]
+            st.session_state["postal_code"] = df_postal_code.loc[
+                st.session_state.destination, PostalCodeAPI.Cols.postal_code
+            ]
         with dept_col:
             st.text_input(
                 "Département",

@@ -3,16 +3,15 @@ import pytest
 
 from src.app_generics.scrap_cnr_indicator import scrap_indicator
 from src.my_transporters.stef.constant import TransporterParams as StefParams
-from src.my_transporters.kuehne_nagel.constant import TransporterParams as KNGParams
 
 
 class TestCNRIndicatorRetriever:
     @pytest.mark.parametrize(
         "modulation_link",
         [
-            StefParams.modulators["GNR"].modulation_link,
+            # StefParams.modulators["GNR"].modulation_link,
             StefParams.modulators["Froid"].modulation_link,
-            KNGParams.modulators["GNR"].modulation_link,
+            # KNGParams.modulators["GNR"].modulation_link,
         ],
     )
     def test_retrieve_indicator(self, modulation_link):

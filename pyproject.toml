@@ -6,27 +6,28 @@ authors = [{ name = "Nicolas Lair", email = "nl.nicolas.lair@gmail.com" }]
 requires-python = ">=3.11.4,<3.13"
 readme = "README.md"
 dependencies = [
-    "pandas>=2.2.2,<3",
+    "pandas>=2.3,<3",
     "plotly~=6.0",
     "numpy~=2.2",
-    "streamlit~=1.42",
+    "streamlit~=1.54",
     "beautifulsoup4~=4.13",
     "python-dateutil>=2.9.0.post0,<3",
     "loguru>=0.7,<0.8",
     "openpyxl~=3.1",
-    "lxml~=5.3",
+    "lxml~=6.0",
     "babel~=2.17",
+    "certifi>=2026.1.4",
 ]
 
 [dependency-groups]
 dev = [
-    "ipython~=8.31",
-    "ruff>=0.8,<0.9",
+    "ipython~=9.10",
+    "ruff",
     "pre-commit~=4.0",
-    "pytest~=8.3",
-    "time-machine~=2.16",
-    "poetry-plugin-export~=1.8",
+    "pytest>=9.0.2",
+    "time-machine~=3.2",
     "importlib_metadata>=8,<9",
+    "pandas-stubs==3.0.0.260204",
 ]
 
 [tool.hatch.build.targets.sdist]
