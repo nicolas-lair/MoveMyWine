@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 from streamlit.testing.v1 import AppTest
 
 from src import streamlit_utils
@@ -6,8 +7,13 @@ from src.app_generics.fetched_indicator import FetchedIndicator
 from src.app_generics.postal_code import PostalCodeAPI
 from src.cost_calculator import CostType
 from src.my_transporters.chronopost import app_calculator as chronopost_app
+from src.my_transporters.chronopost.app_calculator import (
+    ChronopostApp as _ChronopostAppClass,
+)
 from src.my_transporters.geodis import app_calculator as geodis_app
+from src.my_transporters.geodis.app_calculator import GeodisApp as _GeodisAppClass
 from src.my_transporters.stef import app_calculator as stef_app
+from src.my_transporters.stef.app_calculator import StefApp as _StefAppClass
 from src.streamlit_utils import TRANSPORTER_LIST
 
 
@@ -188,6 +194,7 @@ def test_app(monkeypatch):
     app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[0]).run()
     assert app.session_state.transporter.params.name == "Stef"
 
+    app.selectbox(key="destination").set_value("75017 - Paris 17").run()
     app.number_input(key="stef_gnr_modulator").set_value(1.0).run()
     app.number_input(key="stef_froid_modulator").set_value(300.0).run()
     app.number_input(key="bottle").set_value(36).run()
@@ -242,3 +249,141 @@ def test_app(monkeypatch):
         CostType.GNRMod: 0.0,
         CostType.ColdMod: 0.0,
     }
+
+
+# ---------------------------------------------------------------------------
+# Helpers for comparison tab tests
+# ---------------------------------------------------------------------------
+# Class-level mocks (receive modconfig, bypass @st.cache_data)
+
+
+def _ok_indicator(modconfig):
+    return FetchedIndicator(retrieved=True, valid_date=True, value=modconfig.default)
+
+
+def _failing_indicator(modconfig):
+    return FetchedIndicator(retrieved=False)
+
+
+def _invalid_date_indicator(modconfig):
+    return FetchedIndicator(retrieved=True, valid_date=False, value=14.89)
+
+
+def _build_app(monkeypatch, stef_mock=None, geodis_mock=None, chronopost_mock=None):
+    """Build a test app patching scrap_indicator at class level to bypass @st.cache_data."""
+    monkeypatch.setattr(
+        _StefAppClass, "scrap_indicator", staticmethod(stef_mock or _ok_indicator)
+    )
+    monkeypatch.setattr(
+        _GeodisAppClass, "scrap_indicator", staticmethod(geodis_mock or _ok_indicator)
+    )
+    monkeypatch.setattr(
+        _ChronopostAppClass,
+        "scrap_indicator",
+        staticmethod(chronopost_mock or _ok_indicator),
+    )
+    monkeypatch.setattr(
+        streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
+    )
+    return AppTest.from_file("../src/streamlit_app.py").run()
+
+
+def _indicator_expander(app):
+    return next(e for e in app.expander if "Indicateurs" in e.label)
+
+
+# ---------------------------------------------------------------------------
+# Comparison tab — indicator alert logic
+# ---------------------------------------------------------------------------
+
+
+class TestComparisonIndicators:
+    def test_no_bottles_shows_info(self, monkeypatch):
+        """Info message displayed when no bottles entered."""
+        app = _build_app(monkeypatch)
+        assert not app.exception
+        assert any("bouteilles" in info.value.lower() for info in app.info)
+
+    def test_all_indicators_ok(self, monkeypatch):
+        """✅ expander shown when all indicators retrieved with a valid date."""
+        app = _build_app(monkeypatch)
+        app.number_input(key="bottle").set_value(24).run()
+        assert not app.exception
+        expander = _indicator_expander(app)
+        assert "✅" in expander.label
+        assert "⚠️" not in expander.label
+
+    def test_indicator_not_retrieved(self, monkeypatch):
+        """⚠️ 1 alerte when one indicator fails to be retrieved."""
+        app = _build_app(monkeypatch, geodis_mock=_failing_indicator)
+        app.number_input(key="bottle").set_value(24).run()
+        assert not app.exception
+        expander = _indicator_expander(app)
+        assert "⚠️" in expander.label
+        assert "1 alerte" in expander.label
+
+    def test_indicator_invalid_date(self, monkeypatch):
+        """⚠️ 1 alerte when one indicator has an invalid date."""
+        app = _build_app(monkeypatch, geodis_mock=_invalid_date_indicator)
+        app.number_input(key="bottle").set_value(24).run()
+        assert not app.exception
+        expander = _indicator_expander(app)
+        assert "⚠️" in expander.label
+        assert "1 alerte" in expander.label
+
+    def test_multiple_alerts(self, monkeypatch):
+        """Alert count reflects all failing modulators (Stef has 2, Geodis has 1 → 3 total)."""
+        app = _build_app(
+            monkeypatch,
+            stef_mock=_failing_indicator,
+            geodis_mock=_failing_indicator,
+        )
+        app.number_input(key="bottle").set_value(24).run()
+        assert not app.exception
+        expander = _indicator_expander(app)
+        assert "⚠️" in expander.label
+        assert "3 alertes" in expander.label
+
+
+# ---------------------------------------------------------------------------
+# Comparison tab — cost computation
+# ---------------------------------------------------------------------------
+
+
+class TestComparisonCosts:
+    def test_all_transporters_present_with_positive_costs(self, monkeypatch):
+        """Totals dataframe contains all active transporters with positive costs."""
+        app = _build_app(monkeypatch)
+        app.number_input(key="bottle").set_value(24).run()
+        assert not app.exception
+
+        transporter_names = {t.params.name for t in TRANSPORTER_LIST}
+        for element in app.dataframe:
+            df = element.value
+            if hasattr(df, "data"):  # unwrap Styler if needed
+                df = df.data
+            if set(df.index) == transporter_names:
+                assert all(df.iloc[:, 0] > 0), (
+                    "All transporter costs should be positive"
+                )
+                return
+        pytest.fail("Totals dataframe not found among page elements")
+
+    def test_costs_independent_of_selected_transporter(self, monkeypatch):
+        """Comparison costs are computed for all transporters regardless of which is selected in tab1."""
+        app = _build_app(monkeypatch)
+        app.number_input(key="bottle").set_value(24).run()
+        app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[1]).run()
+        assert not app.exception
+        assert app.session_state.transporter.params.name == "Geodis"
+
+        transporter_names = {t.params.name for t in TRANSPORTER_LIST}
+        found = False
+        for element in app.dataframe:
+            df = element.value
+            if hasattr(df, "data"):
+                df = df.data
+            if set(df.index) == transporter_names:
+                found = True
+                assert all(df.iloc[:, 0] > 0)
+        assert found, "Totals dataframe not found"
