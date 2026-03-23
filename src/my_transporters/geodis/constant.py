@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Final
 
 from src.cost_calculator.cost_by_package import ExtraPackageCost
+from src.file_structure import MapZone2PostalCode
 from src.transporter.transporter_params import (
     AbstractTransporterParams,
     ModulatorConfig,
@@ -20,12 +21,18 @@ class TransporterParams(AbstractTransporterParams):
         )
     )
 
-    # extra_destination_cost: dict = field(default_factory=lambda : {
-    #     "cost_by_": []
-    #     "cost_by_zone": {
-    #     "ZoneA": [1.9, 4.1, 6.2],
-    #     "ZoneB": [3.4, 6.8, 10.4],}
-    # })
+    extra_destination_cost: dict = field(
+        default_factory=lambda: {
+            "postalcode2zone": MapZone2PostalCode(
+                name="livraison_zones_urbaines_contraintes_detail.csv"
+            ),
+            "weight_limit": [30, 100],
+            "cost": {
+                "Zone A": [1.9, 4.1, 6.2],
+                "Zone B": [3.4, 6.8, 10.4],
+            },
+        }
+    )
 
     fixed_cost: dict = field(
         default_factory=lambda: {
