@@ -11,8 +11,8 @@ class TestTotalCost:
     @pytest.mark.parametrize(
         ("gnr_factor", "true_cost"),
         [
-            (0, round((42.88 + 2.2 + 6.8), 2)),
-            (10, round((42.88 + 2.2 + 6.8) * 1.1, 2)),
+            (0, round((37.25 + 2.15 + 6.6) + 5, 2)),
+            (10, round((37.25 + 2.15 + 6.6) * 1.1 + 5, 2)),
         ],
     )
     def test_single_exp_computation(self, gnr_factor, true_cost):
@@ -32,8 +32,8 @@ class TestTotalCost:
     @pytest.mark.parametrize(
         ("gnr_factor", "true_cost"),
         [
-            (0, round((57.99 + 2.2 + 6.8), 2)),
-            (10, round((57.99 + 2.2 + 6.8) * 1.1, 2)),
+            (0, round((69.3 + 2.15) + 5, 2)),
+            (10, round((69.3 + 2.15) * 1.1 + 5, 2)),
         ],
     )
     def test_multi_exp_computation(self, gnr_factor, true_cost):
@@ -47,7 +47,7 @@ class TestTotalCost:
                 ),
             ]
         )
-        postal_code = "69001"
+        postal_code = "90001"
         dep = postal_code[:2]
         assert (
             self.cost_calculator.compute_cost(

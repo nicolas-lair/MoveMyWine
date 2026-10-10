@@ -29,13 +29,11 @@ class TestCostByBottle:
     @pytest.mark.parametrize(
         ("n_col", "dpt", "cost"),
         [
-            (30, "49", 22.95),
-            (12, "79", 27.85),
-            (24, "41", 35.92),
-            (42, "95", 47.17),
-            (64, "21", 65.52),
-            (90, "01", 87.39),
-            (66, "90", 86.66),
+            (30, "49", 20.51),  # Zone 1
+            (12, "79", 25.76),  # Zone 2
+            (24, "41", 32.83),  # Zone 3
+            (42, "95", 42.59),  # Zone 4
+            (90, "01", 95.16),  # Zone 5
         ],
     )
     def test_compute_cost_forfait(self, n_col, dpt, cost):
@@ -46,7 +44,7 @@ class TestCostByBottle:
 
     # unit_cost is the sum of the prices for all departments (and relivraison) for given number of bottles
     @pytest.mark.parametrize(
-        ("n_col", "dpt", "unit_cost"), [(300, "49", 0.37), (540, "75", 0.68)]
+        ("n_col", "dpt", "unit_cost"), [(300, "49", 0.31), (540, "75", 0.70)]
     )
     def test_compute_cost_variable(self, n_col, dpt, unit_cost):
         cost = self.cost_calc.compute_cost(
@@ -76,10 +74,10 @@ class TestDestinationCost:
         ("n_col", "postal_code", "dpt", "cost"),
         [
             (12, "01001", "01", 0),
-            (12, "75001", "75", 3.4),
-            (36, "44100", "44", 6.8),
-            (120, "69009", "69", 10.4),
-            (36, "89100", "89", 4.1),
+            (12, "75001", "75", 3.3),
+            (36, "44100", "44", 6.6),
+            (120, "69009", "69", 10.15),
+            (36, "89100", "89", 2),
         ],
     )
     def test_cost(self, n_col, postal_code, dpt, cost):

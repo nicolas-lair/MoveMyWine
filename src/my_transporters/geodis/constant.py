@@ -28,17 +28,14 @@ class TransporterParams(AbstractTransporterParams):
             ),
             "weight_limit": [30, 100],
             "cost": {
-                "Zone A": [1.9, 4.1, 6.2],
-                "Zone B": [3.4, 6.8, 10.4],
+                "Zone A": [2, 2, 2],
+                "Zone B": [3.3, 6.6, 10.15],
             },
         }
     )
 
-    fixed_cost: dict = field(
-        default_factory=lambda: {
-            "surete": 2.2,
-        }
-    )
+    surete_cost = 2.15
+    palet_movement_cost: float = 5.0
 
     modulators: ClassVar[dict[str, ModulatorConfig]] = {
         "GNR": ModulatorConfig(

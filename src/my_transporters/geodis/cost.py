@@ -111,7 +111,8 @@ GeodisCostCollection = BaseCostList(
     [
         MyCostByBottleCalculator(),
         CostByDestination(),
-        FixedCostByExpe(**tp.fixed_cost),
+        FixedCostByExpe(name=CostType.Security, security_cost=tp.surete_cost),
+        FixedCostByExpe(name=CostType.Palet, palet_cost=tp.palet_movement_cost),
     ]
 )
 
@@ -123,7 +124,7 @@ GeodisTotalCost = TotalCostCalculator(
                 name=CostType.GNRMod,
                 modulated_cost=[
                     CostType.ByBottle,
-                    CostType.Expedition,
+                    CostType.Security,
                     CostType.ByDestination,
                 ],
                 modulator_arg_name=tp.modulators["GNR"].arg_name,

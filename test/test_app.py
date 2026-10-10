@@ -116,28 +116,31 @@ def test_app(monkeypatch):
     app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[1]).run()
     assert app.session_state.transporter.params.name == "Geodis"
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 37.22,  # Zone 4 24 bouteilles
-        CostType.Expedition: 2.2,
-        CostType.GNRMod: 0,
-        CostType.ByDestination: 3.4,
+        CostType.ByBottle: 35.5,  # Zone 4 24 bouteilles
+        CostType.Security: 2.15,
+        CostType.GNRMod: 0.0,
+        CostType.ByDestination: 3.3,
+        CostType.Palet: 5.0,
     }
 
     app.number_input(key="geodis_gnr_modulator").set_value(10).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 37.22,  # Zone 4 24 bouteilles
-        CostType.Expedition: 2.2,
-        CostType.GNRMod: 4.28,
-        CostType.ByDestination: 3.4,
+        CostType.ByBottle: 35.5,  # Zone 4 24 bouteilles
+        CostType.Security: 2.15,
+        CostType.GNRMod: 4.1,
+        CostType.ByDestination: 3.3,
+        CostType.Palet: 5.0,
     }
 
     n_bottle = 97
     app.number_input(key="bottle").set_value(n_bottle).run()
     app.selectbox(key="destination").set_value("69001 - Lyon 01").run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: round(0.81 * n_bottle, 2),  # Zone 5 97 bouteilles
-        CostType.Expedition: 2.2,
-        CostType.GNRMod: round(0.1 * (0.81 * n_bottle + 2.2 + 10.4), 2),
-        CostType.ByDestination: 10.4,
+        CostType.ByBottle: round(0.71 * n_bottle, 2),  # Zone 4 97 bouteilles
+        CostType.Security: 2.15,
+        CostType.GNRMod: round(0.1 * (0.71 * n_bottle + 2.15 + 10.15), 2),
+        CostType.ByDestination: 10.15,
+        CostType.Palet: 5.0,
     }
 
     ###################################################
