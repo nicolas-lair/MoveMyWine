@@ -2,19 +2,19 @@ import pandas as pd
 
 from src.cost_calculator import (
     BaseCostCalculator,
-    SingleRefExpedition,
-    MultiRefExpedition,
-    CostType,
     BaseCostList,
     CostByPackageCalculator,
+    CostType,
     FixedCostByExpe,
-    round_cost,
-    TotalCostCalculator,
     ModCostCollection,
     ModulatedCostCalculator,
+    MultiRefExpedition,
+    SingleRefExpedition,
+    TotalCostCalculator,
+    round_cost,
 )
-from src.file_structure import TarifStructureFile
 from src.departement import DEPARTMENTS_TO_CODE
+from src.file_structure import TarifStructureFile
 from src.my_transporters.chronopost.constant import TransporterParams
 
 tp = TransporterParams()

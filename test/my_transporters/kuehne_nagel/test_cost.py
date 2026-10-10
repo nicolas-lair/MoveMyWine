@@ -28,7 +28,7 @@ class TestCostByBottle:
     def test_get_tarif_conditions(
         self, n_col: int, valid_unit: UnitType, valid_tarif: TarifType, valid_id: str
     ):
-        n_unit, t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(
+        _n_unit, t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(
             SingleRefExpedition(n_bottles=n_col)
         )
         assert t_unit == valid_unit

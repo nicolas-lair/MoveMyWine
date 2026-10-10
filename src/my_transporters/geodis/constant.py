@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Final
+from typing import ClassVar, Final
 
 from src.cost_calculator.cost_by_package import ExtraPackageCost
 from src.file_structure import MapZone2PostalCode
@@ -40,7 +40,7 @@ class TransporterParams(AbstractTransporterParams):
         }
     )
 
-    modulators = {
+    modulators: ClassVar[dict[str, ModulatorConfig]] = {
         "GNR": ModulatorConfig(
             modulation_link="https://geodis.com/fr/transport-de-marchandises/transport-de-colis-et-de-palettes/taux-de-surcharge-energie",
             arg_name="gnr_factor",

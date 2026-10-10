@@ -1,5 +1,3 @@
-from typing import Union
-
 import numpy as np
 import pandas as pd
 
@@ -55,7 +53,7 @@ class MyCostByBottleCalculator(CostByBottleCalculator):
         return series_of_dpt.astype(str).str.zfill(2)
 
     def _get_tarif_unit(
-        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
+        self, expedition: SingleRefExpedition | MultiRefExpedition
     ) -> tuple[UnitType, int]:
         """
         Get the tarif unit type from the number of bottles in the expedition

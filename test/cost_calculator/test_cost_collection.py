@@ -1,10 +1,10 @@
 from src.cost_calculator import (
     BaseCostList,
+    CostByPackageCalculator,
     CostType,
+    ExtraPackageCost,
     FixedCostByExpe,
     MonthlyCostCalculator,
-    CostByPackageCalculator,
-    ExtraPackageCost,
     SingleRefExpedition,
 )
 
@@ -32,7 +32,7 @@ class TestCostCollectionCalc:
         )
         assert isinstance(cost_dict, dict)
         assert len(cost_dict.keys()) == len(self.cost_collection)
-        assert all([c == 0 for c in cost_dict.values()])
+        assert all(c == 0 for c in cost_dict.values())
 
     def test_total_cost_one_package(self):
         cost_dict = self.cost_collection.compute_cost(

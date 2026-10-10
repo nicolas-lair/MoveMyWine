@@ -1,5 +1,4 @@
-from .cost import ChronopostTotalCost
 from .app_calculator import ChronopostApp
+from .cost import ChronopostTotalCost
 
-
-__all__ = ["ChronopostTotalCost", "ChronopostApp"]
+__all__ = ["ChronopostApp", "ChronopostTotalCost"]

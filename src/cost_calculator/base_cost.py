@@ -1,4 +1,5 @@
-from typing import Protocol, runtime_checkable, Callable
+from collections.abc import Callable
+from typing import Protocol, runtime_checkable
 
 from .constant import CostType
 

@@ -1,6 +1,7 @@
-from bs4 import BeautifulSoup
-import requests
 from datetime import date
+
+import requests
+from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 from loguru import logger
 
@@ -27,6 +28,6 @@ def scrap_indicator(url: str) -> FetchedIndicator:
         indicator = float(indicator.replace(",", "."))
 
         return FetchedIndicator(retrieved=True, valid_date=valid_date, value=indicator)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - scraping failure must not crash the app
         logger.info(f"Error retrieving gas modulation: {e}", feature="f-strings")
         return FetchedIndicator(retrieved=False)

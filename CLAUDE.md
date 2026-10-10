@@ -17,18 +17,17 @@ uv run pytest test/my_transporters/geodis/test_cost.py
 # Run a single test
 uv run pytest test/test_app.py::test_app
 
-# Lint
+# Lint (ruff version is pinned once, in pyproject.toml; pre-commit and CI both use it)
 ruff check src/ test/
 ruff check --fix src/ test/
 
 # Format
 ruff format src/ test/
-isort src/ test/
 
 # Run the Streamlit app locally
 streamlit run src/streamlit_app.py
 
-# Pre-commit hooks (runs uv-export, uv-lock, isort, ruff)
+# Pre-commit hooks (runs uv-export, uv-lock, ruff)
 pre-commit run --all-files
 ```
 

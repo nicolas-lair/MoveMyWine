@@ -228,7 +228,7 @@ def display_comparison():
         try:
             detail = transporter.compute_cost()
             results[transporter.params.name] = detail
-        except Exception:
+        except Exception:  # noqa: BLE001 - one failing transporter must not break the comparison
             errors.append(transporter.params.name)
 
     if errors:

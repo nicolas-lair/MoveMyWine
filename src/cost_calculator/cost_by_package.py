@@ -1,8 +1,8 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from .constant import CostType
 from .base_cost import BaseCostCalculator, round_cost
+from .constant import CostType
 from .expedition import MultiRefExpedition
 
 

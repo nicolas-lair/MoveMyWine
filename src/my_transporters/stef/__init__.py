@@ -1,4 +1,4 @@
-from .cost import StefTotalCost
 from .app_calculator import StefApp
+from .cost import StefTotalCost
 
-__all__ = ["StefTotalCost", "StefApp"]
+__all__ = ["StefApp", "StefTotalCost"]

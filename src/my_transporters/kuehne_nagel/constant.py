@@ -1,5 +1,5 @@
-from typing import Final
 from dataclasses import dataclass
+from typing import ClassVar, Final
 
 from src.transporter.transporter_params import (
     AbstractTransporterParams,
@@ -16,7 +16,7 @@ class TransporterParams(AbstractTransporterParams):
     position_cost: float = 0.0
     security_cost: float = 1.9
 
-    modulators = {
+    modulators: ClassVar[dict[str, ModulatorConfig]] = {
         "GNR": ModulatorConfig(
             modulation_link="https://www.cnr.fr/espaces/13/indicateurs/43",
             modulation_file="gnr_modulation.csv",
