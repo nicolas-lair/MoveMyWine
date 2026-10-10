@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
+from src.cost_calculator.constant import CostType
 from src.cost_calculator.cost_collection import (
     BaseCostList,
-    ModCostCollection,
     DetailedCost,
+    ModCostCollection,
 )
-from src.cost_calculator.constant import CostType
 
 
 @dataclass

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Union
 
 import pandas as pd
 
@@ -35,14 +34,13 @@ class CostByBottleCalculator(ABC, BaseCostCalculator):
 
     @abstractmethod
     def _get_tarif_unit(
-        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
+        self, expedition: SingleRefExpedition | MultiRefExpedition
     ) -> tuple[UnitType, int]:
         """
         Get the tarif unit type from the number of bottles in the expedition
         :param expedition: Single ref or Multi ref expedition
         :return: tarif unit and number of corresponding units (bottle or palet)
         """
-        pass
 
     def _get_tarif_info(self, n_unit: int, tarif_unit: UnitType) -> pd.DataFrame:
         tarif_structure = self.tarif_structure.loc[tarif_unit]
@@ -51,7 +49,7 @@ class CostByBottleCalculator(ABC, BaseCostCalculator):
         return tarif_structure[min_volume_condition & max_volume_condition]
 
     def get_tarif_conditions(
-        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
+        self, expedition: SingleRefExpedition | MultiRefExpedition
     ) -> tuple[int, UnitType, TarifType, str]:
         tarif_unit, n_unit = self._get_tarif_unit(expedition)
         tarif_info = self._get_tarif_info(n_unit, tarif_unit)
@@ -62,9 +60,11 @@ class CostByBottleCalculator(ABC, BaseCostCalculator):
         return n_unit, tarif_unit, tarif_type, tarif_id
 
     def _compute_cost_nationwide(
-        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
+        self, expedition: SingleRefExpedition | MultiRefExpedition
     ) -> pd.DataFrame:
-        n_unit, tarif_unit, tarif_type, tarif_id = self.get_tarif_conditions(expedition)
+        n_unit, _tarif_unit, tarif_type, tarif_id = self.get_tarif_conditions(
+            expedition
+        )
         cost = self.tarif_by_dep[tarif_id].to_frame(name=n_unit)
         if tarif_type == TarifType.VARIABLE:
             cost *= n_unit

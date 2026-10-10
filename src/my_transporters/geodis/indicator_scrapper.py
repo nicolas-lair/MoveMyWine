@@ -46,6 +46,6 @@ def scrap_indicator(url: str) -> FetchedIndicator:
                     retrieved=True, valid_date=valid_date, value=gas_factor
                 )
         return FetchedIndicator(retrieved=False)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - scraping failure must not crash the app
         logger.info(f"Error retrieving gas modulation: {e}", feature="f-strings")
         return FetchedIndicator(retrieved=False)

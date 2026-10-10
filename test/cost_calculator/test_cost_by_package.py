@@ -1,11 +1,11 @@
 import pytest
 
+from src.cost_calculator.constant import CostType
 from src.cost_calculator.cost_by_package import (
-    ExtraPackageCost,
     CostByPackageCalculator,
+    ExtraPackageCost,
 )
 from src.cost_calculator.expedition import SingleRefExpedition
-from src.cost_calculator.constant import CostType
 
 free_extra_package_cost = ExtraPackageCost()
 custom_extra_package_cost = ExtraPackageCost(

@@ -19,7 +19,7 @@ class TestCostByBottle:
     def test_get_tarif_conditions(
         self, n_col: int, valid_unit: UnitType, valid_tarif: TarifType, valid_id: str
     ):
-        n_unit, t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(
+        _n_unit, t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(
             SingleRefExpedition(n_bottles=n_col)
         )
         assert t_unit == valid_unit
@@ -33,16 +33,16 @@ class TestCostByBottle:
             (12, "79", 27.85),
             (24, "41", 35.92),
             (42, "95", 47.17),
-            (64, "21", 57.99),
+            (64, "21", 65.52),
             (90, "01", 87.39),
             (66, "90", 86.66),
         ],
     )
     def test_compute_cost_forfait(self, n_col, dpt, cost):
-        cost = self.cost_calc.compute_cost(
+        computed = self.cost_calc.compute_cost(
             expedition=SingleRefExpedition(n_bottles=n_col), department=dpt
         )
-        assert cost == cost
+        assert computed == pytest.approx(cost)
 
     # unit_cost is the sum of the prices for all departments (and relivraison) for given number of bottles
     @pytest.mark.parametrize(

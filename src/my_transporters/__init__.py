@@ -1,5 +1,5 @@
-from .stef import StefApp
 from .chronopost import ChronopostApp
 from .kuehne_nagel import KNGApp
+from .stef import StefApp
 
-__all__ = ["StefApp", "ChronopostApp", "KNGApp"]
+__all__ = ["ChronopostApp", "KNGApp", "StefApp"]

@@ -1,4 +1,5 @@
 from src.constant import N_EXPEDITION
+
 from .base_cost import BaseCostCalculator, round_cost
 from .constant import CostType
 

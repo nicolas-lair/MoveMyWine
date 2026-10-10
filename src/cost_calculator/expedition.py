@@ -1,16 +1,15 @@
 from collections import UserList
 from dataclasses import dataclass, field
 from math import ceil
-from typing import Optional
 
-from src.constant import Package, BaseBottle, BOTTLE
+from src.constant import BOTTLE, BaseBottle, Package
 
 
 @dataclass(kw_only=True)
 class SingleRefExpedition:
     n_bottles: int
     bottle_type: BaseBottle = BOTTLE
-    package: Optional[Package] = field(default_factory=Package)
+    package: Package | None = field(default_factory=Package)
 
     def add_package_type(self, package: Package):
         self.package = package

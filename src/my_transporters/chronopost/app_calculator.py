@@ -2,14 +2,15 @@ from typing import Any
 
 import streamlit as st
 
-from src.transporter.transporter_params import ModulatorConfig
 from src.app_generics.transporter_app import (
-    validate_transporter,
-    TransporterApp,
     FetchedIndicator,
+    TransporterApp,
+    validate_transporter,
 )
-from .cost import ChronopostTotalCost
+from src.transporter.transporter_params import ModulatorConfig
+
 from .constant import TransporterParams
+from .cost import ChronopostTotalCost
 from .indicator_scrapper import scrap_indicator
 
 

@@ -8,7 +8,7 @@ import streamlit as st
 
 sys.path.append(Path(__file__).parents[1].as_posix())
 
-from src.streamlit_utils import (  # noqa: E402
+from src.streamlit_utils import (
     TRANSPORTER_LIST,
     bottle_input,
     clear_cache_on_new_month,

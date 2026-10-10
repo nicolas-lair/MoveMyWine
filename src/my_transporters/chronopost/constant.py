@@ -1,10 +1,11 @@
-from typing import Final
 from dataclasses import dataclass, field
+from typing import ClassVar, Final
+
+from src.cost_calculator.cost_by_package import ExtraPackageCost
 from src.transporter.transporter_params import (
     AbstractTransporterParams,
     ModulatorConfig,
 )
-from src.cost_calculator.cost_by_package import ExtraPackageCost
 
 
 @dataclass(kw_only=True)
@@ -30,7 +31,7 @@ class TransporterParams(AbstractTransporterParams):
         }
     )
 
-    modulators = {
+    modulators: ClassVar[dict[str, ModulatorConfig]] = {
         "GNR": ModulatorConfig(
             modulation_link="https://www.chronopost.fr/fr/surcharge-carburant",
             arg_name="gnr_factor",

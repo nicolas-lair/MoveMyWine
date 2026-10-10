@@ -1,5 +1,5 @@
 from src.constant import BaseBottle, Package
-from src.cost_calculator.expedition import SingleRefExpedition, MultiRefExpedition
+from src.cost_calculator.expedition import MultiRefExpedition, SingleRefExpedition
 
 
 class TestSingleRefExpedition:

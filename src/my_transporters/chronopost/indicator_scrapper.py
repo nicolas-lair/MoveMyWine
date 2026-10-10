@@ -1,12 +1,11 @@
-from io import StringIO
-import requests
 from datetime import date
-
-from bs4 import BeautifulSoup
-from loguru import logger
-from babel.dates import format_date
+from io import StringIO
 
 import pandas as pd
+import requests
+from babel.dates import format_date
+from bs4 import BeautifulSoup
+from loguru import logger
 
 from src.app_generics.fetched_indicator import FetchedIndicator
 
@@ -40,6 +39,6 @@ def scrap_indicator(url: str) -> FetchedIndicator:
         gas_factor = float(gas_factor[:-1])
 
         return FetchedIndicator(retrieved=True, valid_date=valid_date, value=gas_factor)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - scraping failure must not crash the app
         logger.info(f"Error retrieving gas modulation: {e}", feature="f-strings")
         return FetchedIndicator(retrieved=False)

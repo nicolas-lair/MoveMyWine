@@ -1,5 +1,4 @@
 from math import ceil
-from typing import Union
 
 import pandas as pd
 
@@ -39,7 +38,7 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
         ].max()
 
     def _get_tarif_unit(
-        self, expedition: Union[SingleRefExpedition, MultiRefExpedition]
+        self, expedition: SingleRefExpedition | MultiRefExpedition
     ) -> tuple[UnitType, int]:
         """
         Get the tarif unit type from the number of bottles in the expedition
