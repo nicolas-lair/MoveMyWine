@@ -2,14 +2,15 @@ from typing import Any
 
 import streamlit as st
 
-from src.transporter import ModulatorConfig
+from src.app_generics.scrap_cnr_indicator import scrap_indicator
 from src.app_generics.transporter_app import (
+    FetchedIndicator,
     TransporterApp,
     validate_transporter,
-    FetchedIndicator,
 )
+from src.transporter import ModulatorConfig
+
 from .cost import StefTotalCost, TransporterParams
-from src.app_generics.scrap_cnr_indicator import scrap_indicator
 
 
 class StefApp(TransporterApp):
@@ -33,7 +34,10 @@ class StefApp(TransporterApp):
     @staticmethod
     @st.cache_data
     def scrap_indicator(modconfig: ModulatorConfig) -> FetchedIndicator:
-        return scrap_indicator(url=modconfig.modulation_link)
+        ind = scrap_indicator(url=modconfig.modulation_link)
+        if not ind.retrieved:
+            ind.value = modconfig.default
+        return ind
 
     @validate_transporter
     def compute_cost(self) -> float:

@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import ClassVar, Dict, Type
+from typing import ClassVar
 
 import pandas as pd
 
@@ -15,11 +15,11 @@ class AbstractCols(StrEnum):
 
 class CSVFile(ABC):
     name: str
-    Cols: Type[AbstractCols]
-    csv_format: ClassVar[Dict[str, str]] = CSV_PARAMS
+    Cols: type[AbstractCols]
+    csv_format: ClassVar[dict[str, str]] = CSV_PARAMS
 
     def load(
-        self, data_folder: Path, index_col: str | list[str] = None
+        self, data_folder: Path, index_col: str | list[str] | None = None
     ) -> pd.DataFrame:
         return pd.read_csv(
             data_folder / self.name,
@@ -66,7 +66,7 @@ class TarifZoneFile(CSVFile):
 
 class CorrespondanceZoneDpt(CSVFile):
     name = "correspondance_zone_dpt.csv"
-    csv_format = {**CSVFile.csv_format, "dtype": str}
+    csv_format: ClassVar[dict] = {**CSVFile.csv_format, "dtype": str}
 
     class Cols(AbstractCols):
         zone = TarifZoneFile.Cols.zone
@@ -81,4 +81,7 @@ class MapZone2PostalCode(CSVFile):
         zone = TarifZoneFile.Cols.zone
         destination = "Destination"
 
-    csv_format = {**CSVFile.csv_format, "dtype": {Cols.destination: str}}
+    csv_format: ClassVar[dict] = {
+        **CSVFile.csv_format,
+        "dtype": {Cols.destination: str},
+    }

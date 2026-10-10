@@ -2,15 +2,16 @@ from typing import Any
 
 import streamlit as st
 
-from src.transporter import ModulatorConfig
+from src.app_generics.scrap_cnr_indicator import scrap_indicator
 from src.app_generics.transporter_app import (
+    FetchedIndicator,
     TransporterApp,
     validate_transporter,
-    FetchedIndicator,
 )
-from .cost import KNGTotalCost
+from src.transporter import ModulatorConfig
+
 from .constant import TransporterParams
-from src.app_generics.scrap_cnr_indicator import scrap_indicator
+from .cost import KNGTotalCost
 
 
 class KNGApp(TransporterApp):

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Final
+from typing import ClassVar, Final
 
 from src.cost_calculator.cost_by_package import ExtraPackageCost
 from src.file_structure import MapZone2PostalCode
@@ -28,19 +28,16 @@ class TransporterParams(AbstractTransporterParams):
             ),
             "weight_limit": [30, 100],
             "cost": {
-                "Zone A": [1.9, 4.1, 6.2],
-                "Zone B": [3.4, 6.8, 10.4],
+                "Zone A": [2, 2, 2],
+                "Zone B": [3.3, 6.6, 10.15],
             },
         }
     )
 
-    fixed_cost: dict = field(
-        default_factory=lambda: {
-            "surete": 2.2,
-        }
-    )
+    surete_cost = 2.15
+    palet_movement_cost: float = 5.0
 
-    modulators = {
+    modulators: ClassVar[dict[str, ModulatorConfig]] = {
         "GNR": ModulatorConfig(
             modulation_link="https://geodis.com/fr/transport-de-marchandises/transport-de-colis-et-de-palettes/taux-de-surcharge-energie",
             arg_name="gnr_factor",

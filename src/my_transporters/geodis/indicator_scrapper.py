@@ -32,18 +32,20 @@ def scrap_indicator(url: str) -> FetchedIndicator:
         for p in soup.find_all("p"):
             if "Taux général" in p.get_text():
                 month_year, rate = re.findall(
-                    r"Taux général (?P<date>.*?): (?P<taux>[\d,]+\.\d+)%", p.get_text()
+                    r"Taux général (?P<date>.*?)\s*:\s*(?P<taux>\d+(?:[.,]\d+)?)\s*%",
+                    p.get_text(),
                 )[0]
 
                 valid_date = (
-                    format_date(date.today(), format="MMMM Y", locale="fr")
-                    == month_year
+                    format_date(date.today(), format="MMMM Y", locale="fr").lower()
+                    == month_year.strip().lower()
                 )
-                gas_factor = float(rate)
+                gas_factor = float(rate.replace(",", "."))
 
                 return FetchedIndicator(
                     retrieved=True, valid_date=valid_date, value=gas_factor
                 )
         return FetchedIndicator(retrieved=False)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - scraping failure must not crash the app
         logger.info(f"Error retrieving gas modulation: {e}", feature="f-strings")
+        return FetchedIndicator(retrieved=False)

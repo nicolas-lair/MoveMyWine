@@ -1,10 +1,9 @@
 from collections import UserList
-from typing import Union
 
-from .constant import CostType
 from .base_cost import BaseCostCalculator
-from .expedition import MultiRefExpedition, SingleRefExpedition
+from .constant import CostType
 from .cost_modulator import ModulatedCostCalculator
+from .expedition import MultiRefExpedition, SingleRefExpedition
 
 DetailedCost = dict[CostType, float]
 
@@ -12,7 +11,7 @@ DetailedCost = dict[CostType, float]
 class BaseCostList(UserList[BaseCostCalculator]):
     def compute_cost(
         self,
-        expedition: Union[SingleRefExpedition, MultiRefExpedition],
+        expedition: SingleRefExpedition | MultiRefExpedition,
         **kwargs,
     ) -> DetailedCost:
         if expedition.n_bottles == 0:

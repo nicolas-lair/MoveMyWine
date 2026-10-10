@@ -1,7 +1,8 @@
 from typing import Protocol, runtime_checkable
 
-from src.transporter import AbstractTransporterParams, ModulatorConfig
 from src.cost_calculator import TotalCostCalculator
+from src.transporter import AbstractTransporterParams, ModulatorConfig
+
 from .fetched_indicator import FetchedIndicator
 
 
@@ -20,8 +21,6 @@ class TransporterApp(Protocol):
     params: AbstractTransporterParams
 
     @staticmethod
-    def scrap_indicator(modconfig: ModulatorConfig) -> FetchedIndicator:
-        ...
+    def scrap_indicator(modconfig: ModulatorConfig) -> FetchedIndicator: ...
 
-    def compute_cost(self) -> float:
-        ...
+    def compute_cost(self) -> float: ...
