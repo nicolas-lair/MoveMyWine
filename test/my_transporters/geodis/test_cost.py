@@ -1,8 +1,13 @@
 import pytest
 
 from src.constant import TarifType, UnitType
+from src.cost_calculator.cost_by_bottle import TarifUnavailableError
 from src.cost_calculator.expedition import SingleRefExpedition
-from src.my_transporters.geodis.cost import CostByDestination, MyCostByBottleCalculator
+from src.my_transporters.geodis.cost import (
+    CostByDestination,
+    MyCostByBottleCalculator,
+    MyCostByPaletCalculator,
+)
 
 
 class TestCostByBottle:
@@ -52,6 +57,55 @@ class TestCostByBottle:
             department=dpt,
         )
         assert cost == round(unit_cost * n_col, 2)
+
+
+class TestCostByPalet:
+    cost_calc = MyCostByPaletCalculator()
+
+    @pytest.mark.parametrize(
+        ("n_col", "n_palet", "valid_id"),
+        [
+            (12, 1, "Tarif 1"),
+            (546, 1, "Tarif 1"),  # 91 cartons, 671.6 kg + palette
+            (552, 2, "Tarif 2"),  # 92 cartons, 679.0 kg + palette
+        ],
+    )
+    def test_get_tarif_conditions(self, n_col, n_palet, valid_id):
+        n_unit, t_unit, t_type, t_id = self.cost_calc.get_tarif_conditions(
+            SingleRefExpedition(n_bottles=n_col)
+        )
+        assert n_unit == n_palet
+        assert t_unit == UnitType.PALET
+        assert t_type == TarifType.FORFAIT
+        assert t_id == valid_id
+
+    @pytest.mark.parametrize(
+        ("n_col", "dpt", "cost"),
+        [
+            (12, "49", 54.80),  # Zone 01
+            (600, "49", 77.91),  # Zone 01, 2 palettes
+            (12, "75", 130.26),  # Zone 05
+            (12, "66", 203.30),  # Zone 09
+        ],
+    )
+    def test_compute_cost(self, n_col, dpt, cost):
+        computed = self.cost_calc.compute_cost(
+            expedition=SingleRefExpedition(n_bottles=n_col), department=dpt
+        )
+        assert computed == pytest.approx(cost)
+
+    @pytest.mark.parametrize(
+        ("n_col", "dpt"),
+        [
+            (12, "20"),  # Corse : nous consulter
+            (1200, "49"),  # 3 palettes : hors grille
+        ],
+    )
+    def test_tarif_unavailable(self, n_col, dpt):
+        with pytest.raises(TarifUnavailableError):
+            self.cost_calc.compute_cost(
+                expedition=SingleRefExpedition(n_bottles=n_col), department=dpt
+            )
 
 
 class TestDestinationCost:

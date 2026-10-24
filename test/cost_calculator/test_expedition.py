@@ -24,6 +24,15 @@ class TestSingleRefExpedition:
         assert self.expe_with_package.weight == 3 * (0.5 + 0.75) + 1
         assert self.other_expe_with_package.weight == 12 * (1.5 + 1) + 2
 
+    def test_n_palets(self):
+        # 32 kg of goods
+        assert self.other_expe_with_package.n_palets(max_palet_weight=57) == 1
+        assert self.other_expe_with_package.n_palets(max_palet_weight=56) == 2
+        assert (
+            self.other_expe_with_package.n_palets(max_palet_weight=16, palet_weight=0)
+            == 2
+        )
+
     def test_bottle_eq(self):
         assert self.expe_with_package.n_bottles_equivalent == 3
         assert self.other_expe_with_package.n_bottles_equivalent == 24
@@ -58,6 +67,15 @@ class TestMultiRefExpedition:
     def test_weight(self):
         expe = MultiRefExpedition([self.first_expe, self.second_expe])
         assert expe.weight == self.first_expe.weight + self.second_expe.weight
+
+    def test_n_palets(self):
+        # Palets are filled with the whole expedition, not ref by ref
+        expe = MultiRefExpedition([self.first_expe, self.second_expe])
+        max_palet_weight = expe.weight + 25
+        assert self.first_expe.n_palets(max_palet_weight) == 1
+        assert self.second_expe.n_palets(max_palet_weight) == 1
+        assert expe.n_palets(max_palet_weight) == 1
+        assert expe.n_palets(max_palet_weight - 1) == 2
 
     def test_bottle_eq(self):
         expe = MultiRefExpedition([self.first_expe, self.second_expe])

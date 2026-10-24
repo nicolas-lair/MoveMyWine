@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.streamlit/secrets.toml)",
+      "Edit(./.streamlit/secrets.toml)",
+      "Bash(*secrets.toml*)"
+    ]
+  }
+}

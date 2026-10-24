@@ -11,10 +11,10 @@ class TestTotalCost:
     @pytest.mark.parametrize(
         ("cold_factor", "gnr_factor", "true_cost"),
         [
-            (300, 1.0, round((41.68 + 5.41) + 0.7 + 1.0, 2)),
-            (300, 1.45, round((41.68 + 5.41) * 1.12 + 0.7 + 1.0, 2)),
-            (315, 1.0, round((41.68 + 5.41) * 1.005 + 0.7 + 1.0, 2)),
-            (315, 1.45, 54.68),
+            (300, 1.2, round((47.72 + 5.41) + 0.7 + 1.0, 2)),
+            (300, 1.45, round((47.72 + 5.41) * 1.04 + 0.7 + 1.0, 2)),
+            (315, 1.2, round((47.72 + 5.41) * 1.005 + 0.7 + 1.0, 2)),
+            (315, 1.45, 57.23),
         ],
     )
     def test_single_exp_computation(self, cold_factor, gnr_factor, true_cost):
@@ -33,10 +33,10 @@ class TestTotalCost:
     @pytest.mark.parametrize(
         ("cold_factor", "gnr_factor", "true_cost"),
         [
-            (300, 1.0, round((56.14 + 5.41) + 0.7 + 1.0, 2)),
-            (300, 1.4, round((56.14 + 5.41) * 1.11 + 0.7 + 1.0, 2)),
-            (315, 1.0, round((56.14 + 5.41) * 1.005 + 0.7 + 1.0, 2)),
-            (315, 1.4, 70.33),
+            (300, 1.2, round((64.29 + 5.41) + 0.7 + 1.0, 2)),
+            (300, 1.4, round((64.29 + 5.41) * 1.03 + 0.7 + 1.0, 2)),
+            (315, 1.2, round((64.29 + 5.41) * 1.005 + 0.7 + 1.0, 2)),
+            (315, 1.4, 73.84),
         ],
     )
     def test_multi_exp_computation(self, cold_factor, gnr_factor, true_cost):

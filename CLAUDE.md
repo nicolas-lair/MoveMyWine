@@ -62,6 +62,8 @@ Each transporter lives under `src/my_transporters/{name}/` and has four files:
 
 Current transporters: `stef`, `chronopost`, `geodis`, `kuehne_nagel`.
 
+`geodis` exposes two offers shown as separate transporters in the app: **Geodis Messagerie** (priced per bottle) and **Geodis Palette** (Résopal, priced per palet, 1–2 palets max). They share one package: `GeodisParams` holds common params, `MessagerieParams` / `PaletteParams` the offer-specific ones, and `build_total_cost()` assembles both calculators. Tarif data lives in `data/geodis/{messagerie,palette}/`; files common to both offers stay in `data/geodis/`.
+
 **To add a new transporter**, create the four files above, then manually register it in `src/streamlit_app.py` in the transporter list.
 
 ### Cost Calculation Flow

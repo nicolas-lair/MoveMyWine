@@ -14,6 +14,8 @@ class UnitType(str, Enum):
     KG = "Kg"
 
 
+EURO_PALET_WEIGHT = 25  # kg, palette Europe 80 x 120
+
 CSV_PARAMS = {
     "sep": ";",
     "decimal": ".",

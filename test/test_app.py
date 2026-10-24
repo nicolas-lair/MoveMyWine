@@ -14,7 +14,7 @@ from src.my_transporters.geodis import app_calculator as geodis_app
 from src.my_transporters.geodis.app_calculator import GeodisApp as _GeodisAppClass
 from src.my_transporters.stef import app_calculator as stef_app
 from src.my_transporters.stef.app_calculator import StefApp as _StefAppClass
-from src.streamlit_utils import TRANSPORTER_LIST
+from src.streamlit_utils import TARIF_UNAVAILABLE_MSG, TRANSPORTER_LIST
 
 
 def mock_stef_indicator(url):
@@ -42,7 +42,7 @@ def mock_chronopost_indicator(url):
 def mock_geodis_indicator(url):
     default_val = [
         x
-        for x in geodis_app.TransporterParams.modulators.values()
+        for x in geodis_app.GeodisParams.modulators.values()
         if x.modulation_link == url
     ]
     return FetchedIndicator(
@@ -59,6 +59,18 @@ def mock_postal_code_retriever():
     ).set_index("full_name")
 
 
+TEST_PASSWORD = "test-password"
+
+
+def _new_app(authenticated: bool = True) -> AppTest:
+    """Create the app with the shared password set in secrets, logged in by default."""
+    app = AppTest.from_file("../src/streamlit_app.py")
+    app.secrets["password"] = TEST_PASSWORD
+    if authenticated:
+        app.session_state["password_correct"] = True
+    return app
+
+
 def test_app(monkeypatch):
     monkeypatch.setattr(chronopost_app, "scrap_indicator", mock_chronopost_indicator)
     monkeypatch.setattr(stef_app, "scrap_indicator", mock_stef_indicator)
@@ -66,12 +78,12 @@ def test_app(monkeypatch):
     monkeypatch.setattr(
         streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
     )
-    app = AppTest.from_file("../src/streamlit_app.py").run()
+    app = _new_app().run()
 
     assert not app.exception
     assert app.selectbox(key="transporter").value.params.name == "Stef"
     assert app.selectbox(key="destination").value == "75017 - Paris 17"
-    app.number_input(key="stef_gnr_modulator").set_value(1.0).run()
+    app.number_input(key="stef_gnr_modulator").set_value(1.2).run()
 
     assert app.session_state.cost == 0
 
@@ -81,7 +93,7 @@ def test_app(monkeypatch):
 
     app.number_input(key="bottle").set_value(24).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 41.68,  # Paris Tarif 1
+        CostType.ByBottle: 47.72,  # Paris Tarif 1
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -91,22 +103,22 @@ def test_app(monkeypatch):
 
     app.number_input(key="stef_gnr_modulator").set_value(1.42).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 41.68,  # Paris Tarif 1
+        CostType.ByBottle: 47.72,  # Paris Tarif 1
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
-        CostType.GNRMod: 5.18,
+        CostType.GNRMod: round(0.04 * (47.72 + 5.41), 2),
         CostType.ColdMod: 0.0,
     }
 
     app.number_input(key="stef_froid_modulator").set_value(330).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 41.68,  # Paris Tarif 1
+        CostType.ByBottle: 47.72,  # Paris Tarif 1
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
-        CostType.GNRMod: 5.18,
-        CostType.ColdMod: 0.24,
+        CostType.GNRMod: round(0.04 * (47.72 + 5.41), 2),
+        CostType.ColdMod: round(0.005 * (47.72 + 5.41), 2),
     }
 
     ###################################################
@@ -114,7 +126,7 @@ def test_app(monkeypatch):
     ###################################################
 
     app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[1]).run()
-    assert app.session_state.transporter.params.name == "Geodis"
+    assert app.session_state.transporter.params.name == "Geodis Messagerie"
     assert app.session_state.detail_cost == {
         CostType.ByBottle: 35.5,  # Zone 4 24 bouteilles
         CostType.Security: 2.15,
@@ -144,11 +156,36 @@ def test_app(monkeypatch):
     }
 
     ###################################################
+    ##### GEODIS PALETTE
+    ###################################################
+    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[2]).run()
+    assert app.session_state.transporter.params.name == "Geodis Palette"
+    # GNR modulator is shared with Geodis Messagerie, already set to 10
+    assert app.number_input(key="geodis_gnr_modulator").value == 10
+    assert app.session_state.detail_cost == {
+        CostType.ByBottle: 136.36,
+        CostType.Security: 2.15,
+        CostType.GNRMod: round(0.1 * (136.36 + 2.15 + 10.15), 2),
+        CostType.ByDestination: 10.15,
+        CostType.Palet: 10.0,
+    }
+
+    app.number_input(key="bottle").set_value(600).run()  # 738 kg -> 2 palettes
+    assert app.session_state.detail_cost[CostType.ByBottle] == 219.12
+    assert app.session_state.detail_cost[CostType.Palet] == 20.0
+
+    app.number_input(key="bottle").set_value(1200).run()  # 3 palettes, hors grille
+    assert not app.exception
+    assert app.session_state.detail_cost == {}
+    assert app.session_state.cost == 0
+    assert any(w.value == TARIF_UNAVAILABLE_MSG for w in app.warning)
+
+    ###################################################
     ##### CHRONOPOST
     ###################################################
     app.selectbox(key="destination").set_value("75017 - Paris 17").run()
     app.number_input(key="bottle").set_value(24).run()
-    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[2]).run()
+    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[3]).run()
     assert app.session_state.transporter.params.name == "Chronopost"
     assert app.session_state.detail_cost == {
         CostType.ByBottle: round(21.06 + 14.52 * 1.13, 2),
@@ -198,11 +235,11 @@ def test_app(monkeypatch):
     assert app.session_state.transporter.params.name == "Stef"
 
     app.selectbox(key="destination").set_value("75017 - Paris 17").run()
-    app.number_input(key="stef_gnr_modulator").set_value(1.0).run()
+    app.number_input(key="stef_gnr_modulator").set_value(1.2).run()
     app.number_input(key="stef_froid_modulator").set_value(300.0).run()
     app.number_input(key="bottle").set_value(36).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 41.68,  # Paris Tarif 1
+        CostType.ByBottle: 47.72,  # Paris Tarif 1
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -212,7 +249,7 @@ def test_app(monkeypatch):
 
     app.number_input(key="bottle").set_value(48).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 54.05,  # Paris Tarif 2
+        CostType.ByBottle: 61.89,  # Paris Tarif 2
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -222,7 +259,7 @@ def test_app(monkeypatch):
 
     app.selectbox(key="destination").set_value("69001 - Lyon 01").run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 56.14,  # Lyon Tarif 2
+        CostType.ByBottle: 64.29,  # Lyon Tarif 2
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -232,8 +269,8 @@ def test_app(monkeypatch):
 
     app.number_input(key="bottle").set_value(130).run()
     assert app.session_state.detail_cost == {
-        # 0.77 = Price per bottle for 130 bottles to Lyon (69)
-        CostType.ByBottle: round(0.77 * 130, 2),
+        # 0.88 = Price per bottle for 130 bottles to Lyon (69)
+        CostType.ByBottle: round(0.88 * 130, 2),
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -244,8 +281,8 @@ def test_app(monkeypatch):
     app.number_input(key="bottle").set_value(170).run()
     app.selectbox(key="destination").set_value("49100 - Angers").run()
     assert app.session_state.detail_cost == {
-        # 0.38 = Price per bottle for 170 bottles to Angers (49)
-        CostType.ByBottle: round(170 * 0.38, 2),
+        # 0.44 = Price per bottle for 170 bottles to Angers (49)
+        CostType.ByBottle: round(170 * 0.44, 2),
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -288,7 +325,7 @@ def _build_app(monkeypatch, stef_mock=None, geodis_mock=None, chronopost_mock=No
     monkeypatch.setattr(
         streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
     )
-    return AppTest.from_file("../src/streamlit_app.py").run()
+    return _new_app().run()
 
 
 def _indicator_expander(app):
@@ -318,16 +355,28 @@ class TestComparisonIndicators:
 
     def test_indicator_not_retrieved(self, monkeypatch):
         """⚠️ 1 alerte when one indicator fails to be retrieved."""
-        app = _build_app(monkeypatch, geodis_mock=_failing_indicator)
+        app = _build_app(monkeypatch, chronopost_mock=_failing_indicator)
         app.number_input(key="bottle").set_value(24).run()
         assert not app.exception
         expander = _indicator_expander(app)
         assert "⚠️" in expander.label
         assert "1 alerte" in expander.label
 
+    def test_geodis_indicator_not_retrieved(self, monkeypatch):
+        """The Geodis indicator is shared by both offers → a single alert naming both."""
+        app = _build_app(monkeypatch, geodis_mock=_failing_indicator)
+        app.number_input(key="bottle").set_value(24).run()
+        assert not app.exception
+        expander = _indicator_expander(app)
+        assert "⚠️" in expander.label
+        assert "1 alerte" in expander.label
+        assert any(
+            "Geodis Messagerie, Geodis Palette / GNR" in w.value for w in app.warning
+        )
+
     def test_indicator_invalid_date(self, monkeypatch):
         """⚠️ 1 alerte when one indicator has an invalid date."""
-        app = _build_app(monkeypatch, geodis_mock=_invalid_date_indicator)
+        app = _build_app(monkeypatch, chronopost_mock=_invalid_date_indicator)
         app.number_input(key="bottle").set_value(24).run()
         assert not app.exception
         expander = _indicator_expander(app)
@@ -335,7 +384,7 @@ class TestComparisonIndicators:
         assert "1 alerte" in expander.label
 
     def test_multiple_alerts(self, monkeypatch):
-        """Alert count reflects all failing modulators (Stef has 2, Geodis has 1 → 3 total)."""
+        """Alert count reflects all failing modulators (Stef has 2, Geodis offers share 1 → 3 total)."""
         app = _build_app(
             monkeypatch,
             stef_mock=_failing_indicator,
@@ -378,7 +427,7 @@ class TestComparisonCosts:
         app.number_input(key="bottle").set_value(24).run()
         app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[1]).run()
         assert not app.exception
-        assert app.session_state.transporter.params.name == "Geodis"
+        assert app.session_state.transporter.params.name == "Geodis Messagerie"
 
         transporter_names = {t.params.name for t in TRANSPORTER_LIST}
         found = False
@@ -390,3 +439,51 @@ class TestComparisonCosts:
                 found = True
                 assert all(df.iloc[:, 0] > 0)
         assert found, "Totals dataframe not found"
+
+
+# ---------------------------------------------------------------------------
+# Authentication
+# ---------------------------------------------------------------------------
+
+
+class TestAuthentication:
+    def test_app_hidden_before_login(self, monkeypatch):
+        """Only the password field is shown until the user logs in."""
+        monkeypatch.setattr(
+            streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
+        )
+        app = _new_app(authenticated=False).run()
+        assert not app.exception
+        assert len(app.text_input) == 1
+        assert len(app.selectbox) == 0
+
+    def test_wrong_password(self, monkeypatch):
+        monkeypatch.setattr(
+            streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
+        )
+        app = _new_app(authenticated=False).run()
+        app.text_input(key="password").input("wrong").run()
+        assert not app.exception
+        assert app.session_state.password_correct is False
+        assert any("incorrect" in e.value for e in app.error)
+        assert len(app.selectbox) == 0
+
+    def test_right_password(self, monkeypatch):
+        monkeypatch.setattr(
+            _StefAppClass, "scrap_indicator", staticmethod(_ok_indicator)
+        )
+        monkeypatch.setattr(
+            _GeodisAppClass, "scrap_indicator", staticmethod(_ok_indicator)
+        )
+        monkeypatch.setattr(
+            _ChronopostAppClass, "scrap_indicator", staticmethod(_ok_indicator)
+        )
+        monkeypatch.setattr(
+            streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
+        )
+        app = _new_app(authenticated=False).run()
+        app.text_input(key="password").input(TEST_PASSWORD).run()
+        assert not app.exception
+        assert app.session_state.password_correct is True
+        assert "password" not in app.session_state
+        assert app.selectbox(key="transporter").value.params.name == "Stef"
