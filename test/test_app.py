@@ -14,7 +14,7 @@ from src.my_transporters.geodis import app_calculator as geodis_app
 from src.my_transporters.geodis.app_calculator import GeodisApp as _GeodisAppClass
 from src.my_transporters.stef import app_calculator as stef_app
 from src.my_transporters.stef.app_calculator import StefApp as _StefAppClass
-from src.streamlit_utils import TRANSPORTER_LIST
+from src.streamlit_utils import TARIF_UNAVAILABLE_MSG, TRANSPORTER_LIST
 
 
 def mock_stef_indicator(url):
@@ -42,7 +42,7 @@ def mock_chronopost_indicator(url):
 def mock_geodis_indicator(url):
     default_val = [
         x
-        for x in geodis_app.TransporterParams.modulators.values()
+        for x in geodis_app.GeodisParams.modulators.values()
         if x.modulation_link == url
     ]
     return FetchedIndicator(
@@ -114,7 +114,7 @@ def test_app(monkeypatch):
     ###################################################
 
     app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[1]).run()
-    assert app.session_state.transporter.params.name == "Geodis"
+    assert app.session_state.transporter.params.name == "Geodis Messagerie"
     assert app.session_state.detail_cost == {
         CostType.ByBottle: 35.5,  # Zone 4 24 bouteilles
         CostType.Security: 2.15,
@@ -144,11 +144,36 @@ def test_app(monkeypatch):
     }
 
     ###################################################
+    ##### GEODIS PALETTE
+    ###################################################
+    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[2]).run()
+    assert app.session_state.transporter.params.name == "Geodis Palette"
+    # GNR modulator is shared with Geodis Messagerie, already set to 10
+    assert app.number_input(key="geodis_gnr_modulator").value == 10
+    assert app.session_state.detail_cost == {
+        CostType.ByBottle: 136.36,
+        CostType.Security: 2.15,
+        CostType.GNRMod: round(0.1 * (136.36 + 2.15 + 10.15), 2),
+        CostType.ByDestination: 10.15,
+        CostType.Palet: 10.0,
+    }
+
+    app.number_input(key="bottle").set_value(600).run()  # 738 kg -> 2 palettes
+    assert app.session_state.detail_cost[CostType.ByBottle] == 219.12
+    assert app.session_state.detail_cost[CostType.Palet] == 20.0
+
+    app.number_input(key="bottle").set_value(1200).run()  # 3 palettes, hors grille
+    assert not app.exception
+    assert app.session_state.detail_cost == {}
+    assert app.session_state.cost == 0
+    assert any(w.value == TARIF_UNAVAILABLE_MSG for w in app.warning)
+
+    ###################################################
     ##### CHRONOPOST
     ###################################################
     app.selectbox(key="destination").set_value("75017 - Paris 17").run()
     app.number_input(key="bottle").set_value(24).run()
-    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[2]).run()
+    app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[3]).run()
     assert app.session_state.transporter.params.name == "Chronopost"
     assert app.session_state.detail_cost == {
         CostType.ByBottle: round(21.06 + 14.52 * 1.13, 2),
@@ -318,16 +343,28 @@ class TestComparisonIndicators:
 
     def test_indicator_not_retrieved(self, monkeypatch):
         """⚠️ 1 alerte when one indicator fails to be retrieved."""
-        app = _build_app(monkeypatch, geodis_mock=_failing_indicator)
+        app = _build_app(monkeypatch, chronopost_mock=_failing_indicator)
         app.number_input(key="bottle").set_value(24).run()
         assert not app.exception
         expander = _indicator_expander(app)
         assert "⚠️" in expander.label
         assert "1 alerte" in expander.label
 
+    def test_geodis_indicator_not_retrieved(self, monkeypatch):
+        """The Geodis indicator is shared by both offers → a single alert naming both."""
+        app = _build_app(monkeypatch, geodis_mock=_failing_indicator)
+        app.number_input(key="bottle").set_value(24).run()
+        assert not app.exception
+        expander = _indicator_expander(app)
+        assert "⚠️" in expander.label
+        assert "1 alerte" in expander.label
+        assert any(
+            "Geodis Messagerie, Geodis Palette / GNR" in w.value for w in app.warning
+        )
+
     def test_indicator_invalid_date(self, monkeypatch):
         """⚠️ 1 alerte when one indicator has an invalid date."""
-        app = _build_app(monkeypatch, geodis_mock=_invalid_date_indicator)
+        app = _build_app(monkeypatch, chronopost_mock=_invalid_date_indicator)
         app.number_input(key="bottle").set_value(24).run()
         assert not app.exception
         expander = _indicator_expander(app)
@@ -335,7 +372,7 @@ class TestComparisonIndicators:
         assert "1 alerte" in expander.label
 
     def test_multiple_alerts(self, monkeypatch):
-        """Alert count reflects all failing modulators (Stef has 2, Geodis has 1 → 3 total)."""
+        """Alert count reflects all failing modulators (Stef has 2, Geodis offers share 1 → 3 total)."""
         app = _build_app(
             monkeypatch,
             stef_mock=_failing_indicator,
@@ -378,7 +415,7 @@ class TestComparisonCosts:
         app.number_input(key="bottle").set_value(24).run()
         app.selectbox(key="transporter").set_value(TRANSPORTER_LIST[1]).run()
         assert not app.exception
-        assert app.session_state.transporter.params.name == "Geodis"
+        assert app.session_state.transporter.params.name == "Geodis Messagerie"
 
         transporter_names = {t.params.name for t in TRANSPORTER_LIST}
         found = False

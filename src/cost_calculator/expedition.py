@@ -2,11 +2,24 @@ from collections import UserList
 from dataclasses import dataclass, field
 from math import ceil
 
-from src.constant import BOTTLE, BaseBottle, Package
+from src.constant import BOTTLE, EURO_PALET_WEIGHT, BaseBottle, Package
+
+
+class PaletLoadMixin:
+    """Palet count shared by single and multi ref expeditions, based on their weight"""
+
+    def n_palets(
+        self, max_palet_weight: float, palet_weight: float = EURO_PALET_WEIGHT
+    ) -> int:
+        """
+        :param max_palet_weight: max gross weight of a loaded palet, palet included
+        :param palet_weight: weight of an empty palet
+        """
+        return ceil(self.weight / (max_palet_weight - palet_weight))
 
 
 @dataclass(kw_only=True)
-class SingleRefExpedition:
+class SingleRefExpedition(PaletLoadMixin):
     n_bottles: int
     bottle_type: BaseBottle = BOTTLE
     package: Package | None = field(default_factory=Package)
@@ -32,7 +45,7 @@ class SingleRefExpedition:
         return self.n_bottles * self.bottle_type.bottle_eq
 
 
-class MultiRefExpedition(UserList[SingleRefExpedition]):
+class MultiRefExpedition(PaletLoadMixin, UserList[SingleRefExpedition]):
     @property
     def weight(self):
         return sum([exp.weight for exp in self])

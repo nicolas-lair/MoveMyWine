@@ -1,6 +1,7 @@
 from .base_cost import BaseCostCalculator, round_cost
 from .constant import CostType
 from .cost_by_package import CostByPackageCalculator, ExtraPackageCost
+from .cost_by_palet import CostByPaletCalculator
 from .cost_collection import BaseCostList, ModCostCollection
 from .cost_modulator import ModulatedCostCalculator, ModulatorFromIndicator
 from .expedition import MultiRefExpedition, SingleRefExpedition
@@ -12,6 +13,7 @@ __all__ = [
     "BaseCostCalculator",
     "BaseCostList",
     "CostByPackageCalculator",
+    "CostByPaletCalculator",
     "CostType",
     "ExtraPackageCost",
     "FixedCostByExpe",

@@ -5,6 +5,7 @@ from src.constant import UnitType
 from src.cost_calculator import (
     BaseCostCalculator,
     BaseCostList,
+    CostByPaletCalculator,
     CostType,
     FixedCostByExpe,
     ModCostCollection,
@@ -21,15 +22,22 @@ from src.file_structure import (
     TarifStructureFile,
     TarifZoneFile,
 )
-from src.my_transporters.geodis.constant import TransporterParams
+from src.my_transporters.geodis.constant import (
+    GeodisParams,
+    MessagerieParams,
+    PaletteParams,
+)
 
-tp = TransporterParams()
+messagerie_tp = MessagerieParams()
+palette_tp = PaletteParams()
 
 
 class MyCostByBottleCalculator(CostByBottleCalculator):
+    """Tarif by zone, priced by bottle (messagerie)"""
+
     name: CostType = CostType.ByBottle
 
-    def __init__(self, transporter_params: TransporterParams = tp):
+    def __init__(self, transporter_params: GeodisParams = messagerie_tp):
         self.tarif_structure = TarifStructureFile().load(
             transporter_params.data_folder,
             index_col=[TarifStructureFile.Cols.unit],
@@ -63,14 +71,30 @@ class MyCostByBottleCalculator(CostByBottleCalculator):
         return UnitType.BOTTLE, expedition.n_bottles_equivalent
 
 
+class MyCostByPaletCalculator(MyCostByBottleCalculator):
+    """Same tarif by zone, priced by palet"""
+
+    def __init__(self, transporter_params: PaletteParams = palette_tp):
+        super().__init__(transporter_params)
+        self.max_palet_weight = transporter_params.max_palet_weight
+        self.palet_weight = transporter_params.palet_weight
+
+    def _get_tarif_unit(
+        self, expedition: SingleRefExpedition | MultiRefExpedition
+    ) -> tuple[UnitType, int]:
+        return UnitType.PALET, expedition.n_palets(
+            self.max_palet_weight, self.palet_weight
+        )
+
+
 class CostByDestination(BaseCostCalculator):
     name = CostType.ByDestination
 
-    def __init__(self, transporter_params: TransporterParams = tp):
+    def __init__(self, transporter_params: GeodisParams = messagerie_tp):
         self.zone_map = transporter_params.extra_destination_cost[
             "postalcode2zone"
         ].load(
-            data_folder=transporter_params.data_folder,
+            data_folder=transporter_params.common_data_folder,
             index_col=MapZone2PostalCode.Cols.destination,
         )
         self.weight_category = np.array(
@@ -107,48 +131,71 @@ class CostByDestination(BaseCostCalculator):
             )
 
 
-GeodisCostCollection = BaseCostList(
-    [
-        MyCostByBottleCalculator(),
-        CostByDestination(),
-        FixedCostByExpe(name=CostType.Security, security_cost=tp.surete_cost),
-        FixedCostByExpe(name=CostType.Palet, palet_cost=tp.palet_movement_cost),
-    ]
+def build_total_cost(
+    transporter_params: GeodisParams,
+    cost_by_unit: BaseCostCalculator,
+    palet_cost: BaseCostCalculator,
+) -> TotalCostCalculator:
+    """Geodis offers only differ by their unit tarif and their palet cost"""
+    return TotalCostCalculator(
+        cost_collection=BaseCostList(
+            [
+                cost_by_unit,
+                CostByDestination(transporter_params),
+                FixedCostByExpe(
+                    name=CostType.Security,
+                    security_cost=transporter_params.surete_cost,
+                ),
+                palet_cost,
+            ]
+        ),
+        cost_modulator=ModCostCollection(
+            [
+                ModulatedCostCalculator(
+                    name=CostType.GNRMod,
+                    modulated_cost=[
+                        CostType.ByBottle,
+                        CostType.Security,
+                        CostType.ByDestination,
+                    ],
+                    modulator_arg_name=transporter_params.modulators["GNR"].arg_name,
+                )
+            ]
+        ),
+    )
+
+
+GeodisMessagerieTotalCost = build_total_cost(
+    messagerie_tp,
+    cost_by_unit=MyCostByBottleCalculator(messagerie_tp),
+    palet_cost=FixedCostByExpe(
+        name=CostType.Palet, palet_cost=messagerie_tp.palet_movement_cost
+    ),
 )
 
-GeodisTotalCost = TotalCostCalculator(
-    cost_collection=GeodisCostCollection,
-    cost_modulator=ModCostCollection(
-        [
-            ModulatedCostCalculator(
-                name=CostType.GNRMod,
-                modulated_cost=[
-                    CostType.ByBottle,
-                    CostType.Security,
-                    CostType.ByDestination,
-                ],
-                modulator_arg_name=tp.modulators["GNR"].arg_name,
-            )
-        ]
+GeodisPaletteTotalCost = build_total_cost(
+    palette_tp,
+    cost_by_unit=MyCostByPaletCalculator(palette_tp),
+    palet_cost=CostByPaletCalculator(
+        cost_by_palet=palette_tp.cost_by_palet,
+        max_palet_weight=palette_tp.max_palet_weight,
+        palet_weight=palette_tp.palet_weight,
     ),
 )
 
 if __name__ == "__main__":
-    from src.constant import BOTTLE, Package, UnitType
+    from src.constant import BOTTLE, Package
 
-    cost_calculator = GeodisCostCollection
     expedition = MultiRefExpedition(
-        [
-            SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package()),
-            # SingleRefExpedition(n_bottles=36, bottle_type=BOTTLE, package=Package()),
-            # SingleRefExpedition(n_bottles=48, bottle_type=BOTTLE, package=Package()),
-            # SingleRefExpedition(n_bottles=6, bottle_type=MAGNUM, package=Package(bottle_by_package=3))
-        ]
+        [SingleRefExpedition(n_bottles=30, bottle_type=BOTTLE, package=Package())]
     )
-    print(
-        cost_calculator.compute_cost(
-            gas_factor=14.89,
-            expedition=expedition,
-            department="73",
+    for total_cost in (GeodisMessagerieTotalCost, GeodisPaletteTotalCost):
+        print(
+            total_cost.compute_cost(
+                gnr_factor=14.89,
+                expedition=expedition,
+                department="73",
+                postal_code="73000",
+                agg=False,
+            )
         )
-    )
