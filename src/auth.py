@@ -16,7 +16,12 @@ def check_password() -> bool:
         del st.session_state["password"]
 
     st.text_input(
-        "Mot de passe", type="password", on_change=password_entered, key="password"
+        "Mot de passe",
+        type="password",
+        # Streamlit defaults to "new-password", which stops password managers from autofilling
+        autocomplete="current-password",
+        on_change=password_entered,
+        key="password",
     )
     if st.session_state.get("password_correct") is False:
         st.error("Mot de passe incorrect")
