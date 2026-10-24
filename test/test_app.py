@@ -59,6 +59,18 @@ def mock_postal_code_retriever():
     ).set_index("full_name")
 
 
+TEST_PASSWORD = "test-password"
+
+
+def _new_app(authenticated: bool = True) -> AppTest:
+    """Create the app with the shared password set in secrets, logged in by default."""
+    app = AppTest.from_file("../src/streamlit_app.py")
+    app.secrets["password"] = TEST_PASSWORD
+    if authenticated:
+        app.session_state["password_correct"] = True
+    return app
+
+
 def test_app(monkeypatch):
     monkeypatch.setattr(chronopost_app, "scrap_indicator", mock_chronopost_indicator)
     monkeypatch.setattr(stef_app, "scrap_indicator", mock_stef_indicator)
@@ -66,7 +78,7 @@ def test_app(monkeypatch):
     monkeypatch.setattr(
         streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
     )
-    app = AppTest.from_file("../src/streamlit_app.py").run()
+    app = _new_app().run()
 
     assert not app.exception
     assert app.selectbox(key="transporter").value.params.name == "Stef"
@@ -288,7 +300,7 @@ def _build_app(monkeypatch, stef_mock=None, geodis_mock=None, chronopost_mock=No
     monkeypatch.setattr(
         streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
     )
-    return AppTest.from_file("../src/streamlit_app.py").run()
+    return _new_app().run()
 
 
 def _indicator_expander(app):
@@ -390,3 +402,51 @@ class TestComparisonCosts:
                 found = True
                 assert all(df.iloc[:, 0] > 0)
         assert found, "Totals dataframe not found"
+
+
+# ---------------------------------------------------------------------------
+# Authentication
+# ---------------------------------------------------------------------------
+
+
+class TestAuthentication:
+    def test_app_hidden_before_login(self, monkeypatch):
+        """Only the password field is shown until the user logs in."""
+        monkeypatch.setattr(
+            streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
+        )
+        app = _new_app(authenticated=False).run()
+        assert not app.exception
+        assert len(app.text_input) == 1
+        assert len(app.selectbox) == 0
+
+    def test_wrong_password(self, monkeypatch):
+        monkeypatch.setattr(
+            streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
+        )
+        app = _new_app(authenticated=False).run()
+        app.text_input(key="password").input("wrong").run()
+        assert not app.exception
+        assert app.session_state.password_correct is False
+        assert any("incorrect" in e.value for e in app.error)
+        assert len(app.selectbox) == 0
+
+    def test_right_password(self, monkeypatch):
+        monkeypatch.setattr(
+            _StefAppClass, "scrap_indicator", staticmethod(_ok_indicator)
+        )
+        monkeypatch.setattr(
+            _GeodisAppClass, "scrap_indicator", staticmethod(_ok_indicator)
+        )
+        monkeypatch.setattr(
+            _ChronopostAppClass, "scrap_indicator", staticmethod(_ok_indicator)
+        )
+        monkeypatch.setattr(
+            streamlit_utils, "retrieve_postal_code", mock_postal_code_retriever
+        )
+        app = _new_app(authenticated=False).run()
+        app.text_input(key="password").input(TEST_PASSWORD).run()
+        assert not app.exception
+        assert app.session_state.password_correct is True
+        assert "password" not in app.session_state
+        assert app.selectbox(key="transporter").value.params.name == "Stef"
