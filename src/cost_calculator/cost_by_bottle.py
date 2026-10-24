@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from math import isnan
 
 import pandas as pd
 
@@ -12,6 +13,10 @@ from src.cost_calculator import (
 from src.cost_calculator.constant import CostType
 from src.file_structure import TarifDeptFile, TarifStructureFile
 from src.transporter.transporter_params import AbstractTransporterParams
+
+
+class TarifUnavailableError(ValueError):
+    """The transporter tarif does not cover this expedition (e.g. 'nous consulter')"""
 
 
 class CostByBottleCalculator(ABC, BaseCostCalculator):
@@ -53,6 +58,8 @@ class CostByBottleCalculator(ABC, BaseCostCalculator):
     ) -> tuple[int, UnitType, TarifType, str]:
         tarif_unit, n_unit = self._get_tarif_unit(expedition)
         tarif_info = self._get_tarif_info(n_unit, tarif_unit)
+        if tarif_info.empty:
+            raise TarifUnavailableError(f"No tarif for {n_unit} {tarif_unit.value}")
         tarif_type, tarif_id = tarif_info.loc[
             tarif_unit,
             [TarifStructureFile.Cols.type_, TarifStructureFile.Cols.tarif_id],
@@ -76,4 +83,7 @@ class CostByBottleCalculator(ABC, BaseCostCalculator):
     ) -> float:
         nation_wide_cost = self._compute_cost_nationwide(expedition)
         nation_wide_cost.index = self._get_dpt_code(nation_wide_cost.index)
-        return nation_wide_cost.loc[department].item()
+        cost = nation_wide_cost.loc[department].item()
+        if isnan(cost):
+            raise TarifUnavailableError(f"No tarif for department {department}")
+        return cost

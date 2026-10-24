@@ -1,5 +1,3 @@
-from math import ceil
-
 import pandas as pd
 
 from src.constant import UnitType
@@ -48,7 +46,8 @@ class StefCostByBottleCalculator(CostByBottleCalculator):
         if expedition.n_bottles_equivalent <= self.max_bottles_at_bottle_tarif:
             return UnitType.BOTTLE, expedition.n_bottles_equivalent
         else:
-            n_palet = ceil(expedition.weight / tp.max_palet_weight)
+            # Stef weight limit has always been applied to goods only
+            n_palet = expedition.n_palets(tp.max_palet_weight)
             return UnitType.PALET, n_palet
 
 

@@ -26,3 +26,12 @@ class AbstractTransporterParams(TransporterParamsProtocol):
     @property
     def data_folder(self) -> Path:
         return Path(__file__).parents[2] / "data" / self.name.lower()
+
+    @property
+    def modulator_prefix(self) -> str:
+        """Transporters with the same prefix share their modulator values"""
+        return self.name.lower()
+
+    def modulator_key(self, mod_name: str) -> str:
+        """Session state key holding the modulator value"""
+        return f"{self.modulator_prefix}_{mod_name.lower()}_modulator"

@@ -1,4 +1,10 @@
-from .app_calculator import GeodisApp
-from .cost import GeodisTotalCost
+from .app_calculator import GeodisApp, GeodisMessagerieApp, GeodisPaletteApp
+from .cost import GeodisMessagerieTotalCost, GeodisPaletteTotalCost
 
-__all__ = ["GeodisApp", "GeodisTotalCost"]
+__all__ = [
+    "GeodisApp",
+    "GeodisMessagerieApp",
+    "GeodisMessagerieTotalCost",
+    "GeodisPaletteApp",
+    "GeodisPaletteTotalCost",
+]
