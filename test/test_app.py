@@ -71,7 +71,7 @@ def test_app(monkeypatch):
     assert not app.exception
     assert app.selectbox(key="transporter").value.params.name == "Stef"
     assert app.selectbox(key="destination").value == "75017 - Paris 17"
-    app.number_input(key="stef_gnr_modulator").set_value(1.0).run()
+    app.number_input(key="stef_gnr_modulator").set_value(1.2).run()
 
     assert app.session_state.cost == 0
 
@@ -81,7 +81,7 @@ def test_app(monkeypatch):
 
     app.number_input(key="bottle").set_value(24).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 41.68,  # Paris Tarif 1
+        CostType.ByBottle: 47.72,  # Paris Tarif 1
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -91,22 +91,22 @@ def test_app(monkeypatch):
 
     app.number_input(key="stef_gnr_modulator").set_value(1.42).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 41.68,  # Paris Tarif 1
+        CostType.ByBottle: 47.72,  # Paris Tarif 1
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
-        CostType.GNRMod: 5.18,
+        CostType.GNRMod: round(0.04 * (47.72 + 5.41), 2),
         CostType.ColdMod: 0.0,
     }
 
     app.number_input(key="stef_froid_modulator").set_value(330).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 41.68,  # Paris Tarif 1
+        CostType.ByBottle: 47.72,  # Paris Tarif 1
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
-        CostType.GNRMod: 5.18,
-        CostType.ColdMod: 0.24,
+        CostType.GNRMod: round(0.04 * (47.72 + 5.41), 2),
+        CostType.ColdMod: round(0.005 * (47.72 + 5.41), 2),
     }
 
     ###################################################
@@ -223,11 +223,11 @@ def test_app(monkeypatch):
     assert app.session_state.transporter.params.name == "Stef"
 
     app.selectbox(key="destination").set_value("75017 - Paris 17").run()
-    app.number_input(key="stef_gnr_modulator").set_value(1.0).run()
+    app.number_input(key="stef_gnr_modulator").set_value(1.2).run()
     app.number_input(key="stef_froid_modulator").set_value(300.0).run()
     app.number_input(key="bottle").set_value(36).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 41.68,  # Paris Tarif 1
+        CostType.ByBottle: 47.72,  # Paris Tarif 1
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -237,7 +237,7 @@ def test_app(monkeypatch):
 
     app.number_input(key="bottle").set_value(48).run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 54.05,  # Paris Tarif 2
+        CostType.ByBottle: 61.89,  # Paris Tarif 2
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -247,7 +247,7 @@ def test_app(monkeypatch):
 
     app.selectbox(key="destination").set_value("69001 - Lyon 01").run()
     assert app.session_state.detail_cost == {
-        CostType.ByBottle: 56.14,  # Lyon Tarif 2
+        CostType.ByBottle: 64.29,  # Lyon Tarif 2
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -257,8 +257,8 @@ def test_app(monkeypatch):
 
     app.number_input(key="bottle").set_value(130).run()
     assert app.session_state.detail_cost == {
-        # 0.77 = Price per bottle for 130 bottles to Lyon (69)
-        CostType.ByBottle: round(0.77 * 130, 2),
+        # 0.88 = Price per bottle for 130 bottles to Lyon (69)
+        CostType.ByBottle: round(0.88 * 130, 2),
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
@@ -269,8 +269,8 @@ def test_app(monkeypatch):
     app.number_input(key="bottle").set_value(170).run()
     app.selectbox(key="destination").set_value("49100 - Angers").run()
     assert app.session_state.detail_cost == {
-        # 0.38 = Price per bottle for 170 bottles to Angers (49)
-        CostType.ByBottle: round(170 * 0.38, 2),
+        # 0.44 = Price per bottle for 170 bottles to Angers (49)
+        CostType.ByBottle: round(170 * 0.44, 2),
         CostType.Palet: 1.0,
         CostType.Security: 0.7,
         CostType.Expedition: 5.41,
