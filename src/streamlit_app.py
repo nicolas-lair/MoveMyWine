@@ -8,6 +8,7 @@ import streamlit as st
 
 sys.path.append(Path(__file__).parents[1].as_posix())
 
+from src.auth import check_password
 from src.streamlit_utils import (
     TRANSPORTER_LIST,
     bottle_input,
@@ -23,6 +24,9 @@ from src.streamlit_utils import (
 )
 
 st.title(":champagne: Move My Wine")
+
+if not check_password():
+    st.stop()
 
 clear_cache_on_new_month()
 define_style()
