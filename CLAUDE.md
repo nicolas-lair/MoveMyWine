@@ -96,6 +96,19 @@ These files are updated manually when carriers send updated Excel or PDF tariff 
 - `TransporterApp` protocol (`src/app_generics/transporter_app.py`) — interface all transporter apps implement
 - Streamlit session state is managed in `src/streamlit_utils.py`; cache is cleared on month boundaries to refresh scraped indicators
 
+### Baqio import
+
+`src/baqio/` lets the user fill the expedition form from Baqio (wine ERP) orders — the 50 most recent uninvoiced orders are fetched once per session ("Recharger Baqio" refetches), the product catalogue is fetched in a background thread right after, and orders are picked in a multiselect; typing a text not in the list and pressing Enter searches Baqio for it: `client.py` (HTTP client), `order.py` (parsing 75 cl / magnum lines), `destination.py` (postal code → destination entry), `app.py` (Streamlit widget "Importer depuis Baqio", rendered right after `#### Expédition`, before the inputs it fills; loading happens in the `on_change` callbacks of the order multiselect and main-recipient radio, because widget keys cannot be written after their widget is declared).
+
+The widget is hidden unless `.streamlit/secrets.toml` has a `[baqio]` section:
+
+```toml
+[baqio]
+user = "..."
+password = "..."
+base_url = "https://app.baqio.com/api/v1"  # optional
+```
+
 ### Testing
 
 `test/test_app.py` is a **non-regression test** for the Streamlit layer — it is the main safety net for the fragile UI code. It uses Streamlit's `AppTest`, mocking indicator scrapers and the postal code API. Always keep it green and extend it when adding a new transporter.

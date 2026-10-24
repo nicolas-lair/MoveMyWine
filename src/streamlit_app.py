@@ -9,6 +9,7 @@ import streamlit as st
 sys.path.append(Path(__file__).parents[1].as_posix())
 
 from src.auth import check_password
+from src.baqio.app import baqio_import, display_group_split
 from src.streamlit_utils import (
     TRANSPORTER_LIST,
     bottle_input,
@@ -42,6 +43,7 @@ except URLError as e:
     df_postal_code = pd.DataFrame()
 
 st.markdown("#### Expédition")
+baqio_import(df_postal_code)
 destination_city_input(df_postal_code)
 bottle_input()
 
@@ -78,6 +80,7 @@ with tab1:
             input_factor(indicator_dict[mod_name], name=mod_name, **asdict(mod))
 
     cost_callback()
+    display_group_split()
     display_result(result)
 
 with tab2:

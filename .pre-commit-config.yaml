@@ -29,5 +29,6 @@ repos:
       name: ruff format
       entry: uv run --frozen ruff format --force-exclude
       language: system
-      types_or: [python, pyi]
+      # ruff also formats Python code blocks in Markdown; CI checks the whole repo
+      types_or: [python, pyi, markdown]
       require_serial: true
