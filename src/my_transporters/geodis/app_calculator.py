@@ -7,21 +7,29 @@ from src.app_generics.transporter_app import (
     TransporterApp,
     validate_transporter,
 )
+from src.cost_calculator import TotalCostCalculator
 from src.transporter.transporter_params import ModulatorConfig
 
-from .constant import TransporterParams
-from .cost import GeodisTotalCost
+from .constant import GeodisParams
+from .cost import (
+    GeodisMessagerieTotalCost,
+    GeodisPaletteTotalCost,
+    messagerie_tp,
+    palette_tp,
+)
 from .indicator_scrapper import scrap_indicator
 
 
 class GeodisApp(TransporterApp):
-    cost_calculator = GeodisTotalCost
-    params = TransporterParams()
+    """Common app for all Geodis offers, subclasses only set params and calculator"""
+
+    cost_calculator: TotalCostCalculator
+    params: GeodisParams
 
     def _build_kwargs(self) -> dict[str, Any]:
         computation_kwargs = {
             self.params.modulators["GNR"].arg_name: st.session_state[
-                "geodis_gnr_modulator"
+                self.params.modulator_key("GNR")
             ],
             "expedition": st.session_state.expedition,
             "department": st.session_state.department,
@@ -39,3 +47,13 @@ class GeodisApp(TransporterApp):
     def compute_cost(self) -> float:
         kwargs = self._build_kwargs()
         return self.cost_calculator.compute_cost(**kwargs)
+
+
+class GeodisMessagerieApp(GeodisApp):
+    cost_calculator = GeodisMessagerieTotalCost
+    params = messagerie_tp
+
+
+class GeodisPaletteApp(GeodisApp):
+    cost_calculator = GeodisPaletteTotalCost
+    params = palette_tp

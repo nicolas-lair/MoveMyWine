@@ -7,13 +7,17 @@ import streamlit as st
 from src.app_generics.postal_code import PostalCodeAPI, get_postal_code_df
 from src.constant import BOTTLE, MAGNUM, Package
 from src.cost_calculator import MultiRefExpedition, SingleRefExpedition
+from src.cost_calculator.cost_by_bottle import TarifUnavailableError
 from src.departement import DEPARTMENTS_TO_CODE
 from src.my_transporters import ChronopostApp, StefApp
-from src.my_transporters.geodis import GeodisApp
+from src.my_transporters.geodis import GeodisMessagerieApp, GeodisPaletteApp
+
+TARIF_UNAVAILABLE_MSG = "Tarif non disponible pour cette expédition."
 
 TRANSPORTER_LIST = [
     StefApp(),
-    GeodisApp(),
+    GeodisMessagerieApp(),
+    GeodisPaletteApp(),
     ChronopostApp(),
     # KNGApp(),
 ]
@@ -78,7 +82,12 @@ def build_expedition():
 
 def cost_callback():
     build_expedition()
-    st.session_state.detail_cost = st.session_state.transporter.compute_cost()
+    try:
+        st.session_state.detail_cost = st.session_state.transporter.compute_cost()
+        st.session_state.tarif_unavailable = False
+    except TarifUnavailableError:
+        st.session_state.detail_cost = {}
+        st.session_state.tarif_unavailable = True
     st.session_state.cost = round(sum(st.session_state.detail_cost.values(), 0), 2)
 
 
@@ -157,7 +166,7 @@ def input_factor(
             value=indicator.value,
             format=input_format,
             help="Récupéré automatiquement si possible",
-            key=f"{st.session_state.transporter.params.name.lower()}_{name.lower()}_modulator",
+            key=st.session_state.transporter.params.modulator_key(name),
         )
 
 
@@ -173,7 +182,10 @@ def display_result(result):
             unsafe_allow_html=True,
         )
     with col2:
-        st.write(st.session_state.detail_cost)
+        if st.session_state.get("tarif_unavailable"):
+            st.warning(TARIF_UNAVAILABLE_MSG)
+        else:
+            st.write(st.session_state.detail_cost)
 
 
 def display_comparison():
@@ -185,24 +197,26 @@ def display_comparison():
         "Les surcharges utilisent les valeurs récupérées automatiquement pour chaque transporteur."
     )
 
-    indicator_issues = []
+    # Modulator key -> (transporters sharing it, modulator name, reason)
+    indicator_issues: dict[str, tuple[list[str], str, str]] = {}
 
     # Phase 1 : scraping et initialisation du session state
     for transporter in TRANSPORTER_LIST:
-        name_lower = transporter.params.name.lower()
         for mod_name, mod in transporter.params.modulators.items():
-            main_key = f"{name_lower}_{mod_name.lower()}_modulator"
+            main_key = transporter.params.modulator_key(mod_name)
+            if main_key in indicator_issues:
+                indicator_issues[main_key][0].append(transporter.params.name)
+                continue
             indicator = transporter.scrap_indicator(mod)
             fallback = indicator.value if indicator is not None else mod.default
             init_session_state(main_key, fallback)
             if indicator is None or not indicator.retrieved:
-                indicator_issues.append(
-                    (transporter.params.name, mod_name, "non récupéré")
-                )
+                reason = "non récupéré"
             elif not indicator.valid_date:
-                indicator_issues.append(
-                    (transporter.params.name, mod_name, "date à vérifier")
-                )
+                reason = "date à vérifier"
+            else:
+                continue
+            indicator_issues[main_key] = ([transporter.params.name], mod_name, reason)
 
     # Phase 2 : expander indicateurs (toujours affiché)
     n_issues = len(indicator_issues)
@@ -215,22 +229,27 @@ def display_comparison():
         if not indicator_issues:
             st.success("Tous les indicateurs ont été récupérés correctement.")
         else:
-            for transporter_name, mod_name, reason in indicator_issues:
+            for transporter_names, mod_name, reason in indicator_issues.values():
                 st.warning(
-                    f"**{transporter_name} / {mod_name}** ({reason}) "
+                    f"**{', '.join(transporter_names)} / {mod_name}** ({reason}) "
                     f"— valeur ajustable manuellement dans l'onglet *Tarif détaillé*"
                 )
 
     # Phase 3 : calcul des coûts
     results = {}
     errors = []
+    unavailable = []
     for transporter in TRANSPORTER_LIST:
         try:
             detail = transporter.compute_cost()
             results[transporter.params.name] = detail
+        except TarifUnavailableError:
+            unavailable.append(transporter.params.name)
         except Exception:  # noqa: BLE001 - one failing transporter must not break the comparison
             errors.append(transporter.params.name)
 
+    if unavailable:
+        st.info(f"{TARIF_UNAVAILABLE_MSG} : {', '.join(unavailable)}")
     if errors:
         st.warning(f"Calcul impossible pour : {', '.join(errors)}")
 

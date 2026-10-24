@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import ClassVar, Final
 
+from src.constant import EURO_PALET_WEIGHT
 from src.cost_calculator.cost_by_package import ExtraPackageCost
 from src.file_structure import MapZone2PostalCode
 from src.transporter.transporter_params import (
@@ -10,8 +12,10 @@ from src.transporter.transporter_params import (
 
 
 @dataclass(kw_only=True)
-class TransporterParams(AbstractTransporterParams):
-    name: Final[str] = "Geodis"
+class GeodisParams(AbstractTransporterParams):
+    """Parameters shared by all Geodis offers (messagerie, palette)"""
+
+    tarif_folder: ClassVar[str]  # Sub-folder of data/geodis holding the offer tarif
 
     extra_package_cost: ExtraPackageCost = field(
         default_factory=lambda: ExtraPackageCost(
@@ -28,17 +32,13 @@ class TransporterParams(AbstractTransporterParams):
             ),
             "weight_limit": [30, 100],
             "cost": {
-                "Zone A": [1.9, 4.1, 6.2],
-                "Zone B": [3.4, 6.8, 10.4],
+                "Zone A": [2, 2, 2],
+                "Zone B": [3.3, 6.6, 10.15],
             },
         }
     )
 
-    fixed_cost: dict = field(
-        default_factory=lambda: {
-            "surete": 2.2,
-        }
-    )
+    surete_cost = 2.15
 
     modulators: ClassVar[dict[str, ModulatorConfig]] = {
         "GNR": ModulatorConfig(
@@ -50,3 +50,33 @@ class TransporterParams(AbstractTransporterParams):
             input_format="%2.f",
         )
     }
+
+    @property
+    def modulator_prefix(self) -> str:
+        return "geodis"  # Same surcharge for all Geodis offers
+
+    @property
+    def common_data_folder(self) -> Path:
+        return Path(__file__).parents[3] / "data" / "geodis"
+
+    @property
+    def data_folder(self) -> Path:
+        return self.common_data_folder / self.tarif_folder
+
+
+@dataclass(kw_only=True)
+class MessagerieParams(GeodisParams):
+    name: Final[str] = "Geodis Messagerie"
+    tarif_folder: ClassVar[str] = "messagerie"
+
+    palet_movement_cost: float = 5.0  # Gestion des palettes Europe, par expédition
+
+
+@dataclass(kw_only=True)
+class PaletteParams(GeodisParams):
+    name: Final[str] = "Geodis Palette"
+    tarif_folder: ClassVar[str] = "palette"
+
+    max_palet_weight: int = 700  # kg, poids brut palette incluse
+    palet_weight: float = EURO_PALET_WEIGHT  # kg
+    cost_by_palet: float = 10.0  # Frais par palette, à confirmer avec Geodis
