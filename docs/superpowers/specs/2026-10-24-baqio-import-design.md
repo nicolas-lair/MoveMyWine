@@ -118,10 +118,11 @@ class IgnoredLine:
     description: str
     quantity: float
 
+
 @dataclass(frozen=True)
 class BaqioOrder:
     id: int
-    name: str           # "#9001"
+    name: str  # "#9001"
     customer: str
     created_at: datetime
     bottles: int
