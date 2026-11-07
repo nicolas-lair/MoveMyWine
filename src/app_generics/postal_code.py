@@ -4,10 +4,9 @@ import pandas as pd
 
 
 class PostalCodeAPI:
-    # https://datanova.laposte.fr/datasets/laposte-hexasmal/api-doc
-    endpoint = (
-        "https://datanova.laposte.fr/data-fair/api/v1/datasets/laposte-hexasmal/raw"
-    )
+    # https://data.laposte.fr/datasets/laposte-hexasmal/api-doc
+    # /raw serves the original CSV file: latin1, ";" separated, original column names
+    endpoint = "https://data.laposte.fr/data-fair/api/v1/datasets/laposte-hexasmal/raw"
 
     class Cols(StrEnum):
         postal_code = "Code_postal"
@@ -27,7 +26,11 @@ def get_postal_code_df():
     df = df.drop_duplicates(keep="first")
     df[col_enum.commune] = df[col_enum.commune].str.title()
     df[col_enum.lieudit] = df[col_enum.lieudit].str.title()
-    df["full_name"] = df[[c.value for c in col_enum]].apply(
-        lambda c: c.str.cat(sep=" - "), axis=1
+    # Vectorized concat (a row-wise apply takes > 1 s on the ~39k rows)
+    df["full_name"] = (
+        df[col_enum.postal_code]
+        + " - "
+        + df[col_enum.commune]
+        + (" - " + df[col_enum.lieudit]).fillna("")
     )
     return df.set_index("full_name")
